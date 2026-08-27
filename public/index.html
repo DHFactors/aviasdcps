@@ -4,128 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AVIA SDCPS - Aviation Safety Platform</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a237e 0%, #0d1555 100%);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-        }
-        .demo-badge {
-            background: #dc3545;
-            padding: 6px 20px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-        h1 {
-            font-size: 56px;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-        h1 .highlight { color: #ff6b35; }
-        p.subtitle {
-            font-size: 20px;
-            opacity: 0.85;
-            max-width: 600px;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .btn-primary {
-            background: #ff6b35;
-            color: white;
-            padding: 14px 40px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.3s;
-            display: inline-block;
-        }
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
-        }
-        .btn-secondary {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            padding: 14px 40px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
-            text-decoration: none;
-            border: 2px solid rgba(255,255,255,0.2);
-            transition: all 0.3s;
-            display: inline-block;
-        }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.25);
-            transform: translateY(-3px);
-        }
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            max-width: 800px;
-            margin-top: 40px;
-        }
-        .feature {
-            background: rgba(255,255,255,0.08);
-            padding: 16px 20px;
-            border-radius: 10px;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
-        }
-        .feature .icon { font-size: 28px; display: block; margin-bottom: 5px; }
-        .footer {
-            margin-top: 40px;
-            font-size: 13px;
-            opacity: 0.6;
-        }
-        @media (max-width: 600px) {
-            h1 { font-size: 32px; }
-            p.subtitle { font-size: 16px; }
-            .btn-primary, .btn-secondary { padding: 12px 24px; font-size: 15px; width: 100%; }
-            .btn-group { flex-direction: column; width: 100%; }
-            .features { grid-template-columns: 1fr 1fr; }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
 </head>
 <body>
-    <div class="demo-badge">🚀 Live Demo Available</div>
-    <h1>✈️ AVIA <span class="highlight">SDCPS</span></h1>
-    <p class="subtitle">
-        Aviation Safety Data Collection & Processing System<br>
-        <span style="font-size:16px;opacity:0.7;">ICAO Annex 19 Compliant · Next-Generation Safety Management</span>
-    </p>
-    <div class="btn-group">
-        <a href="/aviasdcps.html" class="btn-primary">🚀 Launch Demo</a>
-        <a href="#features" class="btn-secondary">Learn More ↓</a>
+    <!-- Demo Banner -->
+    <div class="demo-banner">
+        <span class="demo-icon">⚠️</span>
+        DEMO MODE — For Evaluation Only
+        <span class="demo-timer">Live Demo Available</span>
     </div>
-    <div class="features" id="features">
-        <div class="feature"><span class="icon">📊</span> Real-time Safety Metrics</div>
-        <div class="feature"><span class="icon">📋</span> ICAO Annex 19 Compliance</div>
-        <div class="feature"><span class="icon">🔍</span> Full Audit Trail</div>
-        <div class="feature"><span class="icon">📄</span> Automated Reporting</div>
-    </div>
-    <div class="footer">
+
+    <!-- Hero -->
+    <section class="avia-hero avia-hero--fullscreen">
+        <h1>✈️ AVIA <span class="highlight">SDCPS</span></h1>
+        <p class="subtitle">
+            Aviation Safety Data Collection &amp; Processing System<br>
+            <span style="font-size:16px;opacity:0.72;">ICAO Annex 19 Compliant · Next-Generation Safety Management</span>
+        </p>
+        <div class="btn-group">
+            <a href="/aviasdcps.html" class="btn-primary btn-lg">🚀 Launch Demo</a>
+            <a href="#features" class="btn-secondary btn-lg">Learn More ↓</a>
+        </div>
+
+        <div class="features" id="features">
+            <div class="feature"><span class="icon">📊</span> Real-time Safety Metrics</div>
+            <div class="feature"><span class="icon">📋</span> ICAO Annex 19 Compliance</div>
+            <div class="feature"><span class="icon">🔍</span> Full Audit Trail</div>
+            <div class="feature"><span class="icon">📄</span> Automated Reporting</div>
+        </div>
+    </section>
+
+    <footer class="avia-footer avia-footer--simple">
         &copy; 2026 AVIA Safety Systems · Building safer skies with data-driven safety management
-    </div>
+    </footer>
 </body>
 </html>
