@@ -244,7 +244,7 @@ class AviaSDCPSAPI {
             'tenant-001': { dates: ["Jan","Feb","Mar","Apr","May","Jun"], hrc: [1.1,1.3,1.2,1.4,1.2,1.5], spt: [80,82,83,84,85,85.5], alosp: [1.0,0.98,0.96,0.95,0.96,0.95] },
             'tenant-002': { dates: ["Jan","Feb","Mar","Apr","May","Jun"], hrc: [1.3,1.4,1.5,1.4,1.5,1.5], spt: [78,79,80,81,82,82], alosp: [1.0,1.05,1.08,1.1,1.09,1.1] },
             'tenant-003': { dates: ["Jan","Feb","Mar","Apr","May","Jun"], hrc: [0.9,0.8,0.85,0.8,0.78,0.8], spt: [75,76,77,78,77.5,78], alosp: [1.2,1.25,1.3,1.28,1.3,1.3] },
-            'aggregated': { dates: ["Jan","Feb","Mar","Apr","May","Jun"], hrc: [1.1,1.17,1.18,1.2,1.16,1.27], spt: [77.7,79,80,81,81.5,81.8], alosp: [1.07,1.09,1.11,1.11,1.12,1.12] }
+            'aggregated': { dates: ["Jan","Feb","Mar","Apr","May","Jun"], hrc: [1.2, 1.3, 1.4, 1.2, 1.3, 1.17], spt: [82.0, 80.5, 81.2, 82.5, 81.8, 81.8], alosp: [1.15, 1.12, 1.1, 1.08, 1.12, 1.12] }
         };
         if (tenantId === 'aggregated' || tenantId === 'all') return map['aggregated'];
         return map[tenantId || this.tenantId] || map['tenant-001'];
