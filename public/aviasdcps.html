@@ -48,6 +48,25 @@
         <button data-page="reports">📄 Reports</button>
         <button data-page="demo">⚙️ Demo Controls</button>
     </nav>
+<!-- Admin Login Section (visible to all, but only works with correct credentials) -->
+<div id="adminLoginContainer" style="display:none;background:#f8f9fa;padding:20px;border-radius:10px;margin:20px 0;border:2px solid #2e86c1;">
+    <h3 style="color:#1a237e;">🔐 Admin Access</h3>
+    <p style="color:#666;font-size:14px;">Enter developer credentials to access admin controls.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;">
+        <input type="email" id="adminEmail" placeholder="Email" style="padding:10px 16px;border:2px solid #ddd;border-radius:8px;flex:1;min-width:180px;">
+        <input type="password" id="adminPassword" placeholder="Password" style="padding:10px 16px;border:2px solid #ddd;border-radius:8px;flex:1;min-width:180px;">
+        <button onclick="loginAsAdmin(document.getElementById('adminEmail').value, document.getElementById('adminPassword').value)" class="btn-primary">🔐 Login</button>
+    </div>
+</div>
+
+<!-- Admin-Only Controls (hidden by default) -->
+<div class="admin-only" style="display:none;margin:10px 0;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button onclick="resetDemoData()" class="btn-danger">🔄 Reset All Data</button>
+        <button onclick="seedDemoData()" class="btn-success">🌱 Seed New Data</button>
+        <button onclick="logoutAdmin()" class="btn-secondary" style="background:#666;color:white;border:none;">🚪 Logout</button>
+    </div>
+</div>
     
     <!-- ==================== MAIN CONTENT ==================== -->
     <div class="app-content">
@@ -236,7 +255,7 @@
                 return this.request('/email-preview/recent');
             }
         }
-        
+
         const api = new AviaSDCPSAPI();
         console.log('✅ AVIA SDCPS API Client loaded');
         console.log('📋 Tenant:', api.tenantId);
@@ -638,5 +657,7 @@
         // The API client already has mock data built in
         // No changes needed - it automatically uses mock data when useMock = true
     </script>
+<!-- Admin Controls (excluded from git for security) -->
+<script src="js/admin.js"></script>
 </body>
 </html>

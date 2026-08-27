@@ -55,3 +55,15 @@ htmlcov/
 # Temporary files
 *.tmp
 *.temp
+
+# Admin/Development files
+public/js/admin.js
+admin_credential.json
+admin_credentials.json
+*.secret
+*.private
+*.key
+
+# Local development
+.local
+*.local
