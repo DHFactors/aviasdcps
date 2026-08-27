@@ -132,6 +132,34 @@ class AviaSDCPSAPI {
                 location: "Approach Control, Johannesburg Airport",
                 created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                id: "haz-009",
+                title: "Emergency evacuation drill incomplete",
+                description: "Monthly emergency evacuation drill identified gaps in response time and communication.",
+                category: "Organizational",
+                severity: "High",
+                probability: "Possible",
+                risk_level: "High",
+                status: "Open",
+                owner: "Mark Wilson",
+                location: "Terminal 3, Singapore Airport",
+                created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+                updated_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                id: "haz-010",
+                title: "Navigation system anomaly",
+                description: "GPS navigation system reported intermittent signal loss during approach in specific weather conditions.",
+                category: "Technical",
+                severity: "Critical",
+                probability: "Rare",
+                risk_level: "High",
+                status: "Under Review",
+                owner: "Dr. Alan Chen",
+                location: "Approach Corridor, Dubai Airport",
+                created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
             }
         ];
     }
