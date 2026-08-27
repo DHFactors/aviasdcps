@@ -13,11 +13,11 @@ class AviaSDCPSAPI {
         this.baseURL = baseURL || window.location.origin;
         this.tenantId = localStorage.getItem('tenantId') || 'tenant-001';
         this.apiKey = localStorage.getItem('apiKey') || 'demo-key-001';
-        this.useMock = true; // Enable mock data for demo
+        this.useMock = true;
         console.log('✅ API Client initialized with tenant:', this.tenantId);
-        console.log('📊 Using mock data for demo');
+        console.log('📊 Mode: MOCK DATA');
     }
-
+    
     // ==================== MOCK DATA ====================
     getMockHazards() {
         return [
@@ -136,7 +136,7 @@ class AviaSDCPSAPI {
             {
                 id: "haz-009",
                 title: "Emergency evacuation drill incomplete",
-                description: "Monthly emergency evacuation drill identified gaps in response time and communication.",
+                description: "Monthly emergency evacuation drill identified gaps in response time and communication protocols.",
                 category: "Organizational",
                 severity: "High",
                 probability: "Possible",
@@ -235,29 +235,12 @@ class AviaSDCPSAPI {
     // ==================== API METHODS ====================
     async request(endpoint, options = {}) {
         console.log(`📡 ${options.method || 'GET'} request to:`, endpoint);
-
-        // For demo, return mock data
-        if (this.useMock) {
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-            return this.getMockResponse(endpoint, options);
-        }
-
-        // Real API call (for when backend is deployed)
-        try {
-            const url = `${this.baseURL}/api/v1${endpoint}`;
-            const headers = {
-                'Content-Type': 'application/json',
-                'X-Tenant-Id': this.tenantId,
-                'X-API-Key': this.apiKey,
-                ...options.headers
-            };
-            const response = await fetch(url, { ...options, headers });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json();
-        } catch (error) {
-            console.warn('API call failed, falling back to mock data:', error);
-            return this.getMockResponse(endpoint, options);
-        }
+        
+        // ALWAYS use mock data for demo
+        await new Promise(resolve => setTimeout(resolve, 400));
+        
+        console.log('🔍 Returning mock data for:', endpoint);
+        return this.getMockResponse(endpoint, options);
     }
 
     getMockResponse(endpoint, options) {
@@ -276,7 +259,6 @@ class AviaSDCPSAPI {
         return { message: "Mock response" };
     }
 
-    // ==================== PUBLIC API METHODS ====================
     async getHazards(filters = {}) {
         return this.request('/hazards');
     }
