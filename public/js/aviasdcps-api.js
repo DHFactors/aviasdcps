@@ -216,7 +216,7 @@ class AviaSDCPSAPI {
         };
     }
 
-    getAggregatedMetrics() {
+    getMockAggregatedMetrics() {
         // State Oversight — aggregated across all tenants
         const avgHRC = (1.2 + 1.5 + 0.8) / 3;
         const avgSPT = (85.5 + 82.0 + 78.0) / 3;
@@ -257,7 +257,7 @@ class AviaSDCPSAPI {
             'tenant-001': { categories: ["Operational","Technical","Human Factors","Environmental","Organizational"], values: [1.1,0.9,1.0,0.8,0.95], target: 1.0 },
             'tenant-002': { categories: ["Operational","Technical","Human Factors","Environmental","Organizational"], values: [0.9,1.0,0.8,1.1,1.1], target: 1.0 },
             'tenant-003': { categories: ["Operational","Technical","Human Factors","Environmental","Organizational"], values: [1.0,1.3,1.2,0.9,1.1], target: 1.0 },
-            'aggregated': { categories: ["Operational","Technical","Human Factors","Environmental","Organizational"], values: [1.0,1.07,1.0,0.93,1.05], target: 1.0 }
+            'aggregated': { categories: ["Operational","Technical","Human Factors","Environmental","Organizational"], values: [1.2, 0.8, 1.1, 0.9, 1.0], target: 1.0 }
         };
         if (tenantId === 'aggregated' || tenantId === 'all') return map['aggregated'];
         return map[tenantId || this.tenantId] || map['tenant-001'];
@@ -321,7 +321,7 @@ class AviaSDCPSAPI {
         if (endpoint.includes('audit')) return this.getMockAuditTrail();
         if (endpoint.includes('demo/status')) return this.getMockDemoStatus();
         if (endpoint.includes('demo/reset')) return { success: true, message: "Demo data reset" };
-        if (endpoint.includes('state-risk/aggregated')) return this.getAggregatedMetrics();
+        if (endpoint.includes('state-risk/aggregated')) return this.getMockAggregatedMetrics();
         return { message: "Mock response" };
     }
 
@@ -346,8 +346,8 @@ class AviaSDCPSAPI {
     }
 
     async getAggregatedMetrics() {
-        // State Oversight aggregated
-        return this.getAggregatedMetrics();
+        // State Oversight aggregated - return data directly
+        return this.getMockAggregatedMetrics();
     }
 
     async getSPISPT(period = 'monthly', tenantId) {
