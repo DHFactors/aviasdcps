@@ -241,6 +241,10 @@
         console.log('✅ AVIA SDCPS API Client loaded');
         console.log('📋 Tenant:', api.tenantId);
         
+        // Override API methods to use mock data
+        // The API client already has mock data built in
+        // No changes needed - it automatically uses mock data when useMock = true
+
         // ==================== GLOBAL STATE ====================
         let hazardsData = [];
         let auditData = [];
@@ -628,6 +632,11 @@
             });
             loadDashboard();
         });
+    </script>
+    <script>
+        // Override API methods to use mock data
+        // The API client already has mock data built in
+        // No changes needed - it automatically uses mock data when useMock = true
     </script>
 </body>
 </html>
