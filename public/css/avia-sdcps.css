@@ -748,6 +748,20 @@ strong { font-weight: 700; }
 .state-overview-box h2 { color: #ffffff; margin-bottom: 8px; font-size: 22px; }
 .state-overview-box p { color: rgba(255,255,255,0.85); line-height: 1.6; font-size: 14px; margin: 0; }
 
+.state-risk-card { border-top-color: #2e86c1; border-left: 3px solid #2e86c1; }
+.state-risk-summary {
+  background: #eaf2fb;
+  border: 1px solid #c9deef;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #1a2a4a;
+  text-align: center;
+  font-weight: 500;
+}
+.state-risk-matrix table { border: 2px solid #2e86c1; border-radius: 8px; overflow: hidden; }
+
 /* =============================================================================
    7. Cards & Grids — white, subtle shadow, blue top border
    ============================================================================= */

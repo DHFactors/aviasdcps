@@ -181,6 +181,10 @@ class AviaSDCPSAPI {
         return [...this.getTenantHazards('tenant-001'), ...this.getTenantHazards('tenant-002'), ...this.getTenantHazards('tenant-003')];
     }
 
+    getAggregatedHazards() {
+        return this.getAllHazards();
+    }
+
     getMockHazards(tenantId) {
         // Filtered by tenant — dashboard/hazards show only selected tenant
         if (tenantId === 'all' || tenantId === 'aggregated') return this.getAllHazards();

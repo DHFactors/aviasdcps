@@ -129,7 +129,7 @@
                 <div class="chart-card"><h3>📈 SPI/SPT Trends (State Aggregated)</h3><canvas id="spiChart"></canvas></div>
                 <div class="chart-card"><h3>📊 ALoSP by Category (State Aggregated)</h3><canvas id="alospChart"></canvas></div>
             </div>
-            <div class="chart-card"><h3>📊 Risk Matrix (State View)</h3><div class="risk-matrix" id="riskMatrix"></div></div>
+            <div class="chart-card state-risk-card"><h3>📊 Risk Matrix (State View)</h3><div class="state-risk-summary">Risk Distribution across <strong>10</strong> hazards from <strong>3</strong> operators</div><div class="risk-matrix state-risk-matrix" id="riskMatrix"></div></div>
         </div>
         
         <!-- ======== AUDIT ======== -->
@@ -439,6 +439,10 @@ class AviaSDCPSAPI {
 
     getAllHazards() {
         return [...this.getTenantHazards('tenant-001'), ...this.getTenantHazards('tenant-002'), ...this.getTenantHazards('tenant-003')];
+    }
+
+    getAggregatedHazards() {
+        return this.getAllHazards();
     }
 
     getMockHazards(tenantId) {
@@ -758,7 +762,9 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
                 updateSPIChart(spspt);
                 const alosp = await api.getAggregatedALoSP();
                 updateALoSPChart(alosp);
-                renderRiskMatrix();
+                // State-level risk matrix with aggregated data
+                const aggregatedHazards = api.getAggregatedHazards();
+                renderStateRiskMatrix(aggregatedHazards);
                 updateViewModeIndicator('state');
             } catch (error) {
                 console.error('Error loading State data:', error);
@@ -910,6 +916,52 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             matrix.forEach((row, i) => {
                 html += `<tr><td><strong>${severities[i]}</strong></td>`;
                 row.forEach(c => html += `<td class="${classes[c]}">${c}</td>`);
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderStateRiskMatrix(hazards) {
+            const container = document.getElementById('riskMatrix');
+            if (!container) return;
+            const matrix = {
+                'Critical': { 'Rare': 0, 'Unlikely': 0, 'Possible': 0, 'Likely': 0, 'Almost Certain': 0 },
+                'High': { 'Rare': 0, 'Unlikely': 0, 'Possible': 0, 'Likely': 0, 'Almost Certain': 0 },
+                'Medium': { 'Rare': 0, 'Unlikely': 0, 'Possible': 0, 'Likely': 0, 'Almost Certain': 0 },
+                'Low': { 'Rare': 0, 'Unlikely': 0, 'Possible': 0, 'Likely': 0, 'Almost Certain': 0 }
+            };
+            const severities = ['Critical','High','Medium','Low'];
+            const probabilities = ['Rare','Unlikely','Possible','Likely','Almost Certain'];
+            const riskLevelMap = {
+                'Critical': 'risk-critical',
+                'High': 'risk-high',
+                'Medium': 'risk-medium',
+                'Low': 'risk-low'
+            };
+            hazards.forEach(h => {
+                const severity = h.severity || 'Low';
+                const probability = h.probability || 'Rare';
+                if (matrix[severity] && matrix[severity][probability] !== undefined) {
+                    matrix[severity][probability]++;
+                }
+            });
+            // Update summary if exists
+            const summary = document.querySelector('.state-risk-summary');
+            if (summary) {
+                summary.innerHTML = `Risk Distribution across <strong>${hazards.length}</strong> hazards from <strong>3</strong> operators`;
+            }
+            let html = '<table><thead><tr><th>Severity \\ Probability</th>';
+            probabilities.forEach(p => html += `<th>${p}</th>`);
+            html += '</tr></thead><tbody>';
+            severities.forEach(sev => {
+                html += `<tr><td><strong>${sev}</strong></td>`;
+                probabilities.forEach(prob => {
+                    const count = matrix[sev][prob];
+                    const cls = riskLevelMap[sev];
+                    const display = count > 0 ? count : '0';
+                    html += `<td class="${cls}" style="position:relative;">${display}</td>`;
+                });
                 html += '</tr>';
             });
             html += '</tbody></table>';
