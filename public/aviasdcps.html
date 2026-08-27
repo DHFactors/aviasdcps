@@ -44,6 +44,7 @@
         <button class="active" data-page="dashboard">📊 Dashboard</button>
         <button data-page="hazards">⚠️ Hazards</button>
         <button data-page="state">📋 State Oversight</button>
+        <button data-page="declare">📝 Declare SPIs</button>
         <button data-page="reports">📄 Reports</button>
     </nav>
     
@@ -92,6 +93,14 @@
                 <h2>📋 State Oversight Dashboard</h2>
                 <p>This view provides aggregated safety performance data across all operators in the State (ICAO Member State). Data includes SPI/SPT metrics, ALoSP monitoring, and hazard trends at the national level.</p>
             </div>
+            <!-- Context Note: SPI/SPT Declaration -->
+            <div class="alert alert-info" style="margin-bottom:24px;">
+                <strong>About SPI/SPT Declaration</strong><br>
+                Safety Performance Indicators (SPIs) and Targets (SPTs) are declared by each operator as part of their Safety Management System (SMS). The State monitors these declarations and aggregates them to assess national safety performance under the State Safety Programme (SSP).
+            </div>
+            <div style="background:#eaf2fb;border:1px solid #c9deef;border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:13px;color:#1a2a4a;text-align:center;">
+                <strong>SPI/SPT Monitoring</strong> — Based on declarations from <strong>3</strong> active operators. Targets shown are those declared by each operator.
+            </div>
 
             <!-- Section 2: State KPI Cards -->
             <div class="kpi-banner" id="stateKpiBanner">
@@ -132,6 +141,68 @@
             <div class="chart-card state-risk-card"><h3>📊 Risk Matrix (State View)</h3><div class="state-risk-summary">Risk Distribution across <strong>10</strong> hazards from <strong>3</strong> operators</div><div class="risk-matrix state-risk-matrix" id="riskMatrix"></div></div>
         </div>
         
+        <!-- ======== SPI/SPT DECLARATION ======== -->
+        <div id="page-declare" class="page-section">
+            <h2 style="margin-bottom:8px;">📝 Declare Your Safety Performance Indicators</h2>
+            <p style="color:#5a6a7a;margin-bottom:16px;">Declare your safety performance indicators and targets as required under your State Safety Programme. <em>State defines SPI framework (ICAO) → Tenants align → Tenants declare → State monitors and aggregates.</em></p>
+            <div class="alert alert-info" style="margin-bottom:20px;">
+                <strong>ICAO Annex 19 Flow:</strong> State establishes SSP framework → State defines SPIs/SPTs → Operator declares aligned SPIs/SPTs → Operator measures/reports → State monitors aggregates.
+            </div>
+            <div class="chart-card">
+                <h3>Declare SPI/SPT for <span id="declareTenantName">Pacific Air Services</span> (<span id="declareTenantId">tenant-001</span>)</h3>
+                <form id="spiDeclarationForm" style="margin-top:16px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>SPI Name</label>
+                            <select id="spiName">
+                                <option value="HRC">HRC - Hazard Reporting Culture</option>
+                                <option value="SPT">SPT - Safety Performance Target</option>
+                                <option value="ALoSP">ALoSP - Acceptable Level of Safety Performance</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Value</label>
+                            <input type="number" step="0.01" id="spiTarget" placeholder="e.g., 1.5">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Measurement Unit</label>
+                            <select id="spiUnit">
+                                <option>Rate per 100,000 flights</option>
+                                <option>Percentage</option>
+                                <option>Number of events</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Baseline Value</label>
+                            <input type="number" step="0.01" id="spiBaseline" placeholder="e.g., 1.8">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Review Date</label>
+                            <input type="date" id="spiReviewDate">
+                        </div>
+                        <div class="form-group" style="display:flex;align-items:flex-end;">
+                            <button type="submit" class="btn-primary btn-block">Declare SPI/SPT</button>
+                        </div>
+                    </div>
+                </form>
+                <div id="spiDeclarationStatus" style="margin-top:12px;font-size:13px;"></div>
+            </div>
+            <div class="chart-card">
+                <h3>Current Declarations (All Tenants)</h3>
+                <p style="font-size:13px;color:#5a6a7a;margin-bottom:12px;">Declared targets per operator — State aggregates these for national monitoring.</p>
+                <div class="audit-table-container" style="box-shadow:none;border:none;padding:0;">
+                    <table class="audit-table" id="declarationsTable">
+                        <thead><tr><th>Tenant</th><th>SPI</th><th>Target</th><th>Current</th><th>Unit</th><th>Baseline</th><th>Review Date</th></tr></thead>
+                        <tbody id="declarationsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ======== AUDIT ======== -->
         <div id="page-audit" class="page-section">
             <div class="flex-between" style="margin-bottom:20px;">
@@ -454,16 +525,21 @@ class AviaSDCPSAPI {
     getMockMetrics(tenantId) {
         const id = tenantId || this.tenantId;
         const metricsMap = {
-            'tenant-001': { current: { HRC: 1.2, SPT: 85.5, ALoSP: 0.95 }, trend: { HRC: 'stable', SPT: 'up', ALoSP: 'stable' } },
-            'tenant-002': { current: { HRC: 1.5, SPT: 82.0, ALoSP: 1.1 }, trend: { HRC: 'up', SPT: 'stable', ALoSP: 'up' } },
-            'tenant-003': { current: { HRC: 0.8, SPT: 78.0, ALoSP: 1.3 }, trend: { HRC: 'down', SPT: 'down', ALoSP: 'stable' } }
+            'tenant-001': { current: { HRC: 1.2, SPT: 85.5, ALoSP: 0.95 }, trend: { HRC: 'stable', SPT: 'up', ALoSP: 'stable' }, baseline: { HRC: 1.8, SPT: 78, ALoSP: 1.2 }, unit: { HRC: 'Rate per 100,000 flights', SPT: 'Percentage', ALoSP: 'Rate per 100,000 flights' } },
+            'tenant-002': { current: { HRC: 1.5, SPT: 82.0, ALoSP: 1.1 }, trend: { HRC: 'up', SPT: 'stable', ALoSP: 'up' }, baseline: { HRC: 1.9, SPT: 75, ALoSP: 1.3 }, unit: { HRC: 'Rate per 100,000 flights', SPT: 'Percentage', ALoSP: 'Rate per 100,000 flights' } },
+            'tenant-003': { current: { HRC: 0.8, SPT: 78.0, ALoSP: 1.3 }, trend: { HRC: 'down', SPT: 'down', ALoSP: 'stable' }, baseline: { HRC: 1.4, SPT: 72, ALoSP: 1.5 }, unit: { HRC: 'Rate per 100,000 flights', SPT: 'Percentage', ALoSP: 'Rate per 100,000 flights' } }
         };
         const m = metricsMap[id] || metricsMap['tenant-001'];
         return {
             tenant_id: id,
             tenant_name: this.tenantNames[id],
+            declared_spis: {
+                HRC: { target: 1.5, current: m.current.HRC, unit: m.unit.HRC, baseline: m.baseline.HRC, declaration_date: '2026-01-01', review_date: '2026-12-31' },
+                SPT: { target: 85, current: m.current.SPT, unit: m.unit.SPT, baseline: m.baseline.SPT, declaration_date: '2026-01-01', review_date: '2026-12-31' },
+                ALoSP: { target: 1.0, current: m.current.ALoSP, unit: m.unit.ALoSP, baseline: m.baseline.ALoSP, declaration_date: '2026-01-01', review_date: '2026-12-31' }
+            },
             spi_values: {
-                HRC: { current: m.current.HRC, target: 1.5, trend: m.trend.HRC, history: [m.current.HRC-0.1, m.current.HRC+0.1, m.current.HRC, m.current.HRC+0.2, m.current.HRC, m.current.HRC+0.3] },
+                HRC: { current: m.current.HRC, target: 1.5, trend: m.trend.HRC, history: [m.current.HRC-0.1, m.current.HRC+0.1, m.current.HRC, m.current.HRC+0.2, m.current.HRC, m.current.HRC+0.3], unit: m.unit.HRC, baseline: m.baseline.HRC, declaration_date: '2026-01-01', review_date: '2026-12-31' },
                 SPT: { current: m.current.SPT, target: 85, trend: m.trend.SPT, history: [m.current.SPT-7, m.current.SPT-5, m.current.SPT-3, m.current.SPT-1, m.current.SPT, m.current.SPT+0.5] },
                 ALoSP: { current: m.current.ALoSP, target: 1.0, trend: m.trend.ALoSP, history: [m.current.ALoSP+0.15, m.current.ALoSP+0.05, m.current.ALoSP-0.05, m.current.ALoSP, m.current.ALoSP+0.02, m.current.ALoSP] }
             },
@@ -685,6 +761,7 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
                 if (page === 'dashboard') { updateViewModeIndicator('tenant'); loadDashboard(); }
                 if (page === 'hazards') { updateViewModeIndicator('tenant'); loadHazards(); }
                 if (page === 'state') { updateViewModeIndicator('state'); loadStateOversight(); }
+                if (page === 'declare') { updateViewModeIndicator('tenant'); loadDeclarations(); }
                 if (page === 'audit') { updateViewModeIndicator('tenant'); loadAudit(); }
                 if (page === 'demo') { updateViewModeIndicator('tenant'); loadDemoStatus(); }
                 if (page === 'reports') updateViewModeIndicator('tenant');
@@ -1225,6 +1302,62 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Tenant switching — updates indicator and reloads tenant-filtered data
+// SPI/SPT Declarations
+        function loadDeclarations() {
+            const tenantId = api.tenantId;
+            const nameEl = document.getElementById('declareTenantName');
+            const idEl = document.getElementById('declareTenantId');
+            if (nameEl) nameEl.textContent = api.getTenantName(tenantId);
+            if (idEl) idEl.textContent = tenantId;
+            const body = document.getElementById('declarationsBody');
+            if (!body) return;
+            const tenants = [
+                { id: 'tenant-001', name: 'Pacific Air Services' },
+                { id: 'tenant-002', name: 'Nordic Aviation Group' },
+                { id: 'tenant-003', name: 'Southern Hemisphere Airlines' }
+            ];
+            let rows = '';
+            for (const t of tenants) {
+                const m = api.getMockMetrics(t.id);
+                const storedHRC = localStorage.getItem('declared_HRC_' + t.id);
+                const storedSPT = localStorage.getItem('declared_SPT_' + t.id);
+                const storedALoSP = localStorage.getItem('declared_ALoSP_' + t.id);
+                const hrc = storedHRC ? JSON.parse(storedHRC) : { target: m.spi_values.HRC.target, current: m.spi_values.HRC.current, unit: 'Rate per 100,000 flights', baseline: (m.spi_values.HRC.current+0.3).toFixed(2), review: '2026-12-31' };
+                const spt = storedSPT ? JSON.parse(storedSPT) : { target: m.spi_values.SPT.target, current: m.spi_values.SPT.current, unit: 'Percentage', baseline: 78, review: '2026-12-31' };
+                const alosp = storedALoSP ? JSON.parse(storedALoSP) : { target: m.spi_values.ALoSP.target, current: m.spi_values.ALoSP.current, unit: 'Rate per 100,000 flights', baseline: 1.2, review: '2026-12-31' };
+                rows += '<tr><td>'+t.name+'</td><td>HRC</td><td>'+hrc.target+'</td><td>'+hrc.current+'</td><td>'+hrc.unit+'</td><td>'+hrc.baseline+'</td><td>'+hrc.review+'</td></tr>';
+                rows += '<tr><td>'+t.name+'</td><td>SPT</td><td>'+spt.target+'</td><td>'+spt.current+'</td><td>'+spt.unit+'</td><td>'+spt.baseline+'</td><td>'+spt.review+'</td></tr>';
+                rows += '<tr><td>'+t.name+'</td><td>ALoSP</td><td>'+alosp.target+'</td><td>'+alosp.current+'</td><td>'+alosp.unit+'</td><td>'+alosp.baseline+'</td><td>'+alosp.review+'</td></tr>';
+            }
+            body.innerHTML = rows;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('spiDeclarationForm');
+            if (form && !form.dataset.bound) {
+                form.dataset.bound = 'true';
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const spi = document.getElementById('spiName').value;
+                    const target = document.getElementById('spiTarget').value;
+                    const unit = document.getElementById('spiUnit').value;
+                    const baseline = document.getElementById('spiBaseline').value;
+                    const review = document.getElementById('spiReviewDate').value;
+                    if (!target || !baseline || !review) {
+                        showNotification('Please fill all fields', 'warning');
+                        return;
+                    }
+                    const key = 'declared_' + spi + '_' + api.tenantId;
+                    const data = { target: parseFloat(target), current: api.getMockMetrics(api.tenantId).spi_values[spi].current, unit, baseline: parseFloat(baseline), review, declaration_date: new Date().toISOString().split('T')[0] };
+                    localStorage.setItem(key, JSON.stringify(data));
+                    const statusEl = document.getElementById('spiDeclarationStatus');
+                    if (statusEl) statusEl.innerHTML = '<div class=\"alert alert-success\">✅ Declared ' + spi + ' for ' + api.getTenantName() + ': Target ' + target + ' ' + unit + '</div>';
+                    showNotification('✅ SPI/SPT Declared for ' + api.getTenantName(), 'success');
+                    loadDeclarations();
+                });
+            }
+        });
+
 function switchTenant(tenantId) {
     localStorage.setItem('tenantId', tenantId);
     api.tenantId = tenantId;

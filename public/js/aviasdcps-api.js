@@ -194,18 +194,23 @@ class AviaSDCPSAPI {
     getMockMetrics(tenantId) {
         const id = tenantId || this.tenantId;
         const metricsMap = {
-            'tenant-001': { current: { HRC: 1.2, SPT: 85.5, ALoSP: 0.95 }, trend: { HRC: 'stable', SPT: 'up', ALoSP: 'stable' } },
-            'tenant-002': { current: { HRC: 1.5, SPT: 82.0, ALoSP: 1.1 }, trend: { HRC: 'up', SPT: 'stable', ALoSP: 'up' } },
-            'tenant-003': { current: { HRC: 0.8, SPT: 78.0, ALoSP: 1.3 }, trend: { HRC: 'down', SPT: 'down', ALoSP: 'stable' } }
+            'tenant-001': { current: { HRC: 1.2, SPT: 85.5, ALoSP: 0.95 }, trend: { HRC: 'stable', SPT: 'up', ALoSP: 'stable' }, baseline: { HRC: 1.8, SPT: 78, ALoSP: 1.2 }, unit: { HRC: 'Rate per 100,000 flights', SPT: 'Percentage', ALoSP: 'Rate per 100,000 flights' } },
+            'tenant-002': { current: { HRC: 1.5, SPT: 82.0, ALoSP: 1.1 }, trend: { HRC: 'up', SPT: 'stable', ALoSP: 'up' }, baseline: { HRC: 1.9, SPT: 75, ALoSP: 1.3 }, unit: { HRC: 'Rate per 100,000 flights', SPT: 'Percentage', ALoSP: 'Rate per 100,000 flights' } },
+            'tenant-003': { current: { HRC: 0.8, SPT: 78.0, ALoSP: 1.3 }, trend: { HRC: 'down', SPT: 'down', ALoSP: 'stable' }, baseline: { HRC: 1.4, SPT: 72, ALoSP: 1.5 }, unit: { HRC: 'Rate per 100,000 flights', SPT: 'Percentage', ALoSP: 'Rate per 100,000 flights' } }
         };
         const m = metricsMap[id] || metricsMap['tenant-001'];
         return {
             tenant_id: id,
             tenant_name: this.tenantNames[id],
+            declared_spis: {
+                HRC: { target: 1.5, current: m.current.HRC, unit: m.unit.HRC, baseline: m.baseline.HRC, declaration_date: '2026-01-01', review_date: '2026-12-31' },
+                SPT: { target: 85, current: m.current.SPT, unit: m.unit.SPT, baseline: m.baseline.SPT, declaration_date: '2026-01-01', review_date: '2026-12-31' },
+                ALoSP: { target: 1.0, current: m.current.ALoSP, unit: m.unit.ALoSP, baseline: m.baseline.ALoSP, declaration_date: '2026-01-01', review_date: '2026-12-31' }
+            },
             spi_values: {
-                HRC: { current: m.current.HRC, target: 1.5, trend: m.trend.HRC, history: [m.current.HRC-0.1, m.current.HRC+0.1, m.current.HRC, m.current.HRC+0.2, m.current.HRC, m.current.HRC+0.3] },
-                SPT: { current: m.current.SPT, target: 85, trend: m.trend.SPT, history: [m.current.SPT-7, m.current.SPT-5, m.current.SPT-3, m.current.SPT-1, m.current.SPT, m.current.SPT+0.5] },
-                ALoSP: { current: m.current.ALoSP, target: 1.0, trend: m.trend.ALoSP, history: [m.current.ALoSP+0.15, m.current.ALoSP+0.05, m.current.ALoSP-0.05, m.current.ALoSP, m.current.ALoSP+0.02, m.current.ALoSP] }
+                HRC: { current: m.current.HRC, target: 1.5, trend: m.trend.HRC, history: [m.current.HRC-0.1, m.current.HRC+0.1, m.current.HRC, m.current.HRC+0.2, m.current.HRC, m.current.HRC+0.3], unit: m.unit.HRC, baseline: m.baseline.HRC, declaration_date: '2026-01-01', review_date: '2026-12-31' },
+                SPT: { current: m.current.SPT, target: 85, trend: m.trend.SPT, history: [m.current.SPT-7, m.current.SPT-5, m.current.SPT-3, m.current.SPT-1, m.current.SPT, m.current.SPT+0.5], unit: m.unit.SPT, baseline: m.baseline.SPT, declaration_date: '2026-01-01', review_date: '2026-12-31' },
+                ALoSP: { current: m.current.ALoSP, target: 1.0, trend: m.trend.ALoSP, history: [m.current.ALoSP+0.15, m.current.ALoSP+0.05, m.current.ALoSP-0.05, m.current.ALoSP, m.current.ALoSP+0.02, m.current.ALoSP], unit: m.unit.ALoSP, baseline: m.baseline.ALoSP, declaration_date: '2026-01-01', review_date: '2026-12-31' }
             },
             last_updated: new Date().toISOString()
         };
