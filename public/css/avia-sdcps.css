@@ -498,6 +498,88 @@ strong { font-weight: 700; }
 }
 .feature .icon { font-size: 28px; display: block; margin-bottom: 6px; }
 
+/* Understanding Safety Reporting */
+.understanding-section {
+  background: var(--avia-white);
+  text-align: center;
+}
+.understanding-section h2 { color: var(--avia-primary-dark); margin-bottom: 12px; }
+.understanding-section .section-subtitle {
+  max-width: 760px;
+  margin: 0 auto;
+  color: var(--avia-text-gray);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.understanding-section .card { text-align: left; }
+
+/* What Can I Report? */
+.report-categories-section {
+  background: var(--avia-light-gray);
+  text-align: center;
+}
+.report-categories-section h2 { color: var(--avia-primary-dark); margin-bottom: 8px; }
+.report-categories-section .section-subtitle {
+  max-width: 720px;
+  margin: 0 auto 32px;
+  color: var(--avia-text-gray);
+  font-size: 15px;
+}
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.report-card {
+  background: var(--avia-white);
+  border: 1px solid var(--avia-border);
+  border-radius: var(--avia-radius-lg);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 128px;
+  box-shadow: var(--avia-shadow-sm);
+  transition: transform var(--avia-transition), box-shadow var(--avia-transition), border-color var(--avia-transition);
+}
+.report-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--avia-shadow-md);
+  border-color: var(--avia-accent-blue);
+}
+.report-icon { font-size: 28px; line-height: 1; }
+.report-label {
+  font-family: var(--avia-font);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--avia-text-dark);
+  line-height: 1.4;
+}
+.report-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  background: #eaf2fb;
+  border: 1px solid #c9deef;
+  border-left: 4px solid var(--avia-accent-blue);
+  border-radius: var(--avia-radius-md);
+  padding: 16px 18px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.report-info-box .info-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.report-info-box p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--avia-primary-blue);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
 /* =============================================================================
    7. Cards & Grids — white, subtle shadow, blue top border
    ============================================================================= */
@@ -1041,6 +1123,7 @@ input.is-invalid:focus, select.is-invalid:focus, textarea.is-invalid:focus { box
   .avia-grid-4 { grid-template-columns: repeat(2, 1fr); }
   .avia-grid-3 { grid-template-columns: repeat(2, 1fr); }
   .charts-grid { grid-template-columns: 1fr; }
+  .report-grid { grid-template-columns: repeat(2, 1fr); }
   .footer .footer-grid, .avia-footer .footer-grid { grid-template-columns: 1fr 1fr; }
   .form-row, .avia-form-row { grid-template-columns: 1fr; }
 }
@@ -1072,6 +1155,8 @@ input.is-invalid:focus, select.is-invalid:focus, textarea.is-invalid:focus { box
   .kpi-banner { grid-template-columns: 1fr 1fr; gap: 12px; }
   .kpi-item { padding: 16px; }
   .kpi-item .kpi-value { font-size: 26px; }
+
+  .report-grid { grid-template-columns: 1fr; }
 
   .avia-grid-2, .avia-grid-3, .avia-grid-4 { grid-template-columns: 1fr; }
   .stats-grid, .avia-stats-grid { grid-template-columns: 1fr 1fr; }
