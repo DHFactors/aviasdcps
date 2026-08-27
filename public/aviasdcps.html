@@ -43,7 +43,7 @@
     <nav class="app-nav">
         <button class="active" data-page="dashboard">📊 Dashboard</button>
         <button data-page="hazards">⚠️ Hazards</button>
-        <button data-page="caan">📋 CAAN Oversight</button>
+        <button data-page="state">📋 State Oversight</button>
         <button data-page="audit">🔍 Audit Trail</button>
         <button data-page="reports">📄 Reports</button>
         <button data-page="demo">⚙️ Demo Controls</button>
@@ -82,13 +82,13 @@
             <div class="hazard-list" id="allHazards"><div class="loading"><div class="spinner"></div><p>Loading hazards...</p></div></div>
         </div>
         
-        <!-- ======== CAAN OVERSIGHT ======== -->
-        <div id="page-caan" class="page-section">
-            <h2 style="margin-bottom:20px;">📋 CAAN Oversight Dashboard</h2>
-            <div class="kpi-banner" id="caanKpiBanner">
-                <div class="kpi-item"><div class="kpi-label">HRC Rate</div><div class="kpi-value" id="caanHRC">--</div><div class="kpi-target">Target: 1.5</div><div class="kpi-trend" id="caanHRCTrend">--</div></div>
-                <div class="kpi-item"><div class="kpi-label">SPT Score</div><div class="kpi-value" id="caanSPT">--</div><div class="kpi-target">Target: 85%</div><div class="kpi-trend" id="caanSPTTrend">--</div></div>
-                <div class="kpi-item"><div class="kpi-label">ALoSP</div><div class="kpi-value" id="caanALoSP">--</div><div class="kpi-target">Target: 1.0</div><div class="kpi-trend" id="caanALoSPTrend">--</div></div>
+        <!-- ======== STATE OVERSIGHT ======== -->
+        <div id="page-state" class="page-section">
+            <h2 style="margin-bottom:20px;">📋 State Oversight Dashboard</h2>
+            <div class="kpi-banner" id="stateKpiBanner">
+                <div class="kpi-item"><div class="kpi-label">HRC Rate</div><div class="kpi-value" id="stateHRC">--</div><div class="kpi-target">Target: 1.5</div><div class="kpi-trend" id="stateHRCTrend">--</div></div>
+                <div class="kpi-item"><div class="kpi-label">SPT Score</div><div class="kpi-value" id="stateSPT">--</div><div class="kpi-target">Target: 85%</div><div class="kpi-trend" id="stateSPTTrend">--</div></div>
+                <div class="kpi-item"><div class="kpi-label">ALoSP</div><div class="kpi-value" id="stateALoSP">--</div><div class="kpi-target">Target: 1.0</div><div class="kpi-trend" id="stateALoSPTrend">--</div></div>
             </div>
             <div class="charts-grid">
                 <div class="chart-card"><h3>📈 SPI/SPT Trends</h3><canvas id="spiChart"></canvas></div>
@@ -114,7 +114,7 @@
             <h2 style="margin-bottom:20px;">📄 Report Generator</h2>
             <div class="avia-grid-2">
                 <div class="chart-card">
-                    <h3>📄 CAAN Oversight Report</h3>
+                    <h3>📄 State Oversight Report</h3>
                     <p style="color:#666;margin-bottom:15px;font-size:14px;">Generate a comprehensive PDF report with metrics, hazards, and SPI/SPT data.</p>
                     <div class="btn-group">
                         <button class="btn-primary" onclick="generatePDF()">📄 Generate PDF</button>
@@ -266,7 +266,7 @@
                 const page = this.dataset.page;
                 if (page === 'dashboard') loadDashboard();
                 if (page === 'hazards') loadHazards();
-                if (page === 'caan') loadCAAN();
+                if (page === 'state') loadStateOversight();
                 if (page === 'audit') loadAudit();
                 if (page === 'demo') loadDemoStatus();
             });
@@ -298,18 +298,18 @@
             }
         }
         
-        async function loadCAAN() {
+        async function loadStateOversight() {
             try {
                 const metrics = await api.getMetrics();
-                updateCAANKPIs(metrics);
+                updateStateKPIs(metrics);
                 const spspt = await api.getSPISPT();
                 updateSPIChart(spspt);
                 const alosp = await api.getALoSP();
                 updateALoSPChart(alosp);
                 renderRiskMatrix();
             } catch (error) {
-                console.error('Error loading CAAN data:', error);
-                showNotification('Error loading CAAN data', 'error');
+                console.error('Error loading State data:', error);
+                showNotification('Error loading State data', 'error');
             }
         }
         
@@ -351,19 +351,19 @@
             document.getElementById('kpiClosed').textContent = hazards.filter(h => h.status === 'Closed').length;
         }
         
-        function updateCAANKPIs(metrics) {
+        function updateStateKPIs(metrics) {
             if (!metrics || !metrics.spi_values) return;
             const hrc = metrics.spi_values.HRC || { current: 0, target: 1.5, trend: 'stable' };
             const spt = metrics.spi_values.SPT || { current: 0, target: 85, trend: 'stable' };
             const alosp = metrics.spi_values.ALoSP || { current: 0, target: 1.0, trend: 'stable' };
             
             const el = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
-            el('caanHRC', hrc.current.toFixed(2));
-            el('caanSPT', spt.current.toFixed(1) + '%');
-            el('caanALoSP', alosp.current.toFixed(2));
-            document.getElementById('caanHRCTrend').textContent = `Trend: ${hrc.trend}`;
-            document.getElementById('caanSPTTrend').textContent = `Trend: ${spt.trend}`;
-            document.getElementById('caanALoSPTrend').textContent = `Trend: ${alosp.trend}`;
+            el('stateHRC', hrc.current.toFixed(2));
+            el('stateSPT', spt.current.toFixed(1) + '%');
+            el('stateALoSP', alosp.current.toFixed(2));
+            document.getElementById('stateHRCTrend').textContent = `Trend: ${hrc.trend}`;
+            document.getElementById('stateSPTTrend').textContent = `Trend: ${spt.trend}`;
+            document.getElementById('stateALoSPTrend').textContent = `Trend: ${alosp.trend}`;
         }
         
         // ==================== CHARTS ====================

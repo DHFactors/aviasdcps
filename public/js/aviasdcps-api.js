@@ -55,7 +55,7 @@ class AviaSDCPSAPI {
         });
     }
     
-    // ==================== CAAN OVERSIGHT ====================
+    // ==================== State Oversight ====================
     async getMetrics() {
         return this.request('/state-risk/metrics');
     }
