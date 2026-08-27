@@ -87,17 +87,49 @@
         
         <!-- ======== STATE OVERSIGHT ======== -->
         <div id="page-state" class="page-section">
-            <h2 style="margin-bottom:20px;">📋 State Oversight Dashboard</h2>
+            <!-- Section 1: State Overview -->
+            <div class="state-overview-box">
+                <h2>📋 State Oversight Dashboard</h2>
+                <p>This view provides aggregated safety performance data across all operators in the State (ICAO Member State). Data includes SPI/SPT metrics, ALoSP monitoring, and hazard trends at the national level.</p>
+            </div>
+
+            <!-- Section 2: State KPI Cards -->
             <div class="kpi-banner" id="stateKpiBanner">
-                <div class="kpi-item"><div class="kpi-label">HRC Rate</div><div class="kpi-value" id="stateHRC">--</div><div class="kpi-target">Target: 1.5</div><div class="kpi-trend" id="stateHRCTrend">--</div></div>
-                <div class="kpi-item"><div class="kpi-label">SPT Score</div><div class="kpi-value" id="stateSPT">--</div><div class="kpi-target">Target: 85%</div><div class="kpi-trend" id="stateSPTTrend">--</div></div>
-                <div class="kpi-item"><div class="kpi-label">ALoSP</div><div class="kpi-value" id="stateALoSP">--</div><div class="kpi-target">Target: 1.0</div><div class="kpi-trend" id="stateALoSPTrend">--</div></div>
+                <div class="kpi-item" style="border-left-color:#2e86c1;"><div class="kpi-label">Total State Hazards</div><div class="kpi-value" id="stateTotalHazards">10</div><div class="kpi-target">Across all tenants</div></div>
+                <div class="kpi-item" style="border-left-color:#2e86c1;"><div class="kpi-label">Active Tenants</div><div class="kpi-value" id="stateActiveTenants">3</div><div class="kpi-target">Operators reporting</div></div>
+                <div class="kpi-item" style="border-left-color:#2e86c1;"><div class="kpi-label">Avg Risk Level</div><div class="kpi-value" id="stateAvgRisk">Medium</div><div class="kpi-target">State average</div></div>
             </div>
-            <div class="charts-grid">
-                <div class="chart-card"><h3>📈 SPI/SPT Trends</h3><canvas id="spiChart"></canvas></div>
-                <div class="chart-card"><h3>📊 ALoSP by Category</h3><canvas id="alospChart"></canvas></div>
+
+            <!-- Section 3: State SPI/SPT -->
+            <div class="kpi-banner" id="stateSpiBanner">
+                <div class="kpi-item"><div class="kpi-label">HRC (State Avg)</div><div class="kpi-value" id="stateHRC">1.17</div><div class="kpi-target">Target: 1.5</div><div class="kpi-trend" id="stateHRCTrend">Average across all reporting operators</div></div>
+                <div class="kpi-item"><div class="kpi-label">SPT (State Avg)</div><div class="kpi-value" id="stateSPT">81.8%</div><div class="kpi-target">Target: 85%</div><div class="kpi-trend" id="stateSPTTrend">Average across all reporting operators</div></div>
+                <div class="kpi-item"><div class="kpi-label">ALoSP (State Avg)</div><div class="kpi-value" id="stateALoSP">1.12</div><div class="kpi-target">Target: 1.0</div><div class="kpi-trend" id="stateALoSPTrend">Average across all reporting operators</div></div>
             </div>
-            <div class="chart-card"><h3>📊 Risk Matrix</h3><div class="risk-matrix" id="riskMatrix"></div></div>
+
+            <!-- Section 4: Breakdown by Tenant -->
+            <div class="chart-card">
+                <h3>📊 Breakdown by Tenant</h3>
+                <p style="font-size:13px;color:#5a6a7a;margin-bottom:12px;">Contribution of each operator to state metrics.</p>
+                <div class="audit-table-container" style="box-shadow:none;border:none;padding:0;">
+                    <table class="audit-table" id="stateBreakdownTable">
+                        <thead><tr><th>Tenant</th><th>Hazards</th><th>HRC</th><th>SPT</th><th>ALoSP</th></tr></thead>
+                        <tbody id="stateBreakdownBody">
+                            <tr><td>Pacific Air Services</td><td>4</td><td>1.2</td><td>85.5</td><td>0.95</td></tr>
+                            <tr><td>Nordic Aviation Group</td><td>3</td><td>1.5</td><td>82.0</td><td>1.1</td></tr>
+                            <tr><td>Southern Hemisphere Airlines</td><td>3</td><td>0.8</td><td>78.0</td><td>1.3</td></tr>
+                            <tr style="font-weight:700;background:#f8f9fc;"><td>State Total</td><td id="breakdownTotalHazards">10</td><td id="breakdownHRC">1.17</td><td id="breakdownSPT">81.8</td><td id="breakdownALoSP">1.12</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section 5: State Charts -->
+            <div class="charts-grid" style="margin-top:20px;">
+                <div class="chart-card"><h3>📈 SPI/SPT Trends (State Aggregated)</h3><canvas id="spiChart"></canvas></div>
+                <div class="chart-card"><h3>📊 ALoSP by Category (State Aggregated)</h3><canvas id="alospChart"></canvas></div>
+            </div>
+            <div class="chart-card"><h3>📊 Risk Matrix (State View)</h3><div class="risk-matrix" id="riskMatrix"></div></div>
         </div>
         
         <!-- ======== AUDIT ======== -->
@@ -690,6 +722,38 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
                 // Aggregated across ALL tenants — State Oversight
                 const metrics = await api.getAggregatedMetrics();
                 updateStateKPIs(metrics);
+                // Update State KPI Cards (Section 2)
+                const totalEl = document.getElementById('stateTotalHazards');
+                const activeEl = document.getElementById('stateActiveTenants');
+                const avgRiskEl = document.getElementById('stateAvgRisk');
+                if (totalEl) totalEl.textContent = metrics.total_hazards || 10;
+                if (activeEl) activeEl.textContent = metrics.breakdown ? Object.keys(metrics.breakdown).length : 3;
+                if (avgRiskEl) {
+                    // Compute avg risk level from aggregated hazards
+                    const all = api.getAllHazards();
+                    const critical = all.filter(h=>h.risk_level==='Critical').length;
+                    const high = all.filter(h=>h.risk_level==='High').length;
+                    avgRiskEl.textContent = critical > 0 ? 'High' : high > 3 ? 'High' : 'Medium';
+                    avgRiskEl.className = 'kpi-value ' + (critical>0 ? 'danger' : 'warning');
+                }
+                // Update Breakdown Table (Section 4)
+                const breakdownBody = document.getElementById('stateBreakdownBody');
+                if (breakdownBody) {
+                    const tenants = [
+                        { name: 'Pacific Air Services', id: 'tenant-001' },
+                        { name: 'Nordic Aviation Group', id: 'tenant-002' },
+                        { name: 'Southern Hemisphere Airlines', id: 'tenant-003' }
+                    ];
+                    let rows = '';
+                    for (const t of tenants) {
+                        const m = api.getMockMetrics(t.id);
+                        const count = api.getTenantHazards(t.id).length;
+                        rows += `<tr><td>${t.name}</td><td>${count}</td><td>${m.spi_values.HRC.current}</td><td>${m.spi_values.SPT.current}</td><td>${m.spi_values.ALoSP.current}</td></tr>`;
+                    }
+                    const agg = metrics;
+                    rows += `<tr style="font-weight:700;background:#f8f9fc;"><td>State Total</td><td>${agg.total_hazards}</td><td>${agg.spi_values.HRC.current}</td><td>${agg.spi_values.SPT.current}</td><td>${agg.spi_values.ALoSP.current}</td></tr>`;
+                    breakdownBody.innerHTML = rows;
+                }
                 const spspt = await api.getAggregatedSPISPT();
                 updateSPIChart(spspt);
                 const alosp = await api.getAggregatedALoSP();

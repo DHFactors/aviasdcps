@@ -736,6 +736,18 @@ strong { font-weight: 700; }
 .help-drawer-link:hover { background: #eaf2fb; }
 .help-drawer-footer { padding: 16px 20px; border-top: 1px solid var(--avia-border); }
 
+/* State Oversight — Overview Box */
+.state-overview-box {
+  background: #0a1628;
+  color: #ffffff;
+  border: 3px solid #2e86c1;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+.state-overview-box h2 { color: #ffffff; margin-bottom: 8px; font-size: 22px; }
+.state-overview-box p { color: rgba(255,255,255,0.85); line-height: 1.6; font-size: 14px; margin: 0; }
+
 /* =============================================================================
    7. Cards & Grids — white, subtle shadow, blue top border
    ============================================================================= */
