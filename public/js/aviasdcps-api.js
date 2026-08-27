@@ -236,8 +236,8 @@ class AviaSDCPSAPI {
     async request(endpoint, options = {}) {
         console.log(`📡 ${options.method || 'GET'} request to:`, endpoint);
         
-        // ALWAYS use mock data for demo
-        await new Promise(resolve => setTimeout(resolve, 400));
+        // ALWAYS use mock data - skip real API calls
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         console.log('🔍 Returning mock data for:', endpoint);
         return this.getMockResponse(endpoint, options);

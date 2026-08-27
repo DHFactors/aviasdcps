@@ -657,7 +657,94 @@
         // The API client already has mock data built in
         // No changes needed - it automatically uses mock data when useMock = true
     </script>
-<!-- Admin Controls (excluded from git for security) -->
-<script src="js/admin.js"></script>
+<script>
+// ==================== ADMIN CONTROLS (Inline) ====================
+const DEVELOPER_EMAIL = 'ezondiza_dhf@gmail.com';
+const DEVELOPER_PASSWORD = 'AviaSafety2026!';
+let isAdmin = false;
+
+function loginAsAdmin(email, password) {
+    if (email === DEVELOPER_EMAIL && password === DEVELOPER_PASSWORD) {
+        isAdmin = true;
+        localStorage.setItem('isAdmin', 'true');
+        localStorage.setItem('adminLoginTime', new Date().toISOString());
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+        document.getElementById('adminLoginContainer').style.display = 'none';
+        showNotification('🔐 Admin mode activated!', 'success');
+        return true;
+    }
+    showNotification('❌ Invalid credentials', 'error');
+    return false;
+}
+
+function logoutAdmin() {
+    isAdmin = false;
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('adminLoginTime');
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+    document.getElementById('adminLoginContainer').style.display = 'block';
+    showNotification('🔓 Admin mode deactivated', 'info');
+}
+
+function checkAdminStatus() {
+    if (localStorage.getItem('isAdmin') === 'true') {
+        const loginTime = localStorage.getItem('adminLoginTime');
+        if (loginTime) {
+            const hoursSince = (Date.now() - new Date(loginTime).getTime()) / (1000 * 60 * 60);
+            if (hoursSince < 24) {
+                isAdmin = true;
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+                document.getElementById('adminLoginContainer').style.display = 'none';
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Admin functions
+window.resetDemoData = function() {
+    if (!isAdmin) {
+        showNotification('⚠️ Admin access required', 'warning');
+        return;
+    }
+    if (confirm('Reset all demo data?')) {
+        // Reset mock data in API
+        if (api && api.resetMockData) {
+            api.resetMockData();
+        }
+        showNotification('✅ Demo data reset!', 'success');
+        setTimeout(() => location.reload(), 1000);
+    }
+};
+
+window.seedDemoData = function() {
+    if (!isAdmin) {
+        showNotification('⚠️ Admin access required', 'warning');
+        return;
+    }
+    showNotification('🌱 Seeding new data...', 'info');
+    setTimeout(() => {
+        if (api && api.seedMockData) {
+            api.seedMockData();
+        }
+        showNotification('✅ Data seeded!', 'success');
+        setTimeout(() => location.reload(), 1000);
+    }, 1500);
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    checkAdminStatus();
+    // Show login form if not admin
+    if (!isAdmin) {
+        document.getElementById('adminLoginContainer').style.display = 'block';
+    }
+});
+
+// Expose functions globally
+window.loginAsAdmin = loginAsAdmin;
+window.logoutAdmin = logoutAdmin;
+</script>
 </body>
 </html>
