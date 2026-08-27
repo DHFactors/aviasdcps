@@ -1,8 +1,8 @@
 /*
 ================================================================================
 FILE: public/js/aviasdcps-api.js
-VERSION: 0.3.0
-PURPOSE: Tenant-aware REST API client for AVIA SDCPS — with full mock data
+VERSION: 0.4.0
+PURPOSE: Tenant-aware REST API client — multi-tenant mock data
 AUTHOR: AVIA Safety Systems Team
 LAST UPDATED: 2026-08-27
 ================================================================================
@@ -15,12 +15,19 @@ class AviaSDCPSAPI {
         this.apiKey = localStorage.getItem('apiKey') || 'demo-key-001';
         this.useMock = true;
         console.log('✅ API Client initialized with tenant:', this.tenantId);
-        console.log('📊 Mode: MOCK DATA');
+        console.log('📊 Mode: MOCK DATA (multi-tenant)');
+        this.tenantNames = {
+            'tenant-001': 'Pacific Air Services',
+            'tenant-002': 'Nordic Aviation Group',
+            'tenant-003': 'Southern Hemisphere Airlines'
+        };
     }
-    
-    // ==================== MOCK DATA ====================
-    getMockHazards() {
-        return [
+
+    // ==================== MOCK DATA - TENANT ISOLATED ====================
+    getTenantHazards(tenantId) {
+        const id = tenantId || this.tenantId;
+        const map = {
+            'tenant-001': [
             {
                 id: "haz-001",
                 title: "Bird strike risk on runway 27L",
@@ -76,7 +83,9 @@ class AviaSDCPSAPI {
                 location: "Control Tower, Sydney Airport",
                 created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString()
-            },
+            }
+            ],
+            'tenant-002': [
             {
                 id: "haz-005",
                 title: "De-icing fluid shortage",
@@ -92,20 +101,6 @@ class AviaSDCPSAPI {
                 updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
             },
             {
-                id: "haz-006",
-                title: "Crew fatigue incident",
-                description: "Flight crew reported fatigue after long-haul flight. Investigation into scheduling procedures initiated.",
-                category: "Human Factors",
-                severity: "High",
-                probability: "Possible",
-                risk_level: "High",
-                status: "Open",
-                owner: "Emily Davis",
-                location: "Crew Briefing Room, Dubai Airport",
-                created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-                updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-            },
-            {
                 id: "haz-007",
                 title: "Hydraulic system leak",
                 description: "Minor hydraulic fluid leak detected during routine maintenance. Component scheduled for replacement.",
@@ -115,9 +110,39 @@ class AviaSDCPSAPI {
                 risk_level: "Low",
                 status: "Closed",
                 owner: "David Park",
-                location: "Maintenance Hangar, Singapore Airport",
+                location: "Maintenance Hangar, Oslo Airport",
                 created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                id: "haz-009",
+                title: "Emergency evacuation drill incomplete",
+                description: "Monthly emergency evacuation drill identified gaps in response time and communication protocols.",
+                category: "Organizational",
+                severity: "High",
+                probability: "Possible",
+                risk_level: "High",
+                status: "Open",
+                owner: "Mark Wilson",
+                location: "Terminal 3, Oslo Airport",
+                created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+                updated_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
+            }
+            ],
+            'tenant-003': [
+            {
+                id: "haz-006",
+                title: "Crew fatigue incident",
+                description: "Flight crew reported fatigue after long-haul flight. Investigation into scheduling procedures initiated.",
+                category: "Human Factors",
+                severity: "High",
+                probability: "Possible",
+                risk_level: "High",
+                status: "Open",
+                owner: "Emily Davis",
+                location: "Crew Briefing Room, Johannesburg Airport",
+                created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+                updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
             },
             {
                 id: "haz-008",
@@ -134,20 +159,6 @@ class AviaSDCPSAPI {
                 updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
             },
             {
-                id: "haz-009",
-                title: "Emergency evacuation drill incomplete",
-                description: "Monthly emergency evacuation drill identified gaps in response time and communication protocols.",
-                category: "Organizational",
-                severity: "High",
-                probability: "Possible",
-                risk_level: "High",
-                status: "Open",
-                owner: "Mark Wilson",
-                location: "Terminal 3, Singapore Airport",
-                created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-                updated_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
-            },
-            {
                 id: "haz-010",
                 title: "Navigation system anomaly",
                 description: "GPS navigation system reported intermittent signal loss during approach in specific weather conditions.",
@@ -157,56 +168,93 @@ class AviaSDCPSAPI {
                 risk_level: "High",
                 status: "Under Review",
                 owner: "Dr. Alan Chen",
-                location: "Approach Corridor, Dubai Airport",
+                location: "Approach Corridor, Johannesburg Airport",
                 created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
             }
-        ];
+            ]
+        };
+        return map[id] || map['tenant-001'];
     }
 
-    getMockMetrics() {
+    getAllHazards() {
+        return [...this.getTenantHazards('tenant-001'), ...this.getTenantHazards('tenant-002'), ...this.getTenantHazards('tenant-003')];
+    }
+
+    getMockHazards(tenantId) {
+        // Filtered by tenant — dashboard/hazards show only selected tenant
+        if (tenantId === 'all' || tenantId === 'aggregated') return this.getAllHazards();
+        return this.getTenantHazards(tenantId);
+    }
+
+    getMockMetrics(tenantId) {
+        const id = tenantId || this.tenantId;
+        const metricsMap = {
+            'tenant-001': { current: { HRC: 1.2, SPT: 85.5, ALoSP: 0.95 }, trend: { HRC: 'stable', SPT: 'up', ALoSP: 'stable' } },
+            'tenant-002': { current: { HRC: 1.5, SPT: 82.0, ALoSP: 1.1 }, trend: { HRC: 'up', SPT: 'stable', ALoSP: 'up' } },
+            'tenant-003': { current: { HRC: 0.8, SPT: 78.0, ALoSP: 1.3 }, trend: { HRC: 'down', SPT: 'down', ALoSP: 'stable' } }
+        };
+        const m = metricsMap[id] || metricsMap['tenant-001'];
         return {
-            tenant_id: "tenant-001",
+            tenant_id: id,
+            tenant_name: this.tenantNames[id],
             spi_values: {
-                HRC: {
-                    current: 1.2,
-                    target: 1.5,
-                    trend: "stable",
-                    history: [1.1, 1.3, 1.2, 1.4, 1.2, 1.5]
-                },
-                SPT: {
-                    current: 85.5,
-                    target: 85,
-                    trend: "up",
-                    history: [78, 80, 82, 84, 85, 86]
-                },
-                ALoSP: {
-                    current: 0.95,
-                    target: 1.0,
-                    trend: "stable",
-                    history: [1.1, 1.0, 0.9, 0.95, 1.0, 0.98]
-                }
+                HRC: { current: m.current.HRC, target: 1.5, trend: m.trend.HRC, history: [m.current.HRC-0.1, m.current.HRC+0.1, m.current.HRC, m.current.HRC+0.2, m.current.HRC, m.current.HRC+0.3] },
+                SPT: { current: m.current.SPT, target: 85, trend: m.trend.SPT, history: [m.current.SPT-7, m.current.SPT-5, m.current.SPT-3, m.current.SPT-1, m.current.SPT, m.current.SPT+0.5] },
+                ALoSP: { current: m.current.ALoSP, target: 1.0, trend: m.trend.ALoSP, history: [m.current.ALoSP+0.15, m.current.ALoSP+0.05, m.current.ALoSP-0.05, m.current.ALoSP, m.current.ALoSP+0.02, m.current.ALoSP] }
             },
             last_updated: new Date().toISOString()
         };
     }
 
-    getMockSPISPT() {
+    getAggregatedMetrics() {
+        // State Oversight — aggregated across all tenants
+        const avgHRC = (1.2 + 1.5 + 0.8) / 3;
+        const avgSPT = (85.5 + 82.0 + 78.0) / 3;
+        const avgALoSP = (0.95 + 1.1 + 1.3) / 3;
         return {
-            dates: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-            hrc: [1.2, 1.4, 1.3, 1.5, 1.6, 1.4],
-            spt: [78, 80, 82, 85, 84, 86],
-            alosp: [1.1, 1.0, 0.9, 0.95, 1.0, 0.98]
+            tenant_id: 'all',
+            tenant_name: 'All Tenants (State Oversight)',
+            total_hazards: this.getAllHazards().length,
+            breakdown: {
+                'tenant-001': this.getTenantHazards('tenant-001').length,
+                'tenant-002': this.getTenantHazards('tenant-002').length,
+                'tenant-003': this.getTenantHazards('tenant-003').length
+            },
+            spi_values: {
+                HRC: { current: parseFloat(avgHRC.toFixed(2)), target: 1.5, trend: 'stable', history: [1.1, 1.3, 1.2, 1.4, 1.17, 1.5] },
+                SPT: { current: parseFloat(avgSPT.toFixed(1)), target: 85, trend: 'stable', history: [78, 80, 81, 82, 81.8, 83] },
+                ALoSP: { current: parseFloat(avgALoSP.toFixed(2)), target: 1.0, trend: 'stable', history: [1.1, 1.05, 1.0, 1.12, 1.1, 1.12] }
+            },
+            last_updated: new Date().toISOString()
         };
     }
 
-    getMockALoSP() {
-        return {
-            categories: ["Operational", "Technical", "Human Factors", "Environmental", "Organizational"],
-            values: [1.2, 0.8, 1.1, 0.9, 1.0],
-            target: 1.0
+    getMockSPISPT(tenantId) {
+        const map = {
+            'tenant-001': { dates: ["Jan","Feb","Mar","Apr","May","Jun"], hrc: [1.1,1.3,1.2,1.4,1.2,1.5], spt: [80,82,83,84,85,85.5], alosp: [1.0,0.98,0.96,0.95,0.96,0.95] },
+            'tenant-002': { dates: ["Jan","Feb","Mar","Apr","May","Jun"], hrc: [1.3,1.4,1.5,1.4,1.5,1.5], spt: [78,79,80,81,82,82], alosp: [1.0,1.05,1.08,1.1,1.09,1.1] },
+            'tenant-003': { dates: ["Jan","Feb","Mar","Apr","May","Jun"], hrc: [0.9,0.8,0.85,0.8,0.78,0.8], spt: [75,76,77,78,77.5,78], alosp: [1.2,1.25,1.3,1.28,1.3,1.3] },
+            'aggregated': { dates: ["Jan","Feb","Mar","Apr","May","Jun"], hrc: [1.1,1.17,1.18,1.2,1.16,1.27], spt: [77.7,79,80,81,81.5,81.8], alosp: [1.07,1.09,1.11,1.11,1.12,1.12] }
         };
+        if (tenantId === 'aggregated' || tenantId === 'all') return map['aggregated'];
+        return map[tenantId || this.tenantId] || map['tenant-001'];
     }
+
+    getAggregatedSPISPT() { return this.getMockSPISPT('aggregated'); }
+
+    getMockALoSP(tenantId) {
+        const map = {
+            'tenant-001': { categories: ["Operational","Technical","Human Factors","Environmental","Organizational"], values: [1.1,0.9,1.0,0.8,0.95], target: 1.0 },
+            'tenant-002': { categories: ["Operational","Technical","Human Factors","Environmental","Organizational"], values: [0.9,1.0,0.8,1.1,1.1], target: 1.0 },
+            'tenant-003': { categories: ["Operational","Technical","Human Factors","Environmental","Organizational"], values: [1.0,1.3,1.2,0.9,1.1], target: 1.0 },
+            'aggregated': { categories: ["Operational","Technical","Human Factors","Environmental","Organizational"], values: [1.0,1.07,1.0,0.93,1.05], target: 1.0 }
+        };
+        if (tenantId === 'aggregated' || tenantId === 'all') return map['aggregated'];
+        return map[tenantId || this.tenantId] || map['tenant-001'];
+    }
+
+    getAggregatedALoSP() { return this.getMockALoSP('aggregated'); }
 
     getMockAuditTrail() {
         const actions = ['CREATE', 'UPDATE', 'VIEW', 'EXPORT', 'DELETE'];
@@ -234,7 +282,7 @@ class AviaSDCPSAPI {
 
     // ==================== API METHODS ====================
     async request(endpoint, options = {}) {
-        console.log(`📡 ${options.method || 'GET'} request to:`, endpoint);
+        console.log(`📡 ${options.method || 'GET'} request to:`, endpoint, 'tenant:', this.tenantId);
         
         // ALWAYS use mock data - skip real API calls
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -244,23 +292,36 @@ class AviaSDCPSAPI {
     }
 
     getMockResponse(endpoint, options) {
+        const tenant = this.tenantId;
         if (endpoint.includes('hazards')) {
             if (options.method === 'POST') {
                 return { success: true, message: "Hazard created", hazard: JSON.parse(options.body) };
             }
-            return this.getMockHazards();
+            // Dashboard/Hazards filtered by tenant
+            return this.getMockHazards(tenant);
         }
-        if (endpoint.includes('metrics')) return this.getMockMetrics();
-        if (endpoint.includes('spi-spt')) return this.getMockSPISPT();
-        if (endpoint.includes('alosp')) return this.getMockALoSP();
+        if (endpoint.includes('metrics')) return this.getMockMetrics(tenant);
+        if (endpoint.includes('spi-spt')) {
+            if (endpoint.includes('aggregated')) return this.getAggregatedSPISPT();
+            return this.getMockSPISPT(tenant);
+        }
+        if (endpoint.includes('alosp')) {
+            if (endpoint.includes('aggregated')) return this.getAggregatedALoSP();
+            return this.getMockALoSP(tenant);
+        }
         if (endpoint.includes('audit')) return this.getMockAuditTrail();
         if (endpoint.includes('demo/status')) return this.getMockDemoStatus();
         if (endpoint.includes('demo/reset')) return { success: true, message: "Demo data reset" };
+        if (endpoint.includes('state-risk/aggregated')) return this.getAggregatedMetrics();
         return { message: "Mock response" };
     }
 
+    // ==================== PUBLIC API METHODS ====================
     async getHazards(filters = {}) {
-        return this.request('/hazards');
+        // respect tenant filter if provided
+        const tenant = filters.tenant || this.tenantId;
+        if (filters.aggregated) return this.getAllHazards();
+        return this.getMockHazards(tenant);
     }
 
     async createHazard(data) {
@@ -271,16 +332,29 @@ class AviaSDCPSAPI {
         return this.request(`/hazards/${id}`, { method: 'DELETE' });
     }
 
-    async getMetrics() {
-        return this.request('/state-risk/metrics');
+    async getMetrics(tenantId) {
+        return this.getMockMetrics(tenantId || this.tenantId);
     }
 
-    async getSPISPT(period = 'monthly') {
-        return this.request(`/state-risk/spi-spt?period=${period}`);
+    async getAggregatedMetrics() {
+        // State Oversight aggregated
+        return this.getAggregatedMetrics();
     }
 
-    async getALoSP() {
-        return this.request('/state-risk/alosp');
+    async getSPISPT(period = 'monthly', tenantId) {
+        return this.getMockSPISPT(tenantId || this.tenantId);
+    }
+
+    async getAggregatedSPISPT() {
+        return this.getMockSPISPT('aggregated');
+    }
+
+    async getALoSP(tenantId) {
+        return this.getMockALoSP(tenantId || this.tenantId);
+    }
+
+    async getAggregatedALoSP() {
+        return this.getMockALoSP('aggregated');
     }
 
     async getDemoStatus() {
@@ -294,9 +368,13 @@ class AviaSDCPSAPI {
     async getRecentEmails() {
         return this.request('/email-preview/recent');
     }
+
+    getTenantName(tenantId) {
+        return this.tenantNames[tenantId || this.tenantId] || tenantId;
+    }
 }
 
 const api = new AviaSDCPSAPI();
 console.log('✅ AVIA SDCPS API Client loaded');
-console.log('📋 Tenant:', api.tenantId);
-console.log('📊 Mode:', api.useMock ? 'MOCK DATA' : 'REAL API');
+console.log('📋 Tenant:', api.tenantId, api.getTenantName());
+console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API');
