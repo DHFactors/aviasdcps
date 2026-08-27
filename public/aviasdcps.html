@@ -30,7 +30,7 @@
         </div>
         <div class="tenant-selector">
             <span>Tenant:</span>
-            <select id="tenantSelector">
+            <select id="tenantSelector" onchange="switchTenant(this.value)">
                 <option value="tenant-001">Pacific Air Services</option>
                 <option value="tenant-002">Nordic Aviation Group</option>
                 <option value="tenant-003">Southern Hemisphere Airlines</option>
@@ -44,29 +44,8 @@
         <button class="active" data-page="dashboard">📊 Dashboard</button>
         <button data-page="hazards">⚠️ Hazards</button>
         <button data-page="state">📋 State Oversight</button>
-        <button data-page="audit">🔍 Audit Trail</button>
         <button data-page="reports">📄 Reports</button>
-        <button data-page="demo">⚙️ Demo Controls</button>
     </nav>
-<!-- Admin Login Section (visible to all, but only works with correct credentials) -->
-<div id="adminLoginContainer" style="display:none;background:#f8f9fa;padding:20px;border-radius:10px;margin:20px 0;border:2px solid #2e86c1;">
-    <h3 style="color:#1a237e;">🔐 Admin Access</h3>
-    <p style="color:#666;font-size:14px;">Enter developer credentials to access admin controls.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;">
-        <input type="email" id="adminEmail" placeholder="Email" style="padding:10px 16px;border:2px solid #ddd;border-radius:8px;flex:1;min-width:180px;">
-        <input type="password" id="adminPassword" placeholder="Password" style="padding:10px 16px;border:2px solid #ddd;border-radius:8px;flex:1;min-width:180px;">
-        <button onclick="loginAsAdmin(document.getElementById('adminEmail').value, document.getElementById('adminPassword').value)" class="btn-primary">🔐 Login</button>
-    </div>
-</div>
-
-<!-- Admin-Only Controls (hidden by default) -->
-<div class="admin-only" style="display:none;margin:10px 0;">
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <button onclick="resetDemoData()" class="btn-danger">🔄 Reset All Data</button>
-        <button onclick="seedDemoData()" class="btn-success">🌱 Seed New Data</button>
-        <button onclick="logoutAdmin()" class="btn-secondary" style="background:#666;color:white;border:none;">🚪 Logout</button>
-    </div>
-</div>
     
     <!-- ==================== MAIN CONTENT ==================== -->
     <div class="app-content">
@@ -186,6 +165,68 @@
         </div>
         
     </div>
+<!-- ==================== FOOTER ==================== -->
+<footer class="app-footer" style="background:#0a1628;color:white;padding:30px;margin-top:40px;border-top:3px solid #2e86c1;">
+    <div style="max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;">
+        
+        <!-- Admin Login -->
+        <div>
+            <h4 style="color:#2e86c1;margin-bottom:10px;">🔐 Admin Access</h4>
+            <div id="adminLoginContainer" style="display:none;">
+                <p style="font-size:13px;opacity:0.8;margin-bottom:10px;">Enter developer credentials to access admin controls.</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <input type="email" id="adminEmail" placeholder="Email" style="padding:8px 12px;border-radius:6px;border:1px solid #444;background:#1a2a4a;color:white;flex:1;min-width:150px;">
+                    <input type="password" id="adminPassword" placeholder="Password" style="padding:8px 12px;border-radius:6px;border:1px solid #444;background:#1a2a4a;color:white;flex:1;min-width:150px;">
+                    <button onclick="loginAsAdmin(document.getElementById('adminEmail').value, document.getElementById('adminPassword').value)" class="btn-primary" style="padding:8px 20px;font-size:13px;">Login</button>
+                </div>
+                <div id="adminLoginError" style="color:#dc3545;margin-top:8px;font-size:13px;display:none;"></div>
+            </div>
+            <div class="admin-only" style="display:none;">
+                <span style="background:#28a745;color:white;padding:2px 10px;border-radius:12px;font-size:11px;">🔐 Admin Mode</span>
+                <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                    <button onclick="resetDemoData()" class="btn-danger" style="padding:6px 16px;font-size:12px;">🔄 Reset Data</button>
+                    <button onclick="seedDemoData()" class="btn-success" style="padding:6px 16px;font-size:12px;">🌱 Seed Data</button>
+                    <button onclick="logoutAdmin()" class="btn-secondary" style="padding:6px 16px;font-size:12px;background:#666;color:white;border:none;">🚪 Logout</button>
+                    <button onclick="viewAuditTrail()" class="btn-outline" style="padding:6px 16px;font-size:12px;">🔍 Audit Trail</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Session Info -->
+        <div>
+            <h4 style="color:#2e86c1;margin-bottom:10px;">📋 Session Info</h4>
+            <div style="font-size:13px;opacity:0.8;">
+                <p><strong>Tenant:</strong> <span id="sessionTenant">tenant-001</span></p>
+                <p><strong>Role:</strong> <span id="sessionRole">Viewer</span></p>
+                <p><strong>Status:</strong> <span id="sessionStatus">Active</span></p>
+            </div>
+        </div>
+        
+        <!-- System Status -->
+        <div>
+            <h4 style="color:#2e86c1;margin-bottom:10px;">⚙️ System Status</h4>
+            <div style="font-size:13px;opacity:0.8;">
+                <p><strong>Mode:</strong> <span id="systemMode">Demo</span></p>
+                <p><strong>Version:</strong> <span id="systemVersion">1.0.0</span></p>
+                <p><strong>Data:</strong> <span id="systemData">Mock</span></p>
+            </div>
+        </div>
+        
+        <!-- Footer Links -->
+        <div>
+            <h4 style="color:#2e86c1;margin-bottom:10px;">🔗 Quick Links</h4>
+            <div style="font-size:13px;opacity:0.8;display:flex;flex-direction:column;gap:4px;">
+                <a href="/" style="color:#5dade2;">🏠 Home</a>
+                <a href="/aviasdcps.html" style="color:#5dade2;">📊 Dashboard</a>
+                <a href="/docs" style="color:#5dade2;">📚 API Docs</a>
+                <a href="#" onclick="showNotification('Support: support@aviasafesystems.com', 'info')" style="color:#5dade2;">📧 Support</a>
+            </div>
+        </div>
+    </div>
+    <div style="text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;opacity:0.6;">
+        © 2026 AVIA Safety Systems · ICAO Annex 19 Compliant
+    </div>
+</footer>
     
     <!-- ==================== API CLIENT (Inlined to fix static serving) ==================== -->
     <script>
@@ -917,9 +958,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Tenant switching
+function switchTenant(tenantId) {
+    localStorage.setItem('tenantId', tenantId);
+    api.tenantId = tenantId;
+    const el = document.getElementById('sessionTenant');
+    if (el) el.textContent = tenantId;
+    showNotification('🔄 Switched to ' + tenantId, 'info');
+    // Reload data
+    loadDashboard();
+    loadHazards();
+    loadStateOversight();
+}
+
+function viewAuditTrail() {
+    if (!isAdmin) {
+        showNotification('⚠️ Admin access required', 'warning');
+        return;
+    }
+    // Switch to audit page
+    document.querySelectorAll('.app-nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+    const auditPage = document.getElementById('page-audit');
+    if (auditPage) auditPage.classList.add('active');
+    loadAudit();
+}
+
 // Expose functions globally
 window.loginAsAdmin = loginAsAdmin;
 window.logoutAdmin = logoutAdmin;
+window.switchTenant = switchTenant;
+window.viewAuditTrail = viewAuditTrail;
 </script>
 </body>
 </html>
