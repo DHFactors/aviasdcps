@@ -1391,3 +1391,5 @@ input.is-invalid:focus, select.is-invalid:focus, textarea.is-invalid:focus { box
 /* Spacing helpers for inline style migration */
 .gap-10 { gap: 10px; }
 .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+.metrics-legend-box h3 { color: var(--avia-primary-dark); }

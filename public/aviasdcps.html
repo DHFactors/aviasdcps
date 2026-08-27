@@ -109,25 +109,65 @@
                 <div class="kpi-item" style="border-left-color:#2e86c1;"><div class="kpi-label">Avg Risk Level</div><div class="kpi-value" id="stateAvgRisk">Medium</div><div class="kpi-target">State average</div></div>
             </div>
 
-            <!-- Section 3: State SPI/SPT -->
-            <div class="kpi-banner" id="stateSpiBanner">
-                <div class="kpi-item"><div class="kpi-label">HRC (State Avg)</div><div class="kpi-value" id="stateHRC">1.17</div><div class="kpi-target">Target: 1.5</div><div class="kpi-trend" id="stateHRCTrend">Average across all reporting operators</div></div>
-                <div class="kpi-item"><div class="kpi-label">SPT (State Avg)</div><div class="kpi-value" id="stateSPT">81.8%</div><div class="kpi-target">Target: 85%</div><div class="kpi-trend" id="stateSPTTrend">Average across all reporting operators</div></div>
-                <div class="kpi-item"><div class="kpi-label">ALoSP (State Avg)</div><div class="kpi-value" id="stateALoSP">1.12</div><div class="kpi-target">Target: 1.0</div><div class="kpi-trend" id="stateALoSPTrend">Average across all reporting operators</div></div>
+            <!-- Section 3: State Safety Score Card (Task 3) -->
+            <div class="chart-card state-score-card" style="border-top-color:#0a1628;">
+                <h3>🛡️ State Safety Score</h3>
+                <p style="font-size:13px;color:#5a6a7a;margin-bottom:16px;">Overall safety performance based on aggregated SPI/SPT and ALoSP. Higher is better.</p>
+                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+                    <div id="stateSafetyScoreValue" style="font-size:42px;font-weight:800;color:#0a1628;min-width:90px;">82%</div>
+                    <div style="flex:1;min-width:220px;display:grid;gap:10px;">
+                        <div><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:4px;"><span>HRC</span><span id="scoreHRCText">80%</span></div><div style="background:#eef2f7;border-radius:6px;height:8px;overflow:hidden;"><div id="scoreHRCBar" style="height:100%;background:#2e86c1;width:80%;"></div></div></div>
+                        <div><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:4px;"><span>SPT</span><span id="scoreSPTText">96%</span></div><div style="background:#eef2f7;border-radius:6px;height:8px;overflow:hidden;"><div id="scoreSPTBar" style="height:100%;background:#2e86c1;width:96%;"></div></div></div>
+                        <div><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:4px;"><span>ALoSP</span><span id="scoreALoSPText">89%</span></div><div style="background:#eef2f7;border-radius:6px;height:8px;overflow:hidden;"><div id="scoreALoSPBar" style="height:100%;background:#2e86c1;width:89%;"></div></div></div>
+                    </div>
+                </div>
+                <p id="stateSafetyScoreDesc" style="font-size:13px;color:#5a6a7a;margin-top:12px;">Good overall performance. SPT is on target, HRC is below target — consider strengthening reporting culture.</p>
             </div>
 
-            <!-- Section 4: Breakdown by Tenant -->
+            <!-- Section 3b: State SPI/SPT with Status & Trend -->
+            <div class="kpi-banner" id="stateSpiBanner">
+                <div class="kpi-item"><div class="kpi-label">HRC (State Avg)</div><div style="display:flex;align-items:center;gap:8px;justify-content:center;"><div class="kpi-value" id="stateHRC">1.17</div><span class="badge" id="stateHRCStatus">⚠️</span></div><div class="kpi-target">Target: ≥1.5</div><div class="kpi-trend" id="stateHRCTrend">—</div></div>
+                <div class="kpi-item"><div class="kpi-label">SPT (State Avg)</div><div style="display:flex;align-items:center;gap:8px;justify-content:center;"><div class="kpi-value" id="stateSPT">81.8%</div><span class="badge" id="stateSPTStatus">⚠️</span></div><div class="kpi-target">Target: ≥85%</div><div class="kpi-trend" id="stateSPTTrend">—</div></div>
+                <div class="kpi-item"><div class="kpi-label">ALoSP (State Avg)</div><div style="display:flex;align-items:center;gap:8px;justify-content:center;"><div class="kpi-value" id="stateALoSP">1.12</div><span class="badge" id="stateALoSPStatus">⚠️</span></div><div class="kpi-target">Target: ≤1.0</div><div class="kpi-trend" id="stateALoSPTrend">—</div></div>
+            </div>
+
+            <!-- Task 1: Metrics Legend Box -->
+            <div class="chart-card metrics-legend-box">
+                <h3>📖 Metrics Legend</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:12px;">
+                    <div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:10px;padding:14px;">
+                        <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:6px;">HRC — Hazard Reporting Culture</h4>
+                        <p style="font-size:12px;color:#5a6a7a;margin:0 0 6px;">Number of reports per 100,000 flights</p>
+                        <p style="font-size:12px;margin:0;"><strong>Scale:</strong> 0–5 (Higher = Better)</p>
+                        <p style="font-size:12px;margin:0;"><strong>Target:</strong> ≥ 1.5</p>
+                    </div>
+                    <div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:10px;padding:14px;">
+                        <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:6px;">SPT — Safety Performance Target</h4>
+                        <p style="font-size:12px;color:#5a6a7a;margin:0 0 6px;">Percentage of hazards closed within 30 days</p>
+                        <p style="font-size:12px;margin:0;"><strong>Scale:</strong> 0–100% (Higher = Better)</p>
+                        <p style="font-size:12px;margin:0;"><strong>Target:</strong> ≥ 85%</p>
+                    </div>
+                    <div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:10px;padding:14px;">
+                        <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:6px;">ALoSP — Acceptable Level of Safety Performance</h4>
+                        <p style="font-size:12px;color:#5a6a7a;margin:0 0 6px;">Risk index (lower is better)</p>
+                        <p style="font-size:12px;margin:0;"><strong>Scale:</strong> 0–2.0 (Lower = Better)</p>
+                        <p style="font-size:12px;margin:0;"><strong>Target:</strong> ≤ 1.0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Breakdown by Tenant with Status -->
             <div class="chart-card">
                 <h3>📊 Breakdown by Tenant</h3>
                 <p style="font-size:13px;color:#5a6a7a;margin-bottom:12px;">Contribution of each operator to state metrics.</p>
                 <div class="audit-table-container" style="box-shadow:none;border:none;padding:0;">
                     <table class="audit-table" id="stateBreakdownTable">
-                        <thead><tr><th>Tenant</th><th>Hazards</th><th>HRC</th><th>SPT</th><th>ALoSP</th></tr></thead>
+                        <thead><tr><th>Tenant</th><th>Hazards</th><th>HRC</th><th>SPT</th><th>ALoSP</th><th>Status</th></tr></thead>
                         <tbody id="stateBreakdownBody">
-                            <tr><td>Pacific Air Services</td><td>4</td><td>1.2</td><td>85.5</td><td>0.95</td></tr>
-                            <tr><td>Nordic Aviation Group</td><td>3</td><td>1.5</td><td>82.0</td><td>1.1</td></tr>
-                            <tr><td>Southern Hemisphere Airlines</td><td>3</td><td>0.8</td><td>78.0</td><td>1.3</td></tr>
-                            <tr style="font-weight:700;background:#f8f9fc;"><td>State Total</td><td id="breakdownTotalHazards">10</td><td id="breakdownHRC">1.17</td><td id="breakdownSPT">81.8</td><td id="breakdownALoSP">1.12</td></tr>
+                            <tr><td>Pacific Air Services</td><td>4</td><td>1.2</td><td>85.5</td><td>0.95</td><td><span class="badge badge-warning">⚠️ Good</span></td></tr>
+                            <tr><td>Nordic Aviation Group</td><td>3</td><td>1.5</td><td>82.0</td><td>1.1</td><td><span class="badge badge-warning">⚠️ Attention</span></td></tr>
+                            <tr><td>Southern Hemisphere Airlines</td><td>3</td><td>0.8</td><td>78.0</td><td>1.3</td><td><span class="badge badge-danger">❌ Action</span></td></tr>
+                            <tr style="font-weight:700;background:#f8f9fc;"><td>State Total</td><td id="breakdownTotalHazards">10</td><td id="breakdownHRC">1.17</td><td id="breakdownSPT">81.8</td><td id="breakdownALoSP">1.12</td><td><span class="badge badge-warning">⚠️</span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -139,6 +179,17 @@
                 <div class="chart-card"><h3>📊 ALoSP by Category (State Aggregated)</h3><canvas id="alospChart"></canvas></div>
             </div>
             <div class="chart-card state-risk-card"><h3>📊 Risk Matrix (State View)</h3><div class="state-risk-summary">Risk Distribution across <strong>10</strong> hazards from <strong>3</strong> operators</div><div class="risk-matrix state-risk-matrix" id="riskMatrix"></div></div>
+
+            <!-- Task 5: What This Means -->
+            <div class="chart-card" style="border-top-color:#1a2a4a;">
+                <h3>💡 What This Means</h3>
+                <div style="display:grid;gap:12px;margin-top:12px;">
+                    <div style="background:#f8f9fc;border-radius:10px;padding:14px;border-left:4px solid #f39c12;"><strong>HRC (1.17)</strong> — <span id="whatHRC">Below target of 1.5. This suggests under-reporting of hazards. Consider strengthening reporting culture.</span></div>
+                    <div style="background:#f8f9fc;border-radius:10px;padding:14px;border-left:4px solid #27ae60;"><strong>SPT (81.8%)</strong> — <span id="whatSPT">Below target of 85%. Hazards are taking slightly longer to close. Review closure processes.</span></div>
+                    <div style="background:#f8f9fc;border-radius:10px;padding:14px;border-left:4px solid #f39c12;"><strong>ALoSP (1.12)</strong> — <span id="whatALoSP">Above target of 1.0. Overall risk level is slightly elevated. Maintain and review current controls.</span></div>
+                </div>
+                <p style="font-size:12px;color:#5a6a7a;margin-top:12px;">State Safety Score reflects average performance. Green = On Target, Orange = Below Target, Red = Needs Action per ICAO SSP thresholds.</p>
+            </div>
         </div>
         
         <!-- ======== SPI/SPT DECLARATION ======== -->
@@ -800,7 +851,6 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
         
         async function loadStateOversight() {
             try {
-                // Aggregated across ALL tenants — State Oversight
                 const metrics = await api.getAggregatedMetrics();
                 updateStateKPIs(metrics);
                 // Update State KPI Cards (Section 2)
@@ -810,14 +860,19 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
                 if (totalEl) totalEl.textContent = metrics.total_hazards || 10;
                 if (activeEl) activeEl.textContent = metrics.breakdown ? Object.keys(metrics.breakdown).length : 3;
                 if (avgRiskEl) {
-                    // Compute avg risk level from aggregated hazards
                     const all = api.getAllHazards();
                     const critical = all.filter(h=>h.risk_level==='Critical').length;
                     const high = all.filter(h=>h.risk_level==='High').length;
                     avgRiskEl.textContent = critical > 0 ? 'High' : high > 3 ? 'High' : 'Medium';
                     avgRiskEl.className = 'kpi-value ' + (critical>0 ? 'danger' : 'warning');
                 }
-                // Update Breakdown Table (Section 4)
+                // Task 2,4: Status indicators + Trend
+                updateStateStatusAndTrends(metrics);
+                // Task 3: Safety Score
+                updateStateSafetyScore(metrics);
+                // Task 5: What This Means
+                updateWhatThisMeans(metrics);
+                // Update Breakdown Table with Status (Task 6)
                 const breakdownBody = document.getElementById('stateBreakdownBody');
                 if (breakdownBody) {
                     const tenants = [
@@ -825,27 +880,138 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
                         { name: 'Nordic Aviation Group', id: 'tenant-002' },
                         { name: 'Southern Hemisphere Airlines', id: 'tenant-003' }
                     ];
+                    const getStatus = (hrc, spt, alosp) => {
+                        const hrcStatus = hrc >= 1.5 ? 'ok' : hrc >= 1.0 ? 'warn' : 'bad';
+                        const sptStatus = spt >= 85 ? 'ok' : spt >= 75 ? 'warn' : 'bad';
+                        const alospStatus = alosp <= 1.0 ? 'ok' : alosp <= 1.5 ? 'warn' : 'bad';
+                        const counts = { ok:0, warn:0, bad:0 };
+                        [hrcStatus, sptStatus, alospStatus].forEach(s => counts[s]++);
+                        if (counts.bad > 0) return '<span class="badge badge-danger">❌ Action</span>';
+                        if (counts.warn > 0) return '<span class="badge badge-warning">⚠️ Attention</span>';
+                        return '<span class="badge badge-success">✅ Good</span>';
+                    };
                     let rows = '';
                     for (const t of tenants) {
                         const m = api.getMockMetrics(t.id);
                         const count = api.getTenantHazards(t.id).length;
-                        rows += `<tr><td>${t.name}</td><td>${count}</td><td>${m.spi_values.HRC.current}</td><td>${m.spi_values.SPT.current}</td><td>${m.spi_values.ALoSP.current}</td></tr>`;
+                        const st = getStatus(m.spi_values.HRC.current, m.spi_values.SPT.current, m.spi_values.ALoSP.current);
+                        rows += `<tr><td>${t.name}</td><td>${count}</td><td>${m.spi_values.HRC.current}</td><td>${m.spi_values.SPT.current}</td><td>${m.spi_values.ALoSP.current}</td><td>${st}</td></tr>`;
                     }
                     const agg = metrics;
-                    rows += `<tr style="font-weight:700;background:#f8f9fc;"><td>State Total</td><td>${agg.total_hazards}</td><td>${agg.spi_values.HRC.current}</td><td>${agg.spi_values.SPT.current}</td><td>${agg.spi_values.ALoSP.current}</td></tr>`;
+                    const aggStatus = getStatus(agg.spi_values.HRC.current, agg.spi_values.SPT.current, agg.spi_values.ALoSP.current);
+                    rows += `<tr style="font-weight:700;background:#f8f9fc;"><td>State Total</td><td>${agg.total_hazards}</td><td>${agg.spi_values.HRC.current}</td><td>${agg.spi_values.SPT.current}</td><td>${agg.spi_values.ALoSP.current}</td><td>${aggStatus}</td></tr>`;
                     breakdownBody.innerHTML = rows;
                 }
                 const spspt = await api.getAggregatedSPISPT();
                 updateSPIChart(spspt);
                 const alosp = await api.getAggregatedALoSP();
                 updateALoSPChart(alosp);
-                // State-level risk matrix with aggregated data
                 const aggregatedHazards = api.getAggregatedHazards();
                 renderStateRiskMatrix(aggregatedHazards);
                 updateViewModeIndicator('state');
             } catch (error) {
                 console.error('Error loading State data:', error);
                 showNotification('Error loading State data', 'error');
+            }
+        }
+
+        function getMetricStatus(metric, value) {
+            if (metric === 'HRC') {
+                if (value >= 1.5) return { label: '✅ On Target', cls: 'badge-success' };
+                if (value >= 1.0) return { label: '⚠️ Below Target', cls: 'badge-warning' };
+                return { label: '❌ Needs Action', cls: 'badge-danger' };
+            }
+            if (metric === 'SPT') {
+                if (value >= 85) return { label: '✅ On Target', cls: 'badge-success' };
+                if (value >= 75) return { label: '⚠️ Below Target', cls: 'badge-warning' };
+                return { label: '❌ Needs Action', cls: 'badge-danger' };
+            }
+            if (metric === 'ALoSP') {
+                if (value <= 1.0) return { label: '✅ On Target', cls: 'badge-success' };
+                if (value <= 1.5) return { label: '⚠️ Below Target', cls: 'badge-warning' };
+                return { label: '❌ Needs Action', cls: 'badge-danger' };
+            }
+        }
+
+        function updateStateStatusAndTrends(metrics) {
+            const hrc = metrics.spi_values.HRC.current;
+            const spt = metrics.spi_values.SPT.current;
+            const alosp = metrics.spi_values.ALoSP.current;
+            const prevHRC = metrics.spi_values.HRC.history ? metrics.spi_values.HRC.history[metrics.spi_values.HRC.history.length-2] : hrc - 0.05;
+            const prevSPT = metrics.spi_values.SPT.history ? metrics.spi_values.SPT.history[metrics.spi_values.SPT.history.length-2] : spt - 1;
+            const prevALoSP = metrics.spi_values.ALoSP.history ? metrics.spi_values.ALoSP.history[metrics.spi_values.ALoSP.history.length-2] : alosp + 0.05;
+            const setStatus = (id, metric, val) => {
+                const s = getMetricStatus(metric, val);
+                const el = document.getElementById(id);
+                if (el) { el.textContent = s.label; el.className = 'badge ' + s.cls; }
+            };
+            setStatus('stateHRCStatus', 'HRC', hrc);
+            setStatus('stateSPTStatus', 'SPT', spt);
+            setStatus('stateALoSPStatus', 'ALoSP', alosp);
+            const setTrend = (id, cur, prev, isLowerBetter) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const diff = cur - prev;
+                const improving = isLowerBetter ? diff < 0 : diff > 0;
+                const arrow = diff > 0.001 ? '↑' : diff < -0.001 ? '↓' : '→';
+                const color = Math.abs(diff) < 0.001 ? '#5a6a7a' : improving ? '#1e8449' : '#c0392b';
+                const sign = diff > 0 ? '+' : '';
+                el.innerHTML = `${cur} <span style="font-size:11px;color:#5a6a7a;">(was ${prev})</span> <span style="color:${color};">${arrow} ${sign}${diff.toFixed(2)}</span>`;
+                el.style.color = color;
+            };
+            setTrend('stateHRCTrend', hrc, prevHRC, false);
+            setTrend('stateSPTTrend', spt, prevSPT, false);
+            setTrend('stateALoSPTrend', alosp, prevALoSP, true);
+        }
+
+        function updateStateSafetyScore(metrics) {
+            const hrc = metrics.spi_values.HRC.current;
+            const spt = metrics.spi_values.SPT.current;
+            const alosp = metrics.spi_values.ALoSP.current;
+            const hrcScore = Math.min(100, (hrc / 1.5) * 100);
+            const sptScore = Math.min(100, (spt / 85) * 100);
+            const alospScore = Math.min(100, (1.0 / alosp) * 100);
+            const overall = Math.round((hrcScore + sptScore + alospScore) / 3);
+            const scoreEl = document.getElementById('stateSafetyScoreValue');
+            const descEl = document.getElementById('stateSafetyScoreDesc');
+            if (scoreEl) scoreEl.textContent = overall + '%';
+            const setBar = (idText, idBar, val) => {
+                const te = document.getElementById(idText);
+                const be = document.getElementById(idBar);
+                if (te) te.textContent = Math.round(val) + '%';
+                if (be) be.style.width = Math.round(val) + '%';
+            };
+            setBar('scoreHRCText', 'scoreHRCBar', hrcScore);
+            setBar('scoreSPTText', 'scoreSPTBar', sptScore);
+            setBar('scoreALoSPText', 'scoreALoSPBar', alospScore);
+            if (descEl) {
+                if (overall >= 85) descEl.textContent = 'Excellent overall performance. All metrics near or on target. Maintain current SMS effectiveness.';
+                else if (overall >= 70) descEl.textContent = 'Good overall performance. SPT is on target, HRC is below target — consider strengthening reporting culture.';
+                else descEl.textContent = 'Needs attention. Multiple metrics below target. Review safety controls and reporting processes.';
+            }
+        }
+
+        function updateWhatThisMeans(metrics) {
+            const hrc = metrics.spi_values.HRC.current;
+            const spt = metrics.spi_values.SPT.current;
+            const alosp = metrics.spi_values.ALoSP.current;
+            const hrcEl = document.getElementById('whatHRC');
+            const sptEl = document.getElementById('whatSPT');
+            const alospEl = document.getElementById('whatALoSP');
+            if (hrcEl) {
+                if (hrc >= 1.5) hrcEl.textContent = 'At or above target of 1.5. Reporting culture is healthy. Maintain current practices.';
+                else if (hrc >= 1.0) hrcEl.textContent = 'Below target of 1.5. This suggests under-reporting of hazards. Consider strengthening reporting culture.';
+                else hrcEl.textContent = 'Well below target of 1.5. Significant under-reporting. Immediate action to improve safety reporting is recommended.';
+            }
+            if (sptEl) {
+                if (spt >= 85) sptEl.textContent = 'At target. Hazards are being closed within expected timeframe. Continue current practices.';
+                else if (spt >= 75) sptEl.textContent = 'Below target of 85%. Hazards are taking slightly longer to close. Review closure processes.';
+                else sptEl.textContent = 'Well below target. Hazard closure is delayed. Review resource allocation and follow-up procedures.';
+            }
+            if (alospEl) {
+                if (alosp <= 1.0) alospEl.textContent = 'Below target of 1.0. Overall risk level is acceptable. Maintain current controls.';
+                else if (alosp <= 1.5) alospEl.textContent = 'Above target of 1.0. Overall risk level is slightly elevated. Maintain and review current controls.';
+                else alospEl.textContent = 'Well above target. Elevated risk level. Review and strengthen safety mitigations.';
             }
         }
         
