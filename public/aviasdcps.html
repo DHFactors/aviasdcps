@@ -22,35 +22,17 @@
         </span>
     </div>
     
-    <!-- ==================== HEADER ==================== -->
-    <header class="app-header">
-        <div class="logo">
-            <button class="sidebar-toggle" id="sidebarToggle" onclick="document.getElementById('appSidebar').classList.toggle('open')" style="display:none;background:transparent;border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:6px;padding:6px 10px;font-size:16px;cursor:pointer;">☰</button>
-            <h1>✈️ AVIA SDCPS</h1>
-            <span>Safety Management Platform</span>
-        </div>
-        <div class="tenant-selector">
-            <span>Tenant:</span>
-            <select id="tenantSelector" onchange="switchTenant(this.value)">
-                <option value="tenant-001">Pacific Air Services</option>
-                <option value="tenant-002">Nordic Aviation Group</option>
-                <option value="tenant-003">Southern Hemisphere Airlines</option>
-            </select>
-            <button class="btn-outline" onclick="location.reload()">🔄 Refresh</button>
-        </div>
-    </header>
-    
-    <div class="app-layout">
-    <!-- ==================== SIDEBAR NAVIGATION ==================== -->
-    <aside class="app-sidebar" id="appSidebar">
+    <div class="app-container">
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar app-sidebar" id="sidebar">
         <div class="sidebar-brand">
             <h2>✈️ AVIA SDCPS</h2>
             <span>Safety Management Platform</span>
         </div>
         <nav class="sidebar-nav">
             <button class="active" data-page="dashboard">📊 Dashboard</button>
-            <button data-page="hazard-log">📋 Hazard Log</button>
             <button data-page="can-cap">🔄 CAN/CAP Workflow</button>
+            <button data-page="hazard-log">📋 Hazard Log</button>
             <button data-page="state">📊 State Oversight</button>
             <button data-page="reports">📄 Reports</button>
             <hr class="nav-divider">
@@ -58,13 +40,37 @@
             <button data-page="declare">📝 Declare SPIs</button>
         </nav>
         <div class="sidebar-footer">
-            <button onclick="document.getElementById('page-audit')?.scrollIntoView()">⚙️ Admin</button>
+            <button onclick="switchPage('reports'); showNotification('AVIA SDCPS — Admin footer','info')">⚙️ Admin</button>
             <a href="/" onclick="event.preventDefault(); showNotification('AVIA SDCPS v1.0 — ICAO Annex 19 compliant Safety Management Platform','info')">📖 About</a>
         </div>
     </aside>
 
-    <!-- ==================== MAIN CONTENT ==================== -->
-    <div class="app-content">
+    <!-- ==================== MAIN AREA ==================== -->
+    <div class="main-area">
+        <!-- ==================== HEADER (Task 6) ==================== -->
+        <header class="app-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                <span class="header-title">✈️ AVIA SDCPS</span>
+                <span style="font-size:11px;color:rgba(255,255,255,0.6);margin-left:8px;align-self:center;">Safety Management Platform</span>
+            </div>
+            <div class="header-right">
+                <span class="view-indicator" style="font-size:12px;color:rgba(255,255,255,0.75);display:flex;align-items:center;gap:6px;">
+                    <span style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);padding:4px 8px;border-radius:999px;font-size:11px;color:#fff;">
+                        Viewing: <span id="headerViewModeText">Pacific Air Services</span> <span id="headerViewModeSubtext" style="opacity:0.7;">• 4 hazards</span>
+                    </span>
+                </span>
+                <select id="tenantSelector" onchange="switchTenant(this.value)" style="padding:8px 32px 8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.12);color:white;font-size:13px;">
+                    <option value="tenant-001">Pacific Air Services</option>
+                    <option value="tenant-002">Nordic Aviation Group</option>
+                    <option value="tenant-003">Southern Hemisphere Airlines</option>
+                </select>
+                <button class="btn-refresh btn-outline" onclick="location.reload()" style="padding:7px 10px;font-size:13px;">🔄</button>
+            </div>
+        </header>
+
+        <!-- ==================== CONTENT ==================== -->
+        <main class="app-content">
     <!-- View Mode Indicator -->
     <div id="viewModeIndicator" style="background:#eaf2fb;border:1px solid #c9deef;border-left:4px solid #2e86c1;border-radius:8px;padding:10px 16px;margin:16px 30px;font-size:13px;color:#1a2a4a;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
         <span><strong>Viewing:</strong> <span id="viewModeText">Pacific Air Services</span></span>
@@ -550,8 +556,10 @@
             </div>
         </div>
         
+        </main>
     </div>
-    </div><!-- /.app-layout -->
+    </div><!-- /.app-container -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
     <!-- Hazard Log Detail Modal -->
     <div id="hlModal" class="modal-overlay" aria-hidden="true" style="display:none;" onclick="if(event.target===this) closeHazardModal()">
@@ -1107,21 +1115,23 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
         function updateViewModeIndicator(mode) {
             const textEl = document.getElementById('viewModeText');
             const subEl = document.getElementById('viewModeSubtext');
-            if (!textEl || !subEl) return;
+            const hTextEl = document.getElementById('headerViewModeText');
+            const hSubEl = document.getElementById('headerViewModeSubtext');
+            const setAll = (t,s) => {
+                if(textEl) textEl.textContent=t; if(subEl) subEl.textContent=s;
+                if(hTextEl) hTextEl.textContent=t; if(hSubEl) hSubEl.textContent=s;
+            };
             if (mode === 'state') {
                 const all = api.getAllHazards();
-                textEl.textContent = 'State Oversight (All Tenants)';
-                subEl.textContent = all.length + ' hazards • Aggregated across 3 tenants';
+                setAll('State Oversight (All Tenants)', all.length + ' hazards • Aggregated across 3 tenants');
             } else if (mode === 'hazard-log') {
                 const all = api.getAllHazards();
-                textEl.textContent = 'Hazard Log — Master Register';
-                subEl.textContent = all.length + ' hazards • ICAO-style • All tenants';
+                setAll('Hazard Log — Master Register', all.length + ' hazards • ICAO-style • All tenants');
                 const d = document.getElementById('hlDate'); if (d) d.textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
             } else {
                 const name = api.getTenantName();
                 const count = api.getMockHazards().length;
-                textEl.textContent = name;
-                subEl.textContent = count + ' hazards • Tenant view';
+                setAll(name, count + ' hazards • Tenant view');
             }
         }
 
@@ -1145,9 +1155,29 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             if(page==='demo'){ updateViewModeIndicator('tenant'); loadDemoStatus(); }
             if(page==='reports') updateViewModeIndicator('tenant');
             location.hash=page;
-            document.getElementById('appSidebar')?.classList.remove('open');
+            closeSidebar();
         }
         window.switchPage=switchPage;
+        // Task 5: Sidebar toggle helpers (spec)
+        function toggleSidebar(){
+            const sidebar=document.querySelector('.sidebar')||document.getElementById('sidebar')||document.getElementById('appSidebar');
+            const overlay=document.querySelector('.sidebar-overlay')||document.getElementById('sidebarOverlay');
+            if(sidebar) sidebar.classList.toggle('open');
+            if(overlay) overlay.classList.toggle('active');
+        }
+        function closeSidebar(){
+            const sidebar=document.querySelector('.sidebar')||document.getElementById('sidebar')||document.getElementById('appSidebar');
+            const overlay=document.querySelector('.sidebar-overlay')||document.getElementById('sidebarOverlay');
+            if(sidebar) sidebar.classList.remove('open');
+            const legacy=document.getElementById('appSidebar'); if(legacy) legacy.classList.remove('open');
+            const spec=document.getElementById('sidebar'); if(spec) spec.classList.remove('open');
+            if(overlay) overlay.classList.remove('active');
+        }
+        window.toggleSidebar=toggleSidebar; window.closeSidebar=closeSidebar;
+        document.querySelectorAll('.sidebar-nav button, .sidebar-nav a').forEach(el=>{
+            el.addEventListener('click', function(){ if(window.innerWidth < 1024) closeSidebar(); });
+        });
+        document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSidebar(); });
         document.querySelectorAll('.app-sidebar button, .app-nav button').forEach(btn => {
             btn.addEventListener('click', function() {
                 if (!this.dataset.page) return;
