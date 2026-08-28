@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="demo-banner" id="demoBanner">
+        <span>⚠️ DEMO MODE - For Evaluation Only</span>
+        <span class="demo-timer" id="demoTimer">Data refreshes in 5:00</span>
+        <a href="#" onclick="resetDemoData()">Reset Data</a>
+    </div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <div class="main-area">
+            <div class="app-content">
+                <div class="page-header" style="margin-bottom:20px;">
+                    <h1>📊 Dashboard</h1>
+                    <p>Overview of safety performance across all tenants</p>
+                </div>
+                <div class="kpi-banner" id="kpiBanner">
+                    <div class="kpi-item"><div class="kpi-label">Total Hazards</div><div class="kpi-value" id="kpiTotal">0</div><div class="kpi-target">All time</div></div>
+                    <div class="kpi-item"><div class="kpi-label">Open Hazards</div><div class="kpi-value warning" id="kpiOpen">0</div><div class="kpi-target">Needs attention</div></div>
+                    <div class="kpi-item"><div class="kpi-label">Critical Risk</div><div class="kpi-value danger" id="kpiCritical">0</div><div class="kpi-target">Immediate action</div></div>
+                    <div class="kpi-item"><div class="kpi-label">Closed This Month</div><div class="kpi-value success" id="kpiClosed">0</div><div class="kpi-target">Resolved</div></div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-card"><h3>📈 Safety Performance Trends</h3><canvas id="trendChart"></canvas></div>
+                    <div class="chart-card"><h3>📊 Risk Distribution</h3><canvas id="riskChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>⚠️ Recent Hazards</h3>
+                    <div class="hazard-list" id="recentHazards"><div class="loading"><div class="spinner"></div><p>Loading hazards...</p></div></div>
+                </div>
+                <div class="chart-card" id="cancapWidget" style="border-top-color:#2e86c1;margin-top:20px;">
+                    <h3>🔄 CAN/CAP Summary</h3>
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0;">
+                        <div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#5a6a7a;">Total</div><div id="widgetCanTotal" style="font-size:20px;font-weight:800;color:#0a1628;">3</div></div>
+                        <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#1e40af;">Issued</div><div id="widgetCanIssued" style="font-size:20px;font-weight:800;color:#1e40af;">1</div></div>
+                        <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#92400e;">Review</div><div id="widgetCanReview" style="font-size:20px;font-weight:800;color:#92400e;">1</div></div>
+                        <div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#065f46;">Accepted</div><div id="widgetCanAccepted" style="font-size:20px;font-weight:800;color:#065f46;">0</div></div>
+                        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#991b1b;">Escalated</div><div id="widgetCanEscalated" style="font-size:20px;font-weight:800;color:#991b1b;">1</div></div>
+                    </div>
+                    <div style="display:flex;gap:16px;font-size:12px;color:#1a2a4a;margin-bottom:10px;"><span>⚠️ Pending Your Review: <strong id="widgetCanPending">1</strong></span><span>🔴 Escalated: <strong id="widgetCanEscalated2">1</strong></span></div>
+                    <a href="/can-cap.html" class="btn-primary btn-sm">View All CANs →</a>
+                </div>
+                <div class="chart-card" style="border-top-color:#0a1628;margin-top:20px;">
+                    <h3>🚨 ICAO High-Risk Categories</h3>
+                    <p style="font-size:13px;color:#5a6a7a;margin-bottom:12px;">Monitoring G-HRCs and Nepal-specific risks</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;"><div style="background:#eaf2fb;border:1px solid #c9deef;border-radius:8px;padding:10px 14px;text-align:center;flex:1;"><div style="font-size:11px;font-weight:700;color:#5a6a7a;">Total G-HRC Hazards</div><div id="riskGhrcTotal" style="font-size:22px;font-weight:800;color:#0a1628;">8/10</div></div><div style="background:#fef9e7;border:1px solid #fde49a;border-radius:8px;padding:10px 14px;text-align:center;flex:1;"><div style="font-size:11px;font-weight:700;color:#5a6a7a;">Nepal-Specific</div><div id="riskNepalTotal" style="font-size:22px;font-weight:800;color:#0a1628;">5/10</div></div></div>
+                        <div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:8px;padding:10px 14px;"><div style="font-size:11px;font-weight:700;color:#0a1628;margin-bottom:6px;">Risk Alert List</div><div id="riskAlertList" style="font-size:12px;color:#1a2a4a;line-height:1.6;">Loading…</div></div>
+                    </div>
+                    <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:8px;">G-HRC Overview</h4><div id="ghrcCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;"></div>
+                    <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:8px;">🇳🇵 Nepal-Specific Risks</h4><div id="nepalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;"></div>
+                    <div class="chart-card" style="box-shadow:none;border:1px solid #e3e8ef;margin:0;"><h3>📊 Hazards by Risk Category</h3><canvas id="riskBreakdownChart" style="max-height:280px;"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/aviasdcps-api.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSidebar();
+            // load dashboard data (from common hazard logic)
+            setTimeout(async () => {
+                const hazards = await api.getHazards({tenant: api.tenantId});
+                if(window.updateKPIs) updateKPIs(hazards);
+                if(window.updateTrendChart) updateTrendChart(hazards);
+                if(window.updateRiskChart) updateRiskChart(hazards);
+                if(window.renderRecentHazards) renderRecentHazards(hazards);
+                if(window.updateRiskDashboard) updateRiskDashboard(hazards);
+                try{ updateDashboardCanWidget(); }catch{}
+            }, 300);
+        });
+        // Reuse dashboard functions from aviasdcps.html if needed, fallback
+        function updateKPIs(hazards){ const total=hazards.length; document.getElementById('kpiTotal').textContent=total; document.getElementById('kpiOpen').textContent=hazards.filter(h=>h.status!=='Closed').length; document.getElementById('kpiCritical').textContent=hazards.filter(h=>h.risk_level==='Critical'||h.risk_level==='High').length; document.getElementById('kpiClosed').textContent=hazards.filter(h=>h.status==='Closed').length; }
+        function renderRecentHazards(hazards){ const el=document.getElementById('recentHazards'); if(!el) return; el.innerHTML=hazards.slice(0,5).map(h=>`<div class="hazard-item"><div class="hazard-info"><h4>${h.title}</h4><p>${h.description?.substring(0,80)}...</p></div><div class="hazard-meta"><span class="badge badge-${h.risk_level==='High'?'danger':h.risk_level==='Medium'?'warning':'success'}">${h.risk_level}</span></div></div>`).join(''); }
+    </script>
+</body>
+</html>

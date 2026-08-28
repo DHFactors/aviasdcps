@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+</head>
+<body style="background:#f4f6f9;">
+    <div class="demo-banner"><span>⚠️ DEMO MODE - For Evaluation Only</span></div>
+    <div style="min-height:calc(100vh - 38px); display:flex; align-items:center; justify-content:center; padding:24px;">
+        <div class="chart-card" style="max-width:480px;width:100%;text-align:left;">
+            <div style="text-align:center; margin-bottom:20px;">
+                <div style="font-size:32px;">✈️</div>
+                <h2 style="margin:8px 0 4px;">AVIA SDCPS</h2>
+                <p style="color:#5a6a7a;font-size:13px;margin:0;">Safety Management Platform — Demo Login</p>
+            </div>
+            <div style="background:#eaf2fb;border:1px solid #c9deef;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#1a2a4a;">
+                <strong>Demo Credentials</strong><br>
+                Any Tenant + Password <code>AviaSafety2026!</code><br>
+                Admin: <code>ezondiza_dhf@gmail.com</code> / <code>AviaSafety2026!</code>
+            </div>
+            <div style="display:grid;gap:12px;">
+                <div><label style="font-size:13px;font-weight:600;">Tenant</label><select id="tenantSelect" style="width:100%;padding:10px 12px;border:1px solid #e3e8ef;border-radius:8px;"><option value="tenant-001">Pacific Air Services</option><option value="tenant-002">Nordic Aviation Group</option><option value="tenant-003">Southern Hemisphere Airlines</option></select></div>
+                <div><label style="font-size:13px;font-weight:600;">Email</label><input id="loginEmail" type="email" placeholder="you@airline.com" style="width:100%;padding:10px 12px;border:1px solid #e3e8ef;border-radius:8px;"></div>
+                <div><label style="font-size:13px;font-weight:600;">Password</label><input id="loginPassword" type="password" placeholder="••••••••" value="AviaSafety2026!" style="width:100%;padding:10px 12px;border:1px solid #e3e8ef;border-radius:8px;"></div>
+                <button class="btn-primary btn-block" onclick="doLogin()" style="margin-top:8px;">🔓 Login to Dashboard</button>
+                <div id="loginMsg" style="font-size:13px;min-height:18px;"></div>
+                <div style="text-align:center; margin-top:8px;">
+                    <a href="/index.html" style="font-size:13px;">← Back to Landing</a> · <a href="/dashboard.html" style="font-size:13px;">Skip to Dashboard →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/aviasdcps-api.js"></script>
+    <script>
+        function doLogin(){
+            const tenant=document.getElementById('tenantSelect').value;
+            const email=document.getElementById('loginEmail').value.trim();
+            const pass=document.getElementById('loginPassword').value;
+            const msg=document.getElementById('loginMsg');
+            if(!pass){ msg.style.color='#c0392b'; msg.textContent='⚠️ Enter password (demo: AviaSafety2026!)'; return; }
+            localStorage.setItem('tenantId', tenant);
+            localStorage.setItem('isLoggedIn','true');
+            if(email==='ezondiza_dhf@gmail.com' && pass==='AviaSafety2026!'){
+                localStorage.setItem('isAdmin','true');
+                localStorage.setItem('adminLoginTime', new Date().toISOString());
+            }
+            if(email) localStorage.setItem('userName', email.split('@')[0]);
+            msg.style.color='#1e8449'; msg.textContent='✅ Logged in — redirecting...';
+            setTimeout(()=> location.href='/dashboard.html', 600);
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+            const tid=localStorage.getItem('tenantId')||'tenant-001';
+            document.getElementById('tenantSelect').value=tid;
+        });
+    </script>
+</body>
+</html>

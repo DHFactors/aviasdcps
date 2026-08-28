@@ -1,0 +1,17 @@
+<!-- Reusable HFACS Selector Component -->
+<div class="hfacs-selector">
+    <label>🔢 HFACS Nano-Code</label>
+    <div class="hfacs-search">
+        <input type="text" id="hfacsSearch" placeholder="Search by code or description..." oninput="filterHFACS(this.value)">
+        <div id="hfacsResults" class="hfacs-dropdown"></div>
+    </div>
+    <div id="hfacsSelected" class="hfacs-selected" style="display:none;">
+        <span class="code">PC307</span>
+        <span class="description">Fatigue</span>
+        <button onclick="clearHFACS()" style="background:none;border:none;color:#999;cursor:pointer;float:right;font-size:16px;">✕</button>
+    </div>
+</div>
+<script>
+    // This component expects /api/v1/hfacs endpoints and common HFACS helpers.
+    // Include after main page scripts: fetch('/components/hfacs-selector.html') and inject.
+</script>

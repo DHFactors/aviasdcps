@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+</head>
+<body>
+    <div class="demo-banner" id="demoBanner"><span>⚠️ DEMO MODE - For Evaluation Only</span></div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <div class="main-area">
+            <div class="app-content">
+                <div style="background:#0a1628;color:white;padding:40px 32px;border-radius:12px;margin-bottom:24px;">
+                    <h1 style="color:white;margin:0 0 8px;">✈️ AVIA SDCPS</h1>
+                    <p style="color:rgba(255,255,255,0.75);font-size:16px;margin:0;">Safety Management Platform — ICAO Annex 19 Compliant</p>
+                    <p style="color:rgba(255,255,255,0.6);font-size:13px;margin-top:12px;">Version 1.0.0 · Building safer skies with data-driven safety management</p>
+                </div>
+                <div class="avia-grid-2">
+                    <div class="chart-card"><h3>🎯 Mission</h3><p>Enable States, operators, and service providers to share safety data safely under State Safety Programme (SSP) and Safety Management System (SMS) principles.</p></div>
+                    <div class="chart-card"><h3>🌐 ICAO Compliant</h3><p>Aligned to ICAO Annex 19, Doc 9859, G-HRCs and Nepal-specific risks with full audit trail and ALoSP monitoring.</p></div>
+                </div>
+                <div class="chart-card" style="margin-top:16px;">
+                    <h3>📚 System Info</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px;">
+                        <div><strong>Mode:</strong> Demo (Mock Data)</div>
+                        <div><strong>Version:</strong> 1.0.0</div>
+                        <div><strong>Tenants:</strong> 3 (Pacific Air, Nordic Aviation, Southern Hemisphere)</div>
+                        <div><strong>Hazards:</strong> 10 + imported</div>
+                        <div><strong>API:</strong> /api/v1/hazards, /nlp, /hfacs, /state-risk</div>
+                        <div><strong>Support:</strong> support@aviasafesystems.com</div>
+                    </div>
+                    <div style="margin-top:16px; display:flex; gap:10px;">
+                        <a href="/dashboard.html" class="btn-primary">🚀 Launch Dashboard</a>
+                        <a href="/" class="btn-outline">🏠 Landing Page</a>
+                    </div>
+                </div>
+                <div class="chart-card" style="margin-top:16px; text-align:center;">
+                    <p style="font-size:12px;color:#5a6a7a;">© 2026 AVIA Safety Systems · ICAO Annex 19 Compliant · Multi-Page Application</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/aviasdcps-api.js"></script>
+    <script src="/js/common.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function(){ loadSidebar(); });</script>
+</body>
+</html>

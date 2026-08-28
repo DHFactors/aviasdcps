@@ -1,0 +1,72 @@
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">✈️</div>
+        <div class="brand-text">
+            <h1>AVIA <span class="highlight">SDCPS</span></h1>
+            <span>Safety Management Platform</span>
+        </div>
+    </div>
+    
+    <div class="sidebar-user">
+        <div class="user-avatar">👤</div>
+        <div class="user-info">
+            <span class="user-name" id="sidebarUserName">Guest User</span>
+            <span class="user-tenant" id="sidebarUserTenant">Pacific Air Services</span>
+        </div>
+    </div>
+    
+    <div class="sidebar-view">
+        <span class="view-label">📊 Viewing:</span>
+        <span class="view-detail" id="sidebarViewDetail">Dashboard</span>
+    </div>
+    
+    <div class="sidebar-tenant-selector">
+        <label for="tenantSelector">🏢 Tenant:</label>
+        <select id="tenantSelector" onchange="switchTenant(this.value)">
+            <option value="tenant-001">Pacific Air Services</option>
+            <option value="tenant-002">Nordic Aviation Group</option>
+            <option value="tenant-003">Southern Hemisphere Airlines</option>
+        </select>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item active" data-page="dashboard">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+        <a href="/hazard-log.html" class="nav-item" data-page="hazard-log">
+            <span class="nav-icon">📋</span>
+            <span class="nav-text">Hazard Log</span>
+        </a>
+        <a href="/hazard-analysis.html" class="nav-item" data-page="hazard-analysis">
+            <span class="nav-icon">📈</span>
+            <span class="nav-text">Hazard Analysis</span>
+        </a>
+        <a href="/can-cap.html" class="nav-item" data-page="can-cap">
+            <span class="nav-icon">🔄</span>
+            <span class="nav-text">CAN/CAP Workflow</span>
+        </a>
+        <a href="/state-oversight.html" class="nav-item" data-page="state-oversight">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text">State Oversight</span>
+        </a>
+        <a href="/reports.html" class="nav-item" data-page="reports">
+            <span class="nav-icon">📄</span>
+            <span class="nav-text">Reports</span>
+        </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+        <a href="/about.html" class="nav-item" data-page="about">
+            <span class="nav-icon">📖</span>
+            <span class="nav-text">About</span>
+        </a>
+        <button class="logout-btn" onclick="logoutUser()">
+            🚪 Logout
+        </button>
+    </div>
+</aside>
+
+<!-- Sidebar Overlay (for mobile) -->
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>

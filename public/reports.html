@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+</head>
+<body>
+    <div class="demo-banner" id="demoBanner"><span>⚠️ DEMO MODE - For Evaluation Only</span></div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <div class="main-area">
+            <div class="app-content">
+                <h1 style="margin-bottom:20px;">📄 Report Generator</h1>
+                <div class="avia-grid-2">
+                    <div class="chart-card">
+                        <h3>📄 State Oversight Report</h3>
+                        <p style="color:#666;margin-bottom:15px;font-size:14px;">Generate a comprehensive PDF report with metrics, hazards, and SPI/SPT data.</p>
+                        <div class="btn-group">
+                            <button class="btn-primary" onclick="alert('PDF generated (demo)')">📄 Generate PDF</button>
+                            <button class="btn-success" onclick="alert('Email sent (demo)')">📧 Email Report</button>
+                        </div>
+                        <div id="pdfStatus" style="margin-top:10px;font-size:14px;color:#666;"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>📧 Email Preview (Demo Mode)</h3>
+                        <p style="color:#666;margin-bottom:15px;font-size:14px;">View emails that would be sent in production mode.</p>
+                        <button class="btn-outline" onclick="document.getElementById('emailPreview').innerHTML='<p style=color:#27ae60;>No recent emails (demo)</p>'">📧 View Recent Emails</button>
+                        <div id="emailPreview" style="margin-top:10px;font-size:14px;color:#666;"></div>
+                    </div>
+                </div>
+                <div class="chart-card" style="margin-top:20px;">
+                    <h3>📋 Scheduled Reports</h3>
+                    <div style="color:#666;padding:10px 0;">
+                        <p>Weekly dispatch: Every Monday at 9:00 AM</p>
+                        <p>DLQ Replay: Every hour</p>
+                        <button class="btn-outline" onclick="alert('Dispatch triggered (demo)')" style="margin-top:10px;">🔄 Trigger Dispatch Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/aviasdcps-api.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){ loadSidebar(); });
+    </script>
+</body>
+</html>

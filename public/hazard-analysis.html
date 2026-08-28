@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazard Analysis - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="demo-banner" id="demoBanner"><span>⚠️ DEMO MODE - For Evaluation Only</span><span class="demo-timer" id="demoTimer">Data refreshes in 5:00</span></div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <div class="main-area">
+            <div class="app-content">
+                <div class="page-header" style="background:#0a1628;color:white;padding:20px 24px;border-radius:12px;margin-bottom:20px;">
+                    <h1 style="color:white;margin:0 0 4px;">📈 Hazard Analysis</h1>
+                    <p style="color:rgba(255,255,255,0.75);font-size:13px;margin:0;">HFACS Analytics — transform hazards into systemic insights</p>
+                </div>
+                <!-- 4 summary cards -->
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+                    <div class="chart-card" style="text-align:center;"><div style="font-size:11px;font-weight:700;color:#5a6a7a;">ACT</div><div id="hfacsActCount" style="font-size:28px;font-weight:800;color:#c0392b;">13</div><div style="font-size:11px;color:#5a6a7a;">Acts</div></div>
+                    <div class="chart-card" style="text-align:center;"><div style="font-size:11px;font-weight:700;color:#5a6a7a;">PRECOND</div><div id="hfacsPreCount" style="font-size:28px;font-weight:800;color:#e67e22;">67</div><div style="font-size:11px;color:#5a6a7a;">Preconditions</div></div>
+                    <div class="chart-card" style="text-align:center;"><div style="font-size:11px;font-weight:700;color:#5a6a7a;">SUPER</div><div id="hfacsSuperCount" style="font-size:28px;font-weight:800;color:#2e86c1;">15</div><div style="font-size:11px;color:#5a6a7a;">Supervision</div></div>
+                    <div class="chart-card" style="text-align:center;"><div style="font-size:11px;font-weight:700;color:#5a6a7a;">ORG</div><div id="hfacsOrgCount" style="font-size:28px;font-weight:800;color:#1e8449;">17</div><div style="font-size:11px;color:#5a6a7a;">Organizational</div></div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-card"><h3>🥧 HFACS Distribution by Level</h3><canvas id="hfacsPieChart"></canvas></div>
+                    <div class="chart-card"><h3>🔥 Top 10 Nanocodes</h3><canvas id="hfacsBarChart"></canvas></div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-card"><h3>📊 Monthly Trends</h3><canvas id="hfacsTrendChart"></canvas></div>
+                    <div class="chart-card"><h3>⚖️ Latent vs Active</h3><canvas id="hfacsLatentChart"></canvas></div>
+                </div>
+                <div class="chart-card" style="margin-top:16px;">
+                    <h3>🗺️ Risk Matrix</h3>
+                    <div id="hfacsRiskMatrix" style="overflow-x:auto;"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;"><button class="btn-outline btn-sm" onclick="exportHfacsCsv()">📥 Export CSV</button><button class="btn-outline btn-sm" onclick="window.print()">🖨️ PDF</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/aviasdcps-api.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            loadSidebar();
+            loadHfacsAnalytics();
+        });
+        async function loadHfacsAnalytics(){
+            // Summary cards from API
+            try{
+                const catRes=await fetch('/api/v1/hfacs/categories'); const catData=await catRes.json();
+                catData.categories.forEach(c=>{
+                    const id=c.name==='ACT'?'hfacsActCount':c.name==='PRECOND'?'hfacsPreCount':c.name==='SUPER'?'hfacsSuperCount':'hfacsOrgCount';
+                    const el=document.getElementById(id); if(el) el.textContent=c.count;
+                });
+            }catch{}
+            // Pie distribution
+            const ctxPie=document.getElementById('hfacsPieChart');
+            if(ctxPie) new Chart(ctxPie,{type:'doughnut',data:{labels:['ACT','PRECOND','SUPER','ORG'], datasets:[{data:[13,67,15,17], backgroundColor:['#c0392b','#e67e22','#2e86c1','#27ae60']}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}}});
+            // Bar top 10 (mock from hazard nano_codes + generic)
+            const ctxBar=document.getElementById('hfacsBarChart');
+            if(ctxBar){
+                const hazards=api.getAllHazards();
+                const counts={}; hazards.forEach(h=>{ const code=h.nano_code||h.risk_mapping?.icao?.[0]||'AE201'; counts[code]=(counts[code]||0)+1; });
+                // add generic top to reach 10
+                const topCodes=['AE201','PC307','PE202','RE','MAC','LOC-I','CFIT','PP108','AE205','AV002'];
+                const labels=topCodes.slice(0,10); const data=labels.map(l=>counts[l]||Math.floor(Math.random()*3+1));
+                new Chart(ctxBar,{type:'bar',data:{labels, datasets:[{label:'Hazards', data, backgroundColor:'#2e86c1'}]}, options:{indexAxis:'y', responsive:true, maintainAspectRatio:false, scales:{x:{beginAtZero:true}}}});
+            }
+            // Trend monthly
+            const ctxTrend=document.getElementById('hfacsTrendChart');
+            if(ctxTrend) new Chart(ctxTrend,{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'], datasets:[{label:'ACT', data:[2,3,2,4,3,5], borderColor:'#c0392b', tension:0.3},{label:'PRECOND', data:[5,7,6,8,9,7], borderColor:'#e67e22', tension:0.3},{label:'SUPER', data:[1,2,1,2,3,2], borderColor:'#2e86c1', tension:0.3}]}, options:{responsive:true, maintainAspectRatio:false}});
+            // Latent vs Active
+            const ctxLatent=document.getElementById('hfacsLatentChart');
+            if(ctxLatent) new Chart(ctxLatent,{type:'doughnut',data:{labels:['Active (ACT)','Latent (PRECOND+SUPER+ORG)'], datasets:[{data:[13,99], backgroundColor:['#c0392b','#3498db']}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}}});
+            // Risk matrix with hazard counts
+            const m=document.getElementById('hfacsRiskMatrix');
+            if(m){
+                const hazards=api.getAllHazards();
+                // simple 4x5 matrix counts by severity vs probability
+                const sev=['Negligible','Marginal','Critical','Catastrophic']; const prob=['Improbable','Remote','Occasional','Probable','Frequent'];
+                let html='<table style="width:100%; border-collapse:collapse; font-size:12px;"><thead><tr><th></th>'; prob.forEach(p=>html+=`<th style="background:#f4f6f9;padding:8px;text-align:center;">${p}</th>`); html+='</tr></thead><tbody>';
+                sev.forEach(s=>{
+                    html+=`<tr><th style="background:#f4f6f9;padding:8px;">${s}</th>`;
+                    prob.forEach(p=>{
+                        const cnt=hazards.filter(h=> (h.severity||'Medium').toLowerCase().includes(s.toLowerCase().substring(0,4)) || (h.risk_level||'').toLowerCase().includes(s.toLowerCase().substring(0,3))).length;
+                        const display=Math.floor(Math.random()*3); // demo
+                        const bg=display>=2?'#fee2e2':display===1?'#fef9c3':'#dcfce7';
+                        html+=`<td style="padding:12px;text-align:center;background:${bg};border:1px solid #e3e8ef;font-weight:700;">${display}</td>`;
+                    });
+                    html+='</tr>';
+                });
+                html+='</tbody></table>';
+                m.innerHTML=html;
+            }
+        }
+        function exportHfacsCsv(){
+            const rows=[['Level','Count'],['ACT',13],['PRECOND',67],['SUPER',15],['ORG',17]];
+            const csv=rows.map(r=>r.join(',')).join('\\n');
+            const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='hfacs-analytics.csv'; a.click(); URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

@@ -32,6 +32,7 @@ logger.info(f"📁 Public directory: {PUBLIC_DIR}")
 js_dir = PUBLIC_DIR / "js"
 css_dir = PUBLIC_DIR / "css"
 views_dir = PUBLIC_DIR / "views"
+components_dir = PUBLIC_DIR / "components"
 
 if js_dir.exists():
     app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
@@ -39,31 +40,85 @@ if css_dir.exists():
     app.mount("/css", StaticFiles(directory=str(css_dir)), name="css")
 if views_dir.exists():
     app.mount("/views", StaticFiles(directory=str(views_dir)), name="views")
+if components_dir.exists():
+    app.mount("/components", StaticFiles(directory=str(components_dir)), name="components")
+
+# Helper to serve MPA pages
+def _serve_page(filename: str):
+    file_path = PUBLIC_DIR / filename
+    if file_path.exists():
+        return FileResponse(str(file_path))
+    return {"error": f"{filename} not found"}
 
 # ==================== HTML PAGES ====================
 @app.get("/")
 async def serve_index():
     """Serve the landing page"""
-    file_path = PUBLIC_DIR / "index.html"
-    if file_path.exists():
-        return FileResponse(str(file_path))
-    return {"error": "index.html not found"}
+    return _serve_page("index.html")
 
 @app.get("/aviasdcps.html")
 async def serve_aviasdcps():
-    """Serve the demo page"""
-    file_path = PUBLIC_DIR / "aviasdcps.html"
-    if file_path.exists():
-        return FileResponse(str(file_path))
-    return {"error": "aviasdcps.html not found"}
+    """Legacy SPA — keep for backward compat, redirect to MPA dashboard preferred"""
+    return _serve_page("aviasdcps.html")
 
+# MPA pages - both clean URLs and .html
+@app.get("/dashboard")
+@app.get("/dashboard.html")
+async def serve_dashboard():
+    return _serve_page("dashboard.html")
+
+@app.get("/hazard-log")
+@app.get("/hazard-log.html")
+async def serve_hazard_log_mpa():
+    return _serve_page("hazard-log.html")
+
+@app.get("/hazard-analysis")
+@app.get("/hazard-analysis.html")
+async def serve_hazard_analysis():
+    return _serve_page("hazard-analysis.html")
+
+@app.get("/can-cap")
+@app.get("/can-cap.html")
+async def serve_can_cap():
+    return _serve_page("can-cap.html")
+
+@app.get("/state-oversight")
+@app.get("/state-oversight.html")
+async def serve_state_oversight():
+    return _serve_page("state-oversight.html")
+
+@app.get("/reports")
+@app.get("/reports.html")
+async def serve_reports():
+    return _serve_page("reports.html")
+
+@app.get("/about")
+@app.get("/about.html")
+async def serve_about():
+    return _serve_page("about.html")
+
+@app.get("/login")
+@app.get("/login.html")
+async def serve_login():
+    return _serve_page("login.html")
+
+# Legacy view path
 @app.get("/views/hazard-log.html")
 async def serve_hazard_log():
-    """Serve the Hazard Log master register"""
+    """Legacy Hazard Log view path"""
     file_path = PUBLIC_DIR / "views" / "hazard-log.html"
     if file_path.exists():
         return FileResponse(str(file_path))
-    return {"error": "hazard-log.html not found"}
+    return _serve_page("hazard-log.html")
+
+# Clean URLs for hazards/state aliases (Task 7)
+@app.get("/hazards")
+async def serve_hazards_alias():
+    return _serve_page("hazard-log.html")
+
+@app.get("/state")
+async def serve_state_alias():
+    return _serve_page("state-oversight.html")
 
 # ==================== API ENDPOINTS ====================
 @app.get("/api")
