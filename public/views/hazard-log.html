@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazard Log — AVIA SDCPS | Master Hazard Register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+    <style>
+        .hazard-log-header {
+            background: var(--avia-primary-dark);
+            color: var(--avia-white);
+            padding: 20px 24px;
+            border-radius: var(--avia-radius-lg);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .hazard-log-header h1 { color: var(--avia-white); font-size: 22px; margin-bottom: 4px; }
+        .hazard-log-header p { color: rgba(255,255,255,0.75); font-size: 13px; margin: 0; }
+        .hazard-log-meta { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-size: 13px; color: rgba(255,255,255,0.85); }
+        .hazard-log-toolbar {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+            background: white; border: 1px solid #e3e8ef; border-radius: 10px; padding: 14px 16px;
+        }
+        .hazard-log-toolbar .search-box { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .hazard-log-toolbar .search-box input { min-width: 260px; padding: 8px 12px; font-size: 13px; }
+        .hazard-log-table-container {
+            background: var(--avia-white); border-radius: var(--avia-radius-lg); box-shadow: var(--avia-shadow-sm); border: 1px solid var(--avia-border); overflow-x: auto; padding: 0;
+        }
+        .hazard-log-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1250px; }
+        .hazard-log-table th {
+            background: var(--avia-primary-dark); color: var(--avia-white); padding: 10px 8px; font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; border-bottom: 2px solid var(--avia-accent-blue); text-align: left; vertical-align: middle;
+        }
+        .hazard-log-table th small { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,0.6); text-transform: none; letter-spacing: 0; margin-top: 2px; }
+        .hazard-log-table td { padding: 10px 8px; border-bottom: 1px solid #eef2f7; vertical-align: top; color: var(--avia-text-dark); line-height: 1.4; max-width: 220px; word-wrap: break-word; }
+        .hazard-log-table tbody tr { cursor: pointer; transition: filter 0.15s; }
+        .hazard-log-table tbody tr:hover { filter: brightness(0.97); }
+        .priority-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 12px; font-weight: 800; border: 2px solid; }
+        .priority-H { background: #f9d5d3; color: #c0392b; border-color: #c0392b; }
+        .priority-M { background: #fef9e7; color: #7d6608; border-color: #d4ac0d; }
+        .priority-L { background: #d5f0de; color: #1e8449; border-color: #27ae60; }
+        .row-H { background: #fdf0ef; border-left: 4px solid #c0392b; }
+        .row-M { background: #fef9e7; border-left: 4px solid #d4ac0d; }
+        .row-L { background: #eafaf1; border-left: 4px solid #27ae60; }
+        .yn-y { color: var(--avia-success); font-weight: 800; }
+        .yn-n { color: var(--avia-danger); font-weight: 800; }
+        .hazard-log-footer {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 16px;
+            padding: 12px 16px; background: #eaf2fb; border: 1px solid #c9deef; border-radius: var(--avia-radius-md); font-size: 12px; color: var(--avia-text-gray);
+        }
+        @media print {
+            .demo-banner, .app-header, .app-nav, .hazard-log-toolbar, .app-footer, .no-print { display: none !important; }
+            .hazard-log-table-container { box-shadow: none; border: 1px solid #000; }
+            body { padding-top: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-banner">
+        <span class="demo-icon">⚠️</span>
+        DEMO MODE — For Evaluation Only
+        <span class="demo-timer" id="demoTimer">Data refreshes in 5:00</span>
+        <span style="margin-left:15px;">|</span>
+        <span style="margin-left:15px;font-weight:normal;"><a href="#" onclick="resetDemoData()">Reset Data</a></span>
+    </div>
+    <header class="app-header">
+        <div class="logo"><h1>✈️ AVIA SDCPS</h1><span>Safety Management Platform</span></div>
+        <div class="tenant-selector">
+            <span>Tenant:</span>
+            <select id="tenantSelector" onchange="switchTenant(this.value)">
+                <option value="tenant-001">Pacific Air Services</option>
+                <option value="tenant-002">Nordic Aviation Group</option>
+                <option value="tenant-003">Southern Hemisphere Airlines</option>
+            </select>
+            <button class="btn-outline" onclick="location.reload()">🔄 Refresh</button>
+        </div>
+    </header>
+    <nav class="app-nav">
+        <button onclick="location.href='/aviasdcps.html'">📊 Dashboard</button>
+        <button onclick="location.href='/aviasdcps.html'">⚠️ Hazards</button>
+        <button class="active" data-page="hazard-log">📋 Hazard Log</button>
+        <button onclick="location.href='/aviasdcps.html'">📋 State Oversight</button>
+        <button onclick="location.href='/aviasdcps.html'">📝 Declare SPIs</button>
+        <button onclick="location.href='/aviasdcps.html'">📄 Reports</button>
+    </nav>
+    <div class="app-content">
+        <div id="viewModeIndicator" style="background:#eaf2fb;border:1px solid #c9deef;border-left:4px solid #2e86c1;border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:13px;color:#1a2a4a;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <span><strong>Viewing:</strong> <span id="viewModeText">Master Hazard Register</span></span>
+            <span style="font-size:12px;color:#5a6a7a;" id="viewModeSubtext">All tenants • ICAO-style</span>
+        </div>
+        <div class="hazard-log-header">
+            <div>
+                <h1>📋 Hazard Log (Master Register)</h1>
+                <p>Complete record of all identified hazards, their risk assessment, and mitigation status — ICAO Annex 19 / Doc 9859</p>
+            </div>
+            <div class="hazard-log-meta">
+                <span>📅 <span id="logDate"></span></span>
+                <span>📊 <span id="logCount">0 hazards</span></span>
+            </div>
+        </div>
+
+        <!-- Filter/Search Bar + Export/Import -->
+        <div class="hazard-log-toolbar">
+            <div class="search-box">
+                <input type="text" id="hazardSearch" placeholder="🔍 Search title and description…" oninput="filterHazardLog()">
+                <select id="hazardFilterStatus" onchange="filterHazardLog()" style="padding:8px 12px;border:1px solid #e3e8ef;border-radius:8px;font-size:13px;">
+                    <option value="">All</option>
+                    <option value="Open">Open</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="Closed">Closed</option>
+                </select>
+                <select id="hazardFilterPriority" onchange="filterHazardLog()" style="padding:8px 12px;border:1px solid #e3e8ef;border-radius:8px;font-size:13px;">
+                    <option value="">All</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+                <select id="hazardFilterRisk" onchange="filterHazardLog()" style="padding:8px 12px;border:1px solid #e3e8ef;border-radius:8px;font-size:13px;">
+                    <option value="">All Risks</option>
+                    <option value="CFIT">CFIT</option>
+                    <option value="LOC-I">LOC-I</option>
+                    <option value="MAC">MAC</option>
+                    <option value="RE">RE</option>
+                    <option value="RI">RI</option>
+                    <option value="WX">WX</option>
+                    <option value="TER">TER</option>
+                    <option value="HEL">HEL</option>
+                    <option value="GOV">GOV</option>
+                    <option value="GNSS">GNSS</option>
+                </select>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                <input type="file" id="importFile" accept=".csv" style="display:none;" onchange="importHazardLogCSV(event)">
+                <button class="btn-outline btn-sm" onclick="document.getElementById('importFile').click()">📤 Import hazard_log.csv</button>
+                <button class="btn-outline btn-sm" onclick="exportHazardLogCSV()">📥 Export CSV</button>
+                <button class="btn-outline btn-sm" onclick="window.print()">🖨️ Print</button>
+                <button class="btn-outline btn-sm no-print" onclick="location.href='/aviasdcps.html'">← Dashboard</button>
+            </div>
+        </div>
+
+        <div style="background:#ffffff;border:1px solid #e3e8ef;border-left:4px solid #2e86c1;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:12px;">
+            <strong style="color:#0a1628;">Priority:</strong>
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#c0392b;vertical-align:middle;margin-right:4px;"></span> H (High) — 🔴 Immediate action required</span>
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f1c40f;vertical-align:middle;margin-right:4px;"></span> M (Medium) — 🟡 Action within 30 days</span>
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#27ae60;vertical-align:middle;margin-right:4px;"></span> L (Low) — 🟢 Monitor and review</span>
+            <span style="margin-left:auto;color:#5a6a7a;">Click row to view hazard (read-only demo)</span>
+        </div>
+
+        <div style="background:#ffffff;border:1px solid #e3e8ef;border-left:4px solid #2e86c1;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+            <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:8px;">📖 ICAO Hazard Log — 13 Columns (incl. Risk Mapping)</h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;font-size:11px;color:#5a6a7a;line-height:1.5;">
+                <span><strong>S.N.</strong> — id or index</span>
+                <span><strong>Identified Date</strong> — created_at</span>
+                <span><strong>Area/Operation</strong> — location + category</span>
+                <span><strong>Description</strong> — title + description</span>
+                <span><strong>Unsafe/Top Event</strong> — category</span>
+                <span><strong>Consequence</strong> — severity × probability</span>
+                <span><strong>Priority H/M/L</strong> — risk_level → H/M/L</span>
+                <span><strong>ICAO Risk</strong> — RE/CFIT/LOC-I/MAC/RI</span>
+                <span><strong>Nepal Risk</strong> — WX/HEL/GOV/GNSS/TER</span>
+                <span><strong>Recommended Actions</strong> — mitigation_plan</span>
+                <span><strong>Corrective</strong> — Y/N</span>
+                <span><strong>SRM</strong> — Y/N</span>
+                <span><strong>Remarks</strong> — status / notes</span>
+            </div>
+        </div>
+        <!-- ICAO & Nepal Taxonomy Legend -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div style="background:white;border:1px solid #e3e8ef;border-radius:10px;padding:14px;">
+                <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:8px;">✈️ ICAO Global High-Risk Categories (G-HRCs)</h4>
+                <div style="font-size:11px;color:#5a6a7a;line-height:1.6;">
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:10px;">CFIT</span> Controlled Flight Into Terrain — flown into terrain unaware</div>
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#ffedd5;color:#9a3412;font-weight:700;font-size:10px;">LOC-I</span> Loss of Control In-Flight</div>
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#fef9c3;color:#854d0e;font-weight:700;font-size:10px;">MAC</span> Mid-Air Collision</div>
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#dbeafe;color:#1e40af;font-weight:700;font-size:10px;">RE</span> Runway Excursion — veering off/overrunning</div>
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#f3e8ff;color:#6b21a8;font-weight:700;font-size:10px;">RI</span> Runway Incursion — unauthorized presence</div>
+                </div>
+            </div>
+            <div style="background:white;border:1px solid #e3e8ef;border-radius:10px;padding:14px;">
+                <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:8px;">🇳🇵 Nepal-Specific Top Risks</h4>
+                <div style="font-size:11px;color:#5a6a7a;line-height:1.6;">
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#f3f4f6;color:#374151;font-weight:700;font-size:10px;">WX</span> Severe Weather — monsoon, thunderstorms, icing</div>
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#f3f4f6;color:#374151;font-weight:700;font-size:10px;">TER</span> Terrain — mountainous, CFIT risk</div>
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#dcfce7;color:#166534;font-weight:700;font-size:10px;">HEL</span> Helicopter Operations — dual-pilot, terrain</div>
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#1e293b;color:white;font-weight:700;font-size:10px;">GOV</span> Governance — institutional failures</div>
+                    <div><span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#e0f2fe;color:#0c4a6e;font-weight:700;font-size:10px;">GNSS</span> GNSS Jamming/Spoofing</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hazard-log-table-container">
+            <table class="hazard-log-table" id="hazardLogTable">
+                <thead>
+                    <tr>
+                        <th style="text-align:center;width:45px;">S.N.</th>
+                        <th>Identified Date</th>
+                        <th>Area / Operation <small>location + category</small></th>
+                        <th>Description of Hazard <small>title + description</small></th>
+                        <th>Unsafe Event / Top Event <small>category</small></th>
+                        <th>Consequence <small>severity × probability</small></th>
+                        <th style="text-align:center;">Priority <small>H/M/L</small></th>
+                        <th style="text-align:center;">ICAO Risk <small>G-HRC</small></th>
+                        <th style="text-align:center;">Nepal Risk</th>
+                        <th>Recommended Actions <small>mitigation_plan</small></th>
+                        <th style="text-align:center;">Corrective<small>Y/N</small></th>
+                        <th style="text-align:center;">SRM<small>Y/N</small></th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody id="hazardLogBody"><tr><td colspan="13" style="text-align:center;padding:30px;color:#999;"><div class="loading"><div class="spinner"></div><p>Loading hazard register…</p></div></td></tr></tbody>
+            </table>
+        </div>
+        <div class="hazard-log-footer">
+            <span><strong id="footerCount">0</strong> hazards in register · <span id="footerFiltered">0</span> displayed (filtered view)</span>
+            <span style="font-size:11px;">ICAO Annex 19 · SSP · SRM · Generated <span id="footerGenerated"></span></span>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="hlModal" class="modal-overlay" aria-hidden="true" style="display:none;" onclick="if(event.target===this) closeHazardModal()">
+        <div class="modal-content" role="dialog" aria-modal="true" style="max-width:620px;text-align:left;max-height:90vh;overflow-y:auto;">
+            <button class="modal-close" aria-label="Close modal" onclick="closeHazardModal()">&times;</button>
+            <div id="hlModalBody"></div>
+        </div>
+    </div>
+
+    <footer class="app-footer" style="background:#0a1628;color:white;padding:30px;margin-top:40px;border-top:3px solid #2e86c1;">
+        <div style="max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;">
+            <div>
+                <h4 style="color:#2e86c1;margin-bottom:10px;">🔗 Quick Links</h4>
+                <div style="font-size:13px;opacity:0.8;display:flex;flex-direction:column;gap:4px;">
+                    <a href="/" style="color:#5dade2;">🏠 Home</a>
+                    <a href="/aviasdcps.html" style="color:#5dade2;">📊 Dashboard</a>
+                    <a href="/views/hazard-log.html" style="color:#5dade2;">📒 Hazard Log</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="color:#2e86c1;margin-bottom:10px;">📋 Session Info</h4>
+                <div style="font-size:13px;opacity:0.8;"><p><strong>Tenant:</strong> <span id="sessionTenant">tenant-001</span></p></div>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;opacity:0.6;">© 2026 AVIA Safety Systems · ICAO Annex 19 Compliant · Master Hazard Register</div>
+    </footer>
+
+    <script src="/js/aviasdcps-api.js"></script>
+    <script>
+        const hazardTenantMap = {
+            'haz-001': 'tenant-001', 'haz-002': 'tenant-001', 'haz-003': 'tenant-001', 'haz-004': 'tenant-001',
+            'haz-005': 'tenant-002', 'haz-007': 'tenant-002', 'haz-009': 'tenant-002',
+            'haz-006': 'tenant-003', 'haz-008': 'tenant-003', 'haz-010': 'tenant-003'
+        };
+        let allHazards = [];
+        let filteredHazards = [];
+        function formatDate(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch{return iso;} }
+        function riskToPriority(risk_level){ const m={'Critical':'H','High':'H','Medium':'M','Low':'L'}; return m[risk_level]||'M'; }
+        function consequenceText(h){ return (h.severity||'—')+' × '+(h.probability||'—'); }
+        function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        function showNotification(message, type='info'){
+            const toast=document.createElement('div'); toast.className='toast toast-'+type; toast.textContent=message; document.body.appendChild(toast);
+            setTimeout(()=>{toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(()=>toast.remove(),300);},4000);
+        }
+        function loadHazardLog(){
+            let base = api.getAllHazards ? api.getAllHazards() : api.getMockHazards('all');
+            // merge imported from localStorage (from CSV import)
+            let imported=[]; try{ imported=JSON.parse(localStorage.getItem('hazardLog_imported')||'[]'); }catch{}
+            allHazards = [...base, ...imported].map(h=>({...h, _tenant: hazardTenantMap[h.id]||'tenant-001'}));
+            allHazards.sort((a,b)=> new Date(a.created_at)-new Date(b.created_at));
+            document.getElementById('logCount').textContent = allHazards.length+' hazards';
+            document.getElementById('logDate').textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+            document.getElementById('footerGenerated').textContent = new Date().toLocaleString();
+            document.getElementById('footerCount').textContent = allHazards.length;
+            const sel=document.getElementById('tenantSelector'); if(sel) sel.value=api.tenantId;
+            const sEl=document.getElementById('sessionTenant'); if(sEl) sEl.textContent=api.tenantId;
+            filterHazardLog();
+        }
+        function riskBadge(code){
+            const colors={CFIT:{bg:'#fee2e2',c:'#991b1b'},'LOC-I':{bg:'#ffedd5',c:'#9a3412'},MAC:{bg:'#fef9c3',c:'#854d0e'},RE:{bg:'#dbeafe',c:'#1e40af'},RI:{bg:'#f3e8ff',c:'#6b21a8'},WX:{bg:'#f3f4f6',c:'#374151'},TER:{bg:'#ffedd5',c:'#9a3412'},HEL:{bg:'#dcfce7',c:'#166534'},GOV:{bg:'#1e293b',c:'#fff'},GNSS:{bg:'#e0f2fe',c:'#0c4a6e'}};
+            const col=colors[code]||{bg:'#eef2f7',c:'#374151'};
+            return '<span style="display:inline-block;padding:2px 6px;border-radius:4px;background:'+col.bg+';color:'+col.c+';font-weight:800;font-size:10px;border:1px solid '+col.c+'20;">'+escapeHtml(code)+'</span>';
+        }
+        function getRiskMapping(h){
+            if(h.risk_mapping) return h.risk_mapping;
+            if(typeof api!=='undefined' && api.getHazardRiskMapping) return api.getHazardRiskMapping(h);
+            return {icao:[],nepal:[],ghrc:false};
+        }
+        function filterHazardLog(){
+            const q=(document.getElementById('hazardSearch').value||'').toLowerCase();
+            const status=document.getElementById('hazardFilterStatus').value;
+            const pri=document.getElementById('hazardFilterPriority').value;
+            const risk=document.getElementById('hazardFilterRisk')?document.getElementById('hazardFilterRisk').value:'';
+            filteredHazards = allHazards.filter(h=>{
+                if(status && (h.status||'')!==status) return false;
+                if(pri){
+                    const priMap={'High':['High','Critical'],'Medium':['Medium'],'Low':['Low']};
+                    const allowed=priMap[pri]||[];
+                    if(!allowed.includes(h.risk_level)) return false;
+                }
+                if(risk){
+                    const m=getRiskMapping(h);
+                    const allCodes=[...(m.icao||[]),...(m.nepal||[])];
+                    if(!allCodes.includes(risk)) return false;
+                }
+                if(q){
+                    const hay=[h.title||'',h.description||''].join(' ').toLowerCase();
+                    if(!hay.includes(q)) return false;
+                }
+                return true;
+            });
+            renderHazardLog(filteredHazards);
+            document.getElementById('footerFiltered').textContent = filteredHazards.length;
+        }
+        function renderHazardLog(hazards){
+            const tbody=document.getElementById('hazardLogBody');
+            if(!hazards||hazards.length===0){ tbody.innerHTML='<tr><td colspan="13" style="padding:30px;text-align:center;color:#999;">No hazards match filters.</td></tr>'; return; }
+            tbody.innerHTML = hazards.map((h,idx)=>{
+                const sn=idx+1;
+                const date=formatDate(h.created_at);
+                const area=escapeHtml((h.location||'')+(h.location&&h.category?' · ':'')+(h.category||''));
+                const desc='<strong>'+escapeHtml(h.title||'Untitled')+'</strong><br><span style="color:#5a6a7a;font-size:11px;">'+escapeHtml(h.description||'')+'</span>';
+                const event=escapeHtml(h.category||'—');
+                const consequence=escapeHtml(consequenceText(h));
+                const pri=riskToPriority(h.risk_level);
+                const rowCls= pri==='H'?'row-H':pri==='M'?'row-M':'row-L';
+                const priCls='priority-'+pri;
+                const m=getRiskMapping(h);
+                const icaoBadges=(m.icao&&m.icao.length)?m.icao.map(c=>riskBadge(c)).join(' '):'<span style="color:#999;">—</span>';
+                const nepalBadges=(m.nepal&&m.nepal.length)?m.nepal.map(c=>riskBadge(c)).join(' '):'<span style="color:#999;">—</span>';
+                const mitigation=escapeHtml(h.mitigation_plan||'—');
+                const corrective=h.mitigation_plan?'<span class="yn-y">Y</span>':'<span class="yn-n">N</span>';
+                const srm=h.risk_level?'<span class="yn-y">Y</span>':'<span class="yn-n">N</span>';
+                const remarks=escapeHtml(h.remarks||h.status||'—');
+                const globalIdx=allHazards.indexOf(h);
+                return '<tr class="'+rowCls+'" onclick="showHazardDetail('+globalIdx+')"><td style="text-align:center;font-weight:700;">'+sn+'</td><td style="white-space:nowrap;font-size:11px;">'+date+'</td><td>'+area+'</td><td>'+desc+'</td><td>'+event+'</td><td>'+consequence+'</td><td style="text-align:center;"><span class="priority-badge '+priCls+'">'+pri+'</span></td><td style="text-align:center;">'+icaoBadges+'</td><td style="text-align:center;">'+nepalBadges+'</td><td>'+mitigation+'</td><td style="text-align:center;">'+corrective+'</td><td style="text-align:center;">'+srm+'</td><td>'+remarks+'</td></tr>';
+            }).join('');
+        }
+        function showHazardDetail(idx){
+            const h=allHazards[idx]; if(!h) return;
+            const pri=riskToPriority(h.risk_level);
+            const m=getRiskMapping(h);
+            const body=document.getElementById('hlModalBody');
+            body.innerHTML=''
+                +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:2px solid #0a1628;padding-bottom:8px;">'
+                +'<h3 style="margin:0;font-size:16px;color:#0a1628;">🔍 Hazard Details: '+escapeHtml(h.id||'—')+'</h3>'
+                +'<button onclick="closeHazardModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#5a6a7a;line-height:1;">&times;</button>'
+                +'</div>'
+                +'<div style="display:grid;gap:8px;font-size:13px;line-height:1.5;">'
+                +'<div><strong>Title:</strong> '+escapeHtml(h.title||'Untitled')+'</div>'
+                +'<div><strong>Description:</strong> '+escapeHtml(h.description||'—')+'</div>'
+                +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+                +'<div><strong>Category:</strong> '+escapeHtml(h.category||'—')+'</div>'
+                +'<div><strong>Location:</strong> '+escapeHtml(h.location||'—')+'</div>'
+                +'</div>'
+                +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+                +'<div><strong>Severity:</strong> '+escapeHtml(h.severity||'—')+'</div>'
+                +'<div><strong>Probability:</strong> '+escapeHtml(h.probability||'—')+'</div>'
+                +'</div>'
+                +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+                +'<div><strong>Risk Level:</strong> <span class="priority-badge priority-'+pri+'" style="width:24px;height:24px;font-size:11px;vertical-align:middle;">'+pri+'</span> '+escapeHtml(h.risk_level||'—')+'</div>'
+                +'<div><strong>Status:</strong> <span class="badge badge-'+(h.status==='Closed'?'success':h.status==='Under Review'?'warning':'info')+'">'+escapeHtml(h.status||'Open')+'</span></div>'
+                +'</div>'
+                +'<div><strong>Owner:</strong> '+escapeHtml(h.owner||'—')+'</div>'
+                +'<div><strong>Created:</strong> '+formatDate(h.created_at)+'</div>'
+                +'<div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:8px;padding:12px;">'
+                +'<strong>Mitigation Plan:</strong><br><span style="color:#1a2a4a;">'+escapeHtml(h.mitigation_plan||'— None —')+'</span>'
+                +'</div>'
+                +'<div style="background:#eaf2fb;border:1px solid #c9deef;border-radius:8px;padding:12px;">'
+                +'<strong>🔗 Risk Mapping:</strong><br>'
+                +'<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:12px;">'
+                +'<span><strong>ICAO:</strong> '+((m.icao&&m.icao.length)?m.icao.map(c=>riskBadge(c)).join(' '):'<span style="color:#999;">—</span>')+'</span>'
+                +'<span><strong>Nepal:</strong> '+((m.nepal&&m.nepal.length)?m.nepal.map(c=>riskBadge(c)).join(' '):'<span style="color:#999;">—</span>')+'</span>'
+                +'<span><strong>G-HRC:</strong> '+(m.ghrc?'<span style="color:#c0392b;font-weight:700;">Yes</span>':'<span style="color:#5a6a7a;">No</span>')+'</span>'
+                +'</div></div>'
+                +'</div>'
+                +'<div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;align-items:center;">'
+                +'<span style="font-size:11px;color:#5a6a7a;background:#fef9e7;border:1px solid #fde49a;padding:5px 8px;border-radius:6px;">🔒 Read-only demo</span>'
+                +'<button class="btn-outline btn-sm" onclick="closeHazardModal()">Close</button>'
+                +'</div>';
+            document.getElementById('hlModal').style.display='flex';
+            document.getElementById('hlModal').setAttribute('aria-hidden','false');
+        }
+        function closeHazardModal(){ document.getElementById('hlModal').style.display='none'; }
+        function editHazardFromModal(idx){ showNotification('🔒 Read-only demo — viewing & filtering only','info'); }
+        function exportHazardLogCSV(){
+            const hazards=filteredHazards.length?filteredHazards:allHazards;
+            if(!hazards.length){ showNotification('No data to export','warning'); return; }
+            const headers=['S.N.','Identified Date','Area/Operation','Description of Hazard','Unsafe Event / Top Event','Consequence','Hazard Priority Level','ICAO Risk','Nepal Risk','Recommended Actions','Corrective Action (Y/N)','SRM (Y/N)','Remarks'];
+            const rows=hazards.map((h,i)=>{const m=getRiskMapping(h); return [i+1,formatDate(h.created_at),(h.location||'')+' '+(h.category||''),(h.title||'')+' - '+(h.description||''),h.category||'',consequenceText(h),riskToPriority(h.risk_level),(m.icao||[]).join(','),(m.nepal||[]).join(','),h.mitigation_plan||'',h.mitigation_plan?'Y':'N',h.risk_level?'Y':'N',h.remarks||h.status||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"');});
+            const csv=[headers.map(h=>'"'+h+'"').join(','),...rows.map(r=>r.join(','))].join('\n');
+            const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='hazard_log-'+new Date().toISOString().split('T')[0]+'.csv'; a.click(); URL.revokeObjectURL(url);
+            showNotification('📥 Exported '+hazards.length+' rows (filtered view)','success');
+        }
+        function importHazardLogCSV(event){
+            const file=event.target.files[0]; if(!file) return;
+            const reader=new FileReader();
+            reader.onload=function(e){
+                try{
+                    const text=e.target.result; const lines=text.split(/\r?\n/).filter(l=>l.trim()); if(lines.length<2){ showNotification('CSV empty','error'); return; }
+                    function parseCSV(line){ const res=[]; let cur='',inQ=false; for(let i=0;i<line.length;i++){ const c=line[i]; if(c==='"'){ if(inQ&&line[i+1]==='"'){cur+='"'; i++;} else inQ=!inQ;} else if(c===','&&!inQ){res.push(cur); cur='';} else cur+=c;} res.push(cur); return res; }
+                    const header=parseCSV(lines[0]).map(h=>h.trim().toLowerCase());
+                    const idx={ date: header.findIndex(h=>h.includes('identified')||h==='date'), area: header.findIndex(h=>h.includes('area')), desc: header.findIndex(h=>h.includes('description')), event: header.findIndex(h=>h.includes('unsafe')||h.includes('top event')), consequence: header.findIndex(h=>h.includes('consequence')), priority: header.findIndex(h=>h.includes('priority')), actions: header.findIndex(h=>h.includes('recommended')), remarks: header.findIndex(h=>h.includes('remarks')) };
+                    const imported=[];
+                    for(let i=1;i<lines.length;i++){
+                        const cols=parseCSV(lines[i]); if(cols.length<2) continue;
+                        const desc= idx.desc>=0?cols[idx.desc]:cols[3]||''; const area= idx.area>=0?cols[idx.area]:cols[2]||''; const priRaw= idx.priority>=0?cols[idx.priority]:'M'; const pri=(priRaw||'M').trim().toUpperCase()[0]; const riskMap={H:'High',M:'Medium',L:'Low'}; const risk_level=riskMap[pri]||'Medium';
+                        const actions= idx.actions>=0?cols[idx.actions]:''; const dateRaw= idx.date>=0?cols[idx.date]:new Date().toISOString(); let created_at; try{created_at=new Date(dateRaw).toISOString();}catch{created_at=new Date().toISOString();}
+                        const tmp={ title: desc.split(' - ')[0]||desc||'Imported '+i, description: desc, category: idx.event>=0?cols[idx.event]:'Operational', location: area };
+                        const rm=(typeof api!=='undefined' && api.classifyRiskByKeywords)?api.classifyRiskByKeywords(tmp):{icao:[],nepal:[]};
+                        imported.push({ id:'import-'+Date.now()+'-'+i, title: tmp.title, description: desc, category: tmp.category, severity:'Medium', probability:'Possible', risk_level, status:'Open', owner:'Imported', location: area, mitigation_plan: actions||'', remarks: idx.remarks>=0?cols[idx.remarks]:'', risk_mapping:{icao:rm.icao,nepal:rm.nepal,ghrc:rm.icao.length>0}, created_at, updated_at: new Date().toISOString(), _imported:true });
+                    }
+                    let existing=[]; try{existing=JSON.parse(localStorage.getItem('hazardLog_imported')||'[]');}catch{} existing=existing.concat(imported); localStorage.setItem('hazardLog_imported',JSON.stringify(existing));
+                    showNotification('📤 Imported '+imported.length+' hazards','success'); loadHazardLog(); event.target.value='';
+                }catch(err){ showNotification('Import failed: '+err.message,'error'); }
+            };
+            reader.readAsText(file);
+        }
+        function switchTenant(tenantId){ localStorage.setItem('tenantId',tenantId); api.tenantId=tenantId; location.reload(); }
+        function resetDemoData(){ if(confirm('Reset demo data?')){ localStorage.removeItem('hazardLog_imported'); location.reload(); } }
+        let remainingTime=300; setInterval(()=>{ remainingTime--; if(remainingTime<=0) remainingTime=300; const m=Math.floor(remainingTime/60); const s=remainingTime%60; const el=document.getElementById('demoTimer'); if(el) el.textContent='Data refreshes in '+m+':'+String(s).padStart(2,'0'); },1000);
+        document.addEventListener('DOMContentLoaded',function(){ const sel=document.getElementById('tenantSelector'); if(sel) sel.value=api.tenantId; loadHazardLog(); });
+    </script>
+</body>
+</html>

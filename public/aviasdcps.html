@@ -43,6 +43,7 @@
     <nav class="app-nav">
         <button class="active" data-page="dashboard">📊 Dashboard</button>
         <button data-page="hazards">⚠️ Hazards</button>
+        <button data-page="hazard-log">📋 Hazard Log</button>
         <button data-page="state">📋 State Oversight</button>
         <button data-page="declare">📝 Declare SPIs</button>
         <button data-page="reports">📄 Reports</button>
@@ -75,6 +76,41 @@
                 <h3>⚠️ Recent Hazards</h3>
                 <div class="hazard-list" id="recentHazards"><div class="loading"><div class="spinner"></div><p>Loading hazards...</p></div></div>
             </div>
+
+            <!-- 🚨 ICAO High-Risk Categories — Dashboard Risk Section (Task 6/9) -->
+            <div class="chart-card" style="border-top-color:#0a1628;margin-top:20px;">
+                <h3>🚨 ICAO High-Risk Categories</h3>
+                <p style="font-size:13px;color:#5a6a7a;margin-bottom:12px;">Monitoring ICAO Global High-Risk Categories (G-HRCs) and Nepal-specific risks — based on mapped tenant hazards</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <div style="background:#eaf2fb;border:1px solid #c9deef;border-radius:8px;padding:10px 14px;text-align:center;flex:1;min-width:120px;">
+                            <div style="font-size:11px;font-weight:700;color:#5a6a7a;letter-spacing:0.06em;">Total G-HRC Hazards</div>
+                            <div id="riskGhrcTotal" style="font-size:22px;font-weight:800;color:#0a1628;">8/10</div>
+                            <div style="font-size:11px;color:#5a6a7a;">G-HRC mapped</div>
+                        </div>
+                        <div style="background:#fef9e7;border:1px solid #fde49a;border-radius:8px;padding:10px 14px;text-align:center;flex:1;min-width:120px;">
+                            <div style="font-size:11px;font-weight:700;color:#5a6a7a;letter-spacing:0.06em;">Nepal-Specific</div>
+                            <div id="riskNepalTotal" style="font-size:22px;font-weight:800;color:#0a1628;">5/10</div>
+                            <div style="font-size:11px;color:#5a6a7a;">Nepal risks</div>
+                        </div>
+                    </div>
+                    <div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:8px;padding:10px 14px;">
+                        <div style="font-size:11px;font-weight:700;color:#0a1628;margin-bottom:6px;">Risk Alert List</div>
+                        <div id="riskAlertList" style="font-size:12px;color:#1a2a4a;line-height:1.6;">Loading…</div>
+                    </div>
+                </div>
+                <!-- G-HRC Summary Cards -->
+                <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:8px;">G-HRC Overview</h4>
+                <div id="ghrcCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;"></div>
+                <!-- Nepal-Specific Cards -->
+                <h4 style="font-size:13px;font-weight:800;color:#0a1628;margin-bottom:8px;">🇳🇵 Nepal-Specific Risks</h4>
+                <div id="nepalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;"></div>
+                <!-- Risk Breakdown Chart -->
+                <div class="chart-card" style="box-shadow:none;border:1px solid #e3e8ef;margin:0;">
+                    <h3>📊 Hazards by Risk Category</h3>
+                    <canvas id="riskBreakdownChart" style="max-height:280px;"></canvas>
+                </div>
+            </div>
         </div>
         
         <!-- ======== HAZARDS ======== -->
@@ -84,6 +120,97 @@
                 <button class="btn-primary" onclick="showCreateHazard()">+ New Hazard</button>
             </div>
             <div class="hazard-list" id="allHazards"><div class="loading"><div class="spinner"></div><p>Loading hazards...</p></div></div>
+        </div>
+
+        <!-- ======== HAZARD LOG (MASTER REGISTER) — ICAO-style ======== -->
+        <div id="page-hazard-log" class="page-section">
+            <div style="background:#0a1628;color:white;padding:20px 24px;border-radius:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <h2 style="color:white;margin:0 0 4px;">📋 Hazard Log (Master Register)</h2>
+                    <p style="color:rgba(255,255,255,0.75);font-size:13px;margin:0;">Complete record of all identified hazards, their risk assessment, and mitigation status — ICAO Annex 19 / Doc 9859</p>
+                </div>
+                <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:13px;color:rgba(255,255,255,0.85);">
+                    <span>📅 <span id="hlDate"></span></span>
+                    <span>📊 <span id="hlCount">0 hazards</span></span>
+                </div>
+            </div>
+
+            <!-- Filter/Search Bar + Export/Import -->
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;background:white;border:1px solid #e3e8ef;border-radius:10px;padding:14px 16px;">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                    <input type="text" id="hlSearch" placeholder="🔍 Search title and description…" oninput="filterHazardLogSPA()" style="min-width:260px;padding:8px 12px;border:1px solid #e3e8ef;border-radius:8px;font-size:13px;">
+                    <select id="hlFilterStatus" onchange="filterHazardLogSPA()" style="padding:8px 12px;border:1px solid #e3e8ef;border-radius:8px;font-size:13px;">
+                        <option value="">All</option>
+                        <option value="Open">Open</option>
+                        <option value="Under Review">Under Review</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                    <select id="hlFilterPriority" onchange="filterHazardLogSPA()" style="padding:8px 12px;border:1px solid #e3e8ef;border-radius:8px;font-size:13px;">
+                        <option value="">All</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                    <select id="hlFilterRisk" onchange="filterHazardLogSPA()" style="padding:8px 12px;border:1px solid #e3e8ef;border-radius:8px;font-size:13px;">
+                        <option value="">All Risks</option>
+                        <option value="CFIT">CFIT</option>
+                        <option value="LOC-I">LOC-I</option>
+                        <option value="MAC">MAC</option>
+                        <option value="RE">RE</option>
+                        <option value="RI">RI</option>
+                        <option value="WX">WX</option>
+                        <option value="TER">TER</option>
+                        <option value="HEL">HEL</option>
+                        <option value="GOV">GOV</option>
+                        <option value="GNSS">GNSS</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                    <input type="file" id="hlImportFile" accept=".csv" style="display:none;" onchange="importHazardLogCSV(event)">
+                    <button class="btn-outline btn-sm" onclick="document.getElementById('hlImportFile').click()">📤 Import CSV</button>
+                    <button class="btn-outline btn-sm" onclick="exportHazardLogSPA()">📥 Export CSV</button>
+                    <a href="/views/hazard-log.html" class="btn-outline btn-sm" style="text-decoration:none;">↗ Full Page</a>
+                </div>
+            </div>
+
+            <!-- Priority Legend -->
+            <div style="background:#ffffff;border:1px solid #e3e8ef;border-left:4px solid #2e86c1;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:12px;">
+                <strong style="color:#0a1628;">Priority:</strong>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#c0392b;vertical-align:middle;margin-right:4px;"></span> H (High) — 🔴 Immediate action required</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f1c40f;vertical-align:middle;margin-right:4px;"></span> M (Medium) — 🟡 Action within 30 days</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#27ae60;vertical-align:middle;margin-right:4px;"></span> L (Low) — 🟢 Monitor and review</span>
+                <span style="margin-left:auto;color:#5a6a7a;">Click row to view hazard (read-only)</span>
+            </div>
+
+            <!-- Hazard Log Table (13 cols incl ICAO/Nepal Risk) -->
+            <div style="background:white;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.04);border:1px solid #e3e8ef;overflow-x:auto;padding:0;">
+                <table class="audit-table" id="hlTable" style="min-width:1450px;font-size:12px;">
+                    <thead>
+                        <tr>
+                            <th style="background:#0a1628;color:white;text-align:center;width:45px;">S.N.</th>
+                            <th style="background:#0a1628;color:white;white-space:nowrap;">Identified Date</th>
+                            <th style="background:#0a1628;color:white;">Area / Operation</th>
+                            <th style="background:#0a1628;color:white;min-width:180px;">Description of Hazard</th>
+                            <th style="background:#0a1628;color:white;">Unsafe Event / Top Event</th>
+                            <th style="background:#0a1628;color:white;">Consequence</th>
+                            <th style="background:#0a1628;color:white;text-align:center;">Priority</th>
+                            <th style="background:#0a1628;color:white;text-align:center;">ICAO Risk</th>
+                            <th style="background:#0a1628;color:white;text-align:center;">Nepal Risk</th>
+                            <th style="background:#0a1628;color:white;min-width:150px;">Recommended Actions</th>
+                            <th style="background:#0a1628;color:white;text-align:center;">Corrective<br>Y/N</th>
+                            <th style="background:#0a1628;color:white;text-align:center;">SRM<br>Y/N</th>
+                            <th style="background:#0a1628;color:white;">Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hlBody">
+                        <tr><td colspan="13" style="text-align:center;padding:30px;color:#999;"><div class="loading"><div class="spinner"></div><p>Loading hazard register…</p></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:12px;padding:10px 14px;background:#eaf2fb;border:1px solid #c9deef;border-radius:8px;font-size:12px;color:#5a6a7a;">
+                <span><strong id="hlFooterCount">0</strong> hazards · <span id="hlFooterFiltered">0</span> displayed</span>
+                <span style="font-size:11px;">ICAO Annex 19 · SSP · SRM · Master Hazard Register</span>
+            </div>
         </div>
         
         <!-- ======== STATE OVERSIGHT ======== -->
@@ -348,6 +475,14 @@
         </div>
         
     </div>
+
+    <!-- Hazard Log Detail Modal -->
+    <div id="hlModal" class="modal-overlay" aria-hidden="true" style="display:none;" onclick="if(event.target===this) closeHazardModal()">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="hlModalTitle" style="max-width:620px;text-align:left;max-height:90vh;overflow-y:auto;">
+            <button class="modal-close" aria-label="Close modal" onclick="closeHazardModal()">&times;</button>
+            <div id="hlModalBody"></div>
+        </div>
+    </div>
 <!-- ==================== FOOTER ==================== -->
 <footer class="app-footer" style="background:#0a1628;color:white;padding:30px;margin-top:40px;border-top:3px solid #2e86c1;">
     <div style="max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;">
@@ -444,6 +579,7 @@ class AviaSDCPSAPI {
                 status: "Open",
                 owner: "John Smith",
                 location: "Runway 27L, Sydney Airport",
+                risk_mapping: { icao: ["RE"], nepal: ["WX"], ghrc: true },
                 created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -458,6 +594,7 @@ class AviaSDCPSAPI {
                 status: "Under Review",
                 owner: "Jane Doe",
                 location: "Runway 27L, Sydney Airport",
+                risk_mapping: { icao: ["RE"], nepal: [], ghrc: true },
                 created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -472,6 +609,7 @@ class AviaSDCPSAPI {
                 status: "Open",
                 owner: "Mike Johnson",
                 location: "Fuel Farm, Sydney Airport",
+                risk_mapping: { icao: ["LOC-I"], nepal: [], ghrc: true },
                 created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -486,6 +624,7 @@ class AviaSDCPSAPI {
                 status: "Closed",
                 owner: "Sarah Williams",
                 location: "Control Tower, Sydney Airport",
+                risk_mapping: { icao: ["MAC"], nepal: [], ghrc: true },
                 created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString()
             }
@@ -502,6 +641,7 @@ class AviaSDCPSAPI {
                 status: "Under Review",
                 owner: "Robert Chen",
                 location: "Maintenance Hangar, Oslo Airport",
+                risk_mapping: { icao: [], nepal: ["WX"], ghrc: false },
                 created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -516,6 +656,7 @@ class AviaSDCPSAPI {
                 status: "Closed",
                 owner: "David Park",
                 location: "Maintenance Hangar, Oslo Airport",
+                risk_mapping: { icao: ["LOC-I"], nepal: [], ghrc: true },
                 created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -530,6 +671,7 @@ class AviaSDCPSAPI {
                 status: "Open",
                 owner: "Mark Wilson",
                 location: "Terminal 3, Oslo Airport",
+                risk_mapping: { icao: [], nepal: ["GOV"], ghrc: false },
                 created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
             }
@@ -546,6 +688,7 @@ class AviaSDCPSAPI {
                 status: "Open",
                 owner: "Emily Davis",
                 location: "Crew Briefing Room, Johannesburg Airport",
+                risk_mapping: { icao: ["LOC-I"], nepal: ["HEL"], ghrc: true },
                 created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -560,6 +703,7 @@ class AviaSDCPSAPI {
                 status: "Closed",
                 owner: "Lisa Thompson",
                 location: "Approach Control, Johannesburg Airport",
+                risk_mapping: { icao: ["RE"], nepal: ["WX"], ghrc: true },
                 created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -574,6 +718,7 @@ class AviaSDCPSAPI {
                 status: "Under Review",
                 owner: "Dr. Alan Chen",
                 location: "Approach Corridor, Johannesburg Airport",
+                risk_mapping: { icao: ["CFIT"], nepal: ["GNSS", "TER"], ghrc: true },
                 created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
             }
@@ -594,6 +739,65 @@ class AviaSDCPSAPI {
         // Filtered by tenant — dashboard/hazards show only selected tenant
         if (tenantId === 'all' || tenantId === 'aggregated') return this.getAllHazards();
         return this.getTenantHazards(tenantId);
+    }
+
+    // ==================== ICAO G-HRC & NEPAL TAXONOMY ====================
+    getIcaoTaxonomy() {
+        return {
+            "CFIT": { code: "CFIT", label: "Controlled Flight Into Terrain", desc: "Aircraft flown into terrain without pilot awareness" },
+            "LOC-I": { code: "LOC-I", label: "Loss of Control In-Flight", desc: "Loss of aircraft control in flight" },
+            "MAC": { code: "MAC", label: "Mid-Air Collision", desc: "Collision between aircraft in flight" },
+            "RE": { code: "RE", label: "Runway Excursion", desc: "Aircraft veering off or overrunning runway" },
+            "RI": { code: "RI", label: "Runway Incursion", desc: "Unauthorized presence on runway" }
+        };
+    }
+    getNepalTaxonomy() {
+        return {
+            "WX": { code: "WX", label: "Severe Weather", desc: "Monsoon, thunderstorms, wind shear, icing" },
+            "TER": { code: "TER", label: "Terrain", desc: "Mountainous terrain, CFIT risk in Nepal" },
+            "HEL": { code: "HEL", label: "Helicopter Operations", desc: "Dual-pilot requirements, terrain challenges" },
+            "GOV": { code: "GOV", label: "Governance", desc: "Institutional restructuring failures" },
+            "GNSS": { code: "GNSS", label: "GNSS Jamming/Spoofing", desc: "Navigation system interference" }
+        };
+    }
+    classifyRiskByKeywords(hazard) {
+        const text = ((hazard.title||"")+" "+(hazard.description||"")+" "+(hazard.category||"")+" "+(hazard.location||"")).toLowerCase();
+        const icao=[], nepal=[];
+        if (/terrain|mountain|cfit|controlled flight|navigation.*terrain/.test(text)) { if(!icao.includes("CFIT")) icao.push("CFIT"); if(!nepal.includes("TER")) nepal.push("TER"); }
+        if (/system failure|hydraulic|fuel|engine failure|human error|fatigue|loss of control/.test(text)) { if(!icao.includes("LOC-I")) icao.push("LOC-I"); }
+        if (/communication|atc|separation|mid-air|collision/.test(text)) { if(!icao.includes("MAC")) icao.push("MAC"); }
+        if (/runway|excursion|debris|fod|bird strike|overrun|veering/.test(text)) { if(!icao.includes("RE")) icao.push("RE"); }
+        if (/incursion|unauthorized.*runway|runway incursion/.test(text)) { if(!icao.includes("RI")) icao.push("RI"); }
+        if (/weather|monsoon|thunderstorm|wind shear|icing|de-icing|severe weather|storm/.test(text)) { if(!nepal.includes("WX")) nepal.push("WX"); }
+        if (/helicopter|dual-pilot|rotor/.test(text)) { if(!nepal.includes("HEL")) nepal.push("HEL"); }
+        if (/organizational|governance|drill|evacuation|institutional|restructuring/.test(text)) { if(!nepal.includes("GOV")) nepal.push("GOV"); }
+        if (/navigation|gps|gnss|jamming|spoofing|signal loss/.test(text)) { if(!nepal.includes("GNSS")) nepal.push("GNSS"); }
+        return { icao, nepal };
+    }
+    getHazardRiskMapping(hazard) {
+        if (hazard.risk_mapping) return hazard.risk_mapping;
+        const c = this.classifyRiskByKeywords(hazard);
+        return { icao: c.icao, nepal: c.nepal, ghrc: c.icao.length>0 };
+    }
+    getRiskCounts(hazards) {
+        const list = hazards || this.getAllHazards();
+        const ghrc = { "CFIT":0, "LOC-I":0, "MAC":0, "RE":0, "RI":0 };
+        const nepal = { "WX":0, "TER":0, "HEL":0, "GOV":0, "GNSS":0 };
+        let ghrcTotal=0, nepalTotal=0;
+        list.forEach(h=>{
+            const m=this.getHazardRiskMapping(h);
+            let hasGhrc=false, hasNepal=false;
+            (m.icao||[]).forEach(c=>{ if(ghrc[c]!==undefined){ ghrc[c]++; hasGhrc=true; }});
+            (m.nepal||[]).forEach(c=>{ if(nepal[c]!==undefined){ nepal[c]++; hasNepal=true; }});
+            if(hasGhrc) ghrcTotal++;
+            if(hasNepal) nepalTotal++;
+        });
+        return { ghrc, nepal, ghrcTotal, nepalTotal, total: list.length };
+    }
+    getRiskStatus(count) {
+        if (count===0) return { label:"✅ Clear", color:"#27ae60", bg:"#d5f0de", level:"clear" };
+        if (count<=2) return { label:"⚠️ Alert", color:"#d4ac0d", bg:"#fef9e7", level:"alert" };
+        return { label:"🔴 Critical", color:"#c0392b", bg:"#f9d5d3", level:"critical" };
     }
 
     getMockMetrics(tenantId) {
@@ -817,6 +1021,11 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
                 const all = api.getAllHazards();
                 textEl.textContent = 'State Oversight (All Tenants)';
                 subEl.textContent = all.length + ' hazards • Aggregated across 3 tenants';
+            } else if (mode === 'hazard-log') {
+                const all = api.getAllHazards();
+                textEl.textContent = 'Hazard Log — Master Register';
+                subEl.textContent = all.length + ' hazards • ICAO-style • All tenants';
+                const d = document.getElementById('hlDate'); if (d) d.textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
             } else {
                 const name = api.getTenantName();
                 const count = api.getMockHazards().length;
@@ -827,13 +1036,17 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
 
         document.querySelectorAll('.app-nav button').forEach(btn => {
             btn.addEventListener('click', function() {
+                if (!this.dataset.page) return;
                 document.querySelectorAll('.app-nav button').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-                document.getElementById(`page-${this.dataset.page}`).classList.add('active');
+                const target = document.getElementById(`page-${this.dataset.page}`);
+                if (target) target.classList.add('active');
+                else { showNotification('Page not found: ' + this.dataset.page, 'warning'); return; }
                 const page = this.dataset.page;
                 if (page === 'dashboard') { updateViewModeIndicator('tenant'); loadDashboard(); }
                 if (page === 'hazards') { updateViewModeIndicator('tenant'); loadHazards(); }
+                if (page === 'hazard-log') { updateViewModeIndicator('hazard-log'); loadHazardLogSPA(); }
                 if (page === 'state') { updateViewModeIndicator('state'); loadStateOversight(); }
                 if (page === 'declare') { updateViewModeIndicator('tenant'); loadDeclarations(); }
                 if (page === 'audit') { updateViewModeIndicator('tenant'); loadAudit(); }
@@ -852,10 +1065,74 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
                 updateTrendChart(hazardsData);
                 updateRiskChart(hazardsData);
                 renderRecentHazards(hazardsData);
+                updateRiskDashboard(hazardsData);
                 updateViewModeIndicator('tenant');
             } catch (error) {
                 console.error('Error loading dashboard:', error);
                 showNotification('Error loading dashboard data', 'error');
+            }
+        }
+        // ==================== ICAO RISK DASHBOARD (Tasks 6/9) ====================
+        function updateRiskDashboard(hazards) {
+            const counts = api.getRiskCounts ? api.getRiskCounts(hazards) : {ghrc:{CFIT:0,'LOC-I':0,MAC:0,RE:0,RI:0},nepal:{WX:0,TER:0,HEL:0,GOV:0,GNSS:0},ghrcTotal:0,nepalTotal:0,total:hazards.length};
+            const ghrcTotalEl=document.getElementById('riskGhrcTotal');
+            const nepalTotalEl=document.getElementById('riskNepalTotal');
+            if(ghrcTotalEl) ghrcTotalEl.textContent = counts.ghrcTotal + '/' + counts.total;
+            if(nepalTotalEl) nepalTotalEl.textContent = counts.nepalTotal + '/' + counts.total;
+            // G-HRC cards per Task 10 status logic
+            const ghrcContainer=document.getElementById('ghrcCards');
+            if(ghrcContainer){
+                const icaoTax=api.getIcaoTaxonomy?api.getIcaoTaxonomy():{CFIT:{code:'CFIT'},'LOC-I':{code:'LOC-I'},MAC:{code:'MAC'},RE:{code:'RE'},RI:{code:'RI'}};
+                ghrcContainer.innerHTML = Object.keys(counts.ghrc).map(code=>{
+                    const c=counts.ghrc[code];
+                    const s=api.getRiskStatus?api.getRiskStatus(c):{label:c===0?'✅ Clear':c<=2?'⚠️ Alert':'🔴 Critical',color:c===0?'#27ae60':c<=2?'#d4ac0d':'#c0392b',bg:c===0?'#d5f0de':c<=2?'#fef9e7':'#f9d5d3'};
+                    const tax=icaoTax[code]||{code};
+                    return '<div style="background:'+s.bg+';border:1px solid '+s.color+'30;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;font-weight:800;color:#0a1628;">'+code+'</div><div style="font-size:18px;font-weight:800;color:'+s.color+';">'+c+'</div><div style="font-size:11px;font-weight:600;color:'+s.color+';">'+s.label+'</div><div style="font-size:10px;color:#5a6a7a;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(tax.desc||'')+'">'+(tax.desc?tax.desc.substring(0,28):code)+'</div></div>';
+                }).join('');
+            }
+            const nepalContainer=document.getElementById('nepalCards');
+            if(nepalContainer){
+                const nepalTax=api.getNepalTaxonomy?api.getNepalTaxonomy():{WX:{code:'WX'},TER:{code:'TER'},HEL:{code:'HEL'},GOV:{code:'GOV'},GNSS:{code:'GNSS'}};
+                nepalContainer.innerHTML = Object.keys(counts.nepal).map(code=>{
+                    const c=counts.nepal[code];
+                    const s=api.getRiskStatus?api.getRiskStatus(c):{label:c===0?'✅ Clear':c<=2?'⚠️ Alert':'🔴 Critical',color:c===0?'#27ae60':c<=2?'#d4ac0d':'#c0392b',bg:c===0?'#d5f0de':c<=2?'#fef9e7':'#f9d5d3'};
+                    const tax=nepalTax[code]||{code};
+                    const labels={WX:'Weather',TER:'Terrain',HEL:'Helicopter',GOV:'Governance',GNSS:'Navigation'};
+                    return '<div style="background:'+s.bg+';border:1px solid '+s.color+'30;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;font-weight:800;color:#0a1628;">'+code+' ('+(labels[code]||code)+')</div><div style="font-size:18px;font-weight:800;color:'+s.color+';">'+c+'</div><div style="font-size:11px;font-weight:600;color:'+s.color+';">'+s.label+'</div></div>';
+                }).join('');
+            }
+            // Alert list
+            const alertEl=document.getElementById('riskAlertList');
+            if(alertEl){
+                const alerts=[];
+                Object.entries(counts.ghrc).forEach(([k,v])=>{ if(v>0) alerts.push(k+': '+v+' hazard'+(v>1?'s':'')); });
+                Object.entries(counts.nepal).forEach(([k,v])=>{ if(v>0) alerts.push(k+': '+v+' hazard'+(v>1?'s':'')); });
+                alertEl.innerHTML = alerts.length? alerts.map(a=>'<div>• '+a+'</div>').join('') : '<div style="color:#27ae60;">✅ No active risks — all clear</div>';
+            }
+            // Horizontal bar chart hazards per risk category
+            const ctx=document.getElementById('riskBreakdownChart');
+            if(ctx){
+                if(window.riskBreakdownChartInst) window.riskBreakdownChartInst.destroy();
+                const labels=[...Object.keys(counts.ghrc),...Object.keys(counts.nepal)];
+                const data=[...Object.values(counts.ghrc),...Object.values(counts.nepal)];
+                const colors=labels.map(l=>{
+                    if(['CFIT'].includes(l)) return '#c0392b';
+                    if(['LOC-I'].includes(l)) return '#e67e22';
+                    if(['MAC'].includes(l)) return '#f1c40f';
+                    if(['RE'].includes(l)) return '#2e86c1';
+                    if(['RI'].includes(l)) return '#8e44ad';
+                    if(['WX'].includes(l)) return '#5d6d7e';
+                    if(['TER'].includes(l)) return '#d35400';
+                    if(['HEL'].includes(l)) return '#27ae60';
+                    if(['GOV'].includes(l)) return '#1a2a4a';
+                    if(['GNSS'].includes(l)) return '#3498db';
+                    return '#95a5a6';
+                });
+                window.riskBreakdownChartInst=new Chart(ctx,{
+                    type:'bar',
+                    data:{labels:labels,datasets:[{label:'Hazards',data:data,backgroundColor:colors,borderWidth:1}]},
+                    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}}
+                });
             }
         }
         
@@ -1370,6 +1647,260 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             `).join('');
         }
         
+        // ==================== HAZARD LOG (MASTER REGISTER) ====================
+        let hlData = [];
+        let hlFiltered = [];
+        function hlPriority(risk_level) {
+            const m = { 'Critical':'H', 'High':'H', 'Medium':'M', 'Low':'L' };
+            return m[risk_level] || 'M';
+        }
+        function hlConsequence(h) { return (h.severity||'—') + ' × ' + (h.probability||'—'); }
+        function hlFormatDate(iso) {
+            if (!iso) return '—';
+            try { return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); } catch { return iso; }
+        }
+        function hlEscape(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        function riskBadge(code){
+            const colors={CFIT:{bg:'#fee2e2',c:'#991b1b'},'LOC-I':{bg:'#ffedd5',c:'#9a3412'},MAC:{bg:'#fef9c3',c:'#854d0e'},RE:{bg:'#dbeafe',c:'#1e40af'},RI:{bg:'#f3e8ff',c:'#6b21a8'},WX:{bg:'#f3f4f6',c:'#374151'},TER:{bg:'#ffedd5',c:'#9a3412'},HEL:{bg:'#dcfce7',c:'#166534'},GOV:{bg:'#1e293b',c:'#fff'},GNSS:{bg:'#e0f2fe',c:'#0c4a6e'}};
+            const col=colors[code]||{bg:'#eef2f7',c:'#374151'};
+            return '<span style="display:inline-block;padding:2px 6px;border-radius:4px;background:'+col.bg+';color:'+col.c+';font-weight:800;font-size:10px;border:1px solid '+col.c+'20;">'+hlEscape(code)+'</span>';
+        }
+        function getRiskMapping(h){ if(h.risk_mapping) return h.risk_mapping; if(typeof api!=='undefined' && api.getHazardRiskMapping) return api.getHazardRiskMapping(h); return {icao:[],nepal:[],ghrc:false}; }
+        async function loadHazardLogSPA() {
+            // Master register = all tenants aggregated (ICAO State view) sorted chronologically
+            const all = api.getAllHazards ? api.getAllHazards() : api.getMockHazards('all');
+            // Include imported CSV hazards from localStorage
+            let imported = [];
+            try { imported = JSON.parse(localStorage.getItem('hazardLog_imported')||'[]'); } catch {}
+            hlData = [...all, ...imported];
+            hlData.sort((a,b)=> new Date(a.created_at)-new Date(b.created_at));
+            // Also include tenant mapping for display if needed
+            const c = document.getElementById('hlCount'); if(c) c.textContent = hlData.length + ' hazards';
+            const d = document.getElementById('hlDate'); if(d) d.textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+            const fc = document.getElementById('hlFooterCount'); if(fc) fc.textContent = hlData.length;
+            filterHazardLogSPA();
+        }
+        function filterHazardLogSPA() {
+            const q = (document.getElementById('hlSearch')?.value||'').toLowerCase();
+            const status = document.getElementById('hlFilterStatus')?.value||'';
+            const pri = document.getElementById('hlFilterPriority')?.value||'';
+            const risk = document.getElementById('hlFilterRisk')?.value||'';
+            hlFiltered = hlData.filter(h=>{
+                if (status && (h.status||'') !== status) return false;
+                if (pri) {
+                    const priMap={'High':['High','Critical'],'Medium':['Medium'],'Low':['Low']};
+                    const allowed=priMap[pri]||[];
+                    if(!allowed.includes(h.risk_level)) return false;
+                }
+                if (risk) {
+                    const m=getRiskMapping(h);
+                    const allCodes=[...(m.icao||[]),...(m.nepal||[])];
+                    if(!allCodes.includes(risk)) return false;
+                }
+                if (q) {
+                    const hay = [h.title||'',h.description||''].join(' ').toLowerCase();
+                    if (!hay.includes(q)) return false;
+                }
+                return true;
+            });
+            renderHazardLogSPA(hlFiltered);
+            const ff = document.getElementById('hlFooterFiltered'); if(ff) ff.textContent = hlFiltered.length;
+        }
+        function renderHazardLogSPA(hazards) {
+            const tbody = document.getElementById('hlBody');
+            if (!tbody) return;
+            if (!hazards || hazards.length===0) {
+                tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:30px;color:#999;">No hazards match filters.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = hazards.map((h, idx)=>{
+                const sn = idx+1;
+                const date = hlFormatDate(h.created_at);
+                const area = hlEscape((h.location||'') + (h.location&&h.category?' · ':'') + (h.category||''));
+                const desc = '<strong>'+hlEscape(h.title||'Untitled')+'</strong><br><span style="color:#5a6a7a;font-size:11px;">'+hlEscape(h.description||'')+'</span>';
+                const event = hlEscape(h.category||'—');
+                const consequence = hlEscape(hlConsequence(h));
+                const pri = hlPriority(h.risk_level);
+                const priColor = pri==='H' ? '#c0392b' : pri==='M' ? '#d4ac0d' : '#27ae60';
+                const priBg = pri==='H' ? '#f9d5d3' : pri==='M' ? '#fef9e7' : '#d5f0de';
+                const m=getRiskMapping(h);
+                const icaoBadges=(m.icao&&m.icao.length)?m.icao.map(c=>riskBadge(c)).join(' '):'<span style="color:#999;">—</span>';
+                const nepalBadges=(m.nepal&&m.nepal.length)?m.nepal.map(c=>riskBadge(c)).join(' '):'<span style="color:#999;">—</span>';
+                const mitigation = hlEscape(h.mitigation_plan||'—');
+                const corrective = h.mitigation_plan ? '<span style="color:#27ae60;font-weight:800;">Y</span>' : '<span style="color:#c0392b;font-weight:800;">N</span>';
+                const srm = h.risk_level ? '<span style="color:#27ae60;font-weight:800;">Y</span>' : '<span style="color:#c0392b;font-weight:800;">N</span>';
+                const remarks = hlEscape(h.remarks||h.status||'—');
+                const rowBg = pri==='H' ? 'background:#fdf0ef;' : pri==='M' ? 'background:#fef9e7;' : 'background:#eafaf1;';
+                const globalIdx = hlData.indexOf(h);
+                return '<tr onclick="showHazardDetail('+globalIdx+')" style="cursor:pointer;'+rowBg+' border-left:4px solid '+priColor+';">'
+                    + '<td style="text-align:center;font-weight:700;">'+sn+'</td>'
+                    + '<td style="white-space:nowrap;font-size:11px;">'+date+'</td>'
+                    + '<td>'+area+'</td>'
+                    + '<td>'+desc+'</td>'
+                    + '<td>'+event+'</td>'
+                    + '<td>'+consequence+'</td>'
+                    + '<td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:'+priBg+';color:'+priColor+';font-weight:800;border:2px solid '+priColor+';font-size:12px;">'+pri+'</span></td>'
+                    + '<td style="text-align:center;">'+icaoBadges+'</td>'
+                    + '<td style="text-align:center;">'+nepalBadges+'</td>'
+                    + '<td>'+mitigation+'</td>'
+                    + '<td style="text-align:center;">'+corrective+'</td>'
+                    + '<td style="text-align:center;">'+srm+'</td>'
+                    + '<td>'+remarks+'</td>'
+                    + '</tr>';
+            }).join('');
+        }
+        function showHazardDetail(idx) {
+            const h = hlData[idx];
+            if (!h) return;
+            const modal = document.getElementById('hlModal');
+            const body = document.getElementById('hlModalBody');
+            if (!modal || !body) return;
+            const pri = hlPriority(h.risk_level);
+            body.innerHTML = ''
+                + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:2px solid #0a1628;padding-bottom:8px;">'
+                + '<h3 style="margin:0;font-size:16px;color:#0a1628;">🔍 Hazard Details: '+hlEscape(h.id||'—')+'</h3>'
+                + '<button onclick="closeHazardModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#5a6a7a;line-height:1;">&times;</button>'
+                + '</div>'
+                + '<div style="display:grid;gap:8px;font-size:13px;line-height:1.5;">'
+                + '<div><strong>Title:</strong> '+hlEscape(h.title||'Untitled')+'</div>'
+                + '<div><strong>Description:</strong> '+hlEscape(h.description||'—')+'</div>'
+                + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+                + '<div><strong>Category:</strong> '+hlEscape(h.category||'—')+'</div>'
+                + '<div><strong>Location:</strong> '+hlEscape(h.location||'—')+'</div>'
+                + '</div>'
+                + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+                + '<div><strong>Severity:</strong> '+hlEscape(h.severity||'—')+'</div>'
+                + '<div><strong>Probability:</strong> '+hlEscape(h.probability||'—')+'</div>'
+                + '</div>'
+                + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+                + '<div><strong>Risk Level:</strong> <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:'+(pri==='H'?'#f9d5d3':pri==='M'?'#fef9e7':'#d5f0de')+';color:'+(pri==='H'?'#c0392b':pri==='M'?'#7d6608':'#1e8449')+';font-weight:800;border:1px solid '+(pri==='H'?'#c0392b':pri==='M'?'#d4ac0d':'#27ae60')+';">'+pri+'</span> '+hlEscape(h.risk_level||'—')+'</div>'
+                + '<div><strong>Status:</strong> <span class="badge badge-'+(h.status==='Closed'?'success':h.status==='Under Review'?'warning':'info')+'">'+hlEscape(h.status||'Open')+'</span></div>'
+                + '</div>'
+                + '<div><strong>Owner:</strong> '+hlEscape(h.owner||'—')+'</div>'
+                + '<div><strong>Created:</strong> '+hlFormatDate(h.created_at)+'</div>'
+                + '<div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:8px;padding:12px;">'
+                + '<strong>Mitigation Plan:</strong><br><span style="color:#1a2a4a;">'+hlEscape(h.mitigation_plan||'— None —')+'</span>'
+                + '</div>'
+                + '<div style="background:#eaf2fb;border:1px solid #c9deef;border-radius:8px;padding:12px;">'
+                + '<strong>🔗 Risk Mapping:</strong><br>'
+                + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:12px;">'
+                + '<span><strong>ICAO:</strong> '+((getRiskMapping(h).icao&&getRiskMapping(h).icao.length)?getRiskMapping(h).icao.map(c=>riskBadge(c)).join(' '):'<span style="color:#999;">—</span>')+'</span>'
+                + '<span><strong>Nepal:</strong> '+((getRiskMapping(h).nepal&&getRiskMapping(h).nepal.length)?getRiskMapping(h).nepal.map(c=>riskBadge(c)).join(' '):'<span style="color:#999;">—</span>')+'</span>'
+                + '<span><strong>G-HRC:</strong> '+(getRiskMapping(h).ghrc?'<span style="color:#c0392b;font-weight:700;">Yes</span>':'<span style="color:#5a6a7a;">No</span>')+'</span>'
+                + '</div></div>'
+                + '</div>'
+                + '<div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;align-items:center;">'
+                + '<span style="font-size:11px;color:#5a6a7a;background:#fef9e7;border:1px solid #fde49a;padding:5px 8px;border-radius:6px;">🔒 Read-only demo</span>'
+                + '<button class="btn-outline btn-sm" onclick="closeHazardModal()">Close</button>'
+                + '</div>';
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden','false');
+        }
+        function closeHazardModal(){
+            const m=document.getElementById('hlModal'); if(m){ m.style.display='none'; m.setAttribute('aria-hidden','true'); }
+        }
+        function editHazardFromModal(idx){
+            // Read-only demo: editing disabled, viewing only
+            showNotification('🔒 Read-only demo — Hazard Log is view-only. Use filters, search, and Export/Import to interact.', 'info');
+        }
+        function exportHazardLogSPA(){
+            const hazards = hlFiltered.length?hlFiltered:hlData;
+            if (!hazards.length){ showNotification('No data to export','warning'); return; }
+            const headers = ['S.N.','Identified Date','Area/Operation','Description of Hazard','Unsafe Event / Top Event','Consequence','Hazard Priority Level','ICAO Risk','Nepal Risk','Recommended Actions','Corrective Action (Y/N)','SRM (Y/N)','Remarks'];
+            const rows = hazards.map((h,i)=>{
+                const pri=hlPriority(h.risk_level); const m=getRiskMapping(h);
+                return [i+1, hlFormatDate(h.created_at), (h.location||'')+' '+(h.category||''), (h.title||'')+' - '+(h.description||''), h.category||'', hlConsequence(h), pri, (m.icao||[]).join(','), (m.nepal||[]).join(','), h.mitigation_plan||'', h.mitigation_plan?'Y':'N', h.risk_level?'Y':'N', h.remarks||h.status||'']
+                    .map(v=> '"'+String(v).replace(/"/g,'""')+'"');
+            });
+            const csv = [headers.map(h=>'"'+h+'"').join(','), ...rows.map(r=>r.join(','))].join('\n');
+            const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a'); a.href=url; a.download='hazard_log-'+new Date().toISOString().split('T')[0]+'.csv'; a.click(); URL.revokeObjectURL(url);
+            showNotification('📥 Hazard Log exported ('+hazards.length+' rows)','success');
+        }
+        function importHazardLogCSV(event){
+            const file=event.target.files[0]; if(!file) return;
+            const reader=new FileReader();
+            reader.onload=function(e){
+                try{
+                    const text=e.target.result;
+                    const lines=text.split(/\r?\n/).filter(l=>l.trim());
+                    if(lines.length<2){ showNotification('CSV empty or invalid','error'); return; }
+                    // simple CSV parse respecting quoted commas
+                    function parseCSV(line){
+                        const res=[]; let cur='', inQ=false;
+                        for(let i=0;i<line.length;i++){
+                            const c=line[i];
+                            if(c==='"'){ if(inQ && line[i+1]==='"'){ cur+='"'; i++; } else inQ=!inQ; }
+                            else if(c===',' && !inQ){ res.push(cur); cur=''; }
+                            else cur+=c;
+                        }
+                        res.push(cur); return res;
+                    }
+                    const header=parseCSV(lines[0]).map(h=>h.trim().toLowerCase());
+                    const idx = {
+                        sn: header.findIndex(h=>h.includes('s.n')),
+                        date: header.findIndex(h=>h.includes('identified')||h==='date'),
+                        area: header.findIndex(h=>h.includes('area')),
+                        desc: header.findIndex(h=>h.includes('description')),
+                        event: header.findIndex(h=>h.includes('unsafe')||h.includes('top event')),
+                        consequence: header.findIndex(h=>h.includes('consequence')),
+                        priority: header.findIndex(h=>h.includes('priority')),
+                        actions: header.findIndex(h=>h.includes('recommended')),
+                        corrective: header.findIndex(h=>h.includes('corrective')),
+                        srm: header.findIndex(h=>h==='srm'||h.includes('srm')),
+                        remarks: header.findIndex(h=>h.includes('remarks'))
+                    };
+                    const imported=[];
+                    for(let i=1;i<lines.length;i++){
+                        const cols=parseCSV(lines[i]);
+                        if(cols.length<2) continue;
+                        const desc = idx.desc>=0?cols[idx.desc]:cols[3]||'';
+                        const area = idx.area>=0?cols[idx.area]:cols[2]||'';
+                        const priRaw = idx.priority>=0?cols[idx.priority]:'M';
+                        const pri = (priRaw||'M').trim().toUpperCase()[0];
+                        const riskMap={H:'High', M:'Medium', L:'Low'}; const risk_level=riskMap[pri]||'Medium';
+                        const actions = idx.actions>=0?cols[idx.actions]:'';
+                        const dateRaw = idx.date>=0?cols[idx.date]:new Date().toISOString();
+                        let created_at; try{ created_at=new Date(dateRaw).toISOString(); } catch{ created_at=new Date().toISOString(); }
+                        const tmp={title:desc.split(' - ')[0]||desc||'Imported Hazard '+(i),description:desc,category:idx.event>=0?cols[idx.event]:'Operational',location:area};
+                        const rm=api.classifyRiskByKeywords?api.classifyRiskByKeywords(tmp):{icao:[],nepal:[]};
+                        imported.push({
+                            id: 'import-'+Date.now()+'-'+i,
+                            title: tmp.title,
+                            description: desc,
+                            category: tmp.category,
+                            severity: 'Medium',
+                            probability: 'Possible',
+                            risk_level,
+                            status: 'Open',
+                            owner: 'Imported',
+                            location: area,
+                            mitigation_plan: actions||'',
+                            remarks: idx.remarks>=0?cols[idx.remarks]:'',
+                            risk_mapping:{icao:rm.icao,nepal:rm.nepal,ghrc:rm.icao.length>0},
+                            created_at,
+                            updated_at: new Date().toISOString(),
+                            _imported:true
+                        });
+                    }
+                    let existing=[]; try{ existing=JSON.parse(localStorage.getItem('hazardLog_imported')||'[]'); }catch{}
+                    existing = existing.concat(imported);
+                    localStorage.setItem('hazardLog_imported', JSON.stringify(existing));
+                    showNotification('📤 Imported '+imported.length+' hazards from CSV','success');
+                    loadHazardLogSPA();
+                    event.target.value='';
+                }catch(err){ console.error(err); showNotification('Import failed: '+err.message,'error'); }
+            };
+            reader.readAsText(file);
+        }
+        window.filterHazardLogSPA=filterHazardLogSPA;
+        window.exportHazardLogSPA=exportHazardLogSPA;
+        window.importHazardLogCSV=importHazardLogCSV;
+        window.showHazardDetail=showHazardDetail;
+        window.closeHazardModal=closeHazardModal;
+        window.editHazardFromModal=editHazardFromModal;
+
         // ==================== AUDIT RENDERING ====================
         function renderAuditTable(audit) {
             const tbody = document.getElementById('auditBody');

@@ -39,6 +39,7 @@ class AviaSDCPSAPI {
                 status: "Open",
                 owner: "John Smith",
                 location: "Runway 27L, Sydney Airport",
+                risk_mapping: { icao: ["RE"], nepal: ["WX"], ghrc: true },
                 created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -53,6 +54,7 @@ class AviaSDCPSAPI {
                 status: "Under Review",
                 owner: "Jane Doe",
                 location: "Runway 27L, Sydney Airport",
+                risk_mapping: { icao: ["RE"], nepal: [], ghrc: true },
                 created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -67,6 +69,7 @@ class AviaSDCPSAPI {
                 status: "Open",
                 owner: "Mike Johnson",
                 location: "Fuel Farm, Sydney Airport",
+                risk_mapping: { icao: ["LOC-I"], nepal: [], ghrc: true },
                 created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -81,6 +84,7 @@ class AviaSDCPSAPI {
                 status: "Closed",
                 owner: "Sarah Williams",
                 location: "Control Tower, Sydney Airport",
+                risk_mapping: { icao: ["MAC"], nepal: [], ghrc: true },
                 created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString()
             }
@@ -97,6 +101,7 @@ class AviaSDCPSAPI {
                 status: "Under Review",
                 owner: "Robert Chen",
                 location: "Maintenance Hangar, Oslo Airport",
+                risk_mapping: { icao: [], nepal: ["WX"], ghrc: false },
                 created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -111,6 +116,7 @@ class AviaSDCPSAPI {
                 status: "Closed",
                 owner: "David Park",
                 location: "Maintenance Hangar, Oslo Airport",
+                risk_mapping: { icao: ["LOC-I"], nepal: [], ghrc: true },
                 created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -125,6 +131,7 @@ class AviaSDCPSAPI {
                 status: "Open",
                 owner: "Mark Wilson",
                 location: "Terminal 3, Oslo Airport",
+                risk_mapping: { icao: [], nepal: ["GOV"], ghrc: false },
                 created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
             }
@@ -141,6 +148,7 @@ class AviaSDCPSAPI {
                 status: "Open",
                 owner: "Emily Davis",
                 location: "Crew Briefing Room, Johannesburg Airport",
+                risk_mapping: { icao: ["LOC-I"], nepal: ["HEL"], ghrc: true },
                 created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -155,6 +163,7 @@ class AviaSDCPSAPI {
                 status: "Closed",
                 owner: "Lisa Thompson",
                 location: "Approach Control, Johannesburg Airport",
+                risk_mapping: { icao: ["RE"], nepal: ["WX"], ghrc: true },
                 created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
             },
@@ -169,6 +178,7 @@ class AviaSDCPSAPI {
                 status: "Under Review",
                 owner: "Dr. Alan Chen",
                 location: "Approach Corridor, Johannesburg Airport",
+                risk_mapping: { icao: ["CFIT"], nepal: ["GNSS", "TER"], ghrc: true },
                 created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
                 updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
             }
@@ -189,6 +199,65 @@ class AviaSDCPSAPI {
         // Filtered by tenant — dashboard/hazards show only selected tenant
         if (tenantId === 'all' || tenantId === 'aggregated') return this.getAllHazards();
         return this.getTenantHazards(tenantId);
+    }
+
+    // ==================== ICAO G-HRC & NEPAL RISK TAXONOMY (Task 1) ====================
+    getIcaoTaxonomy() {
+        return {
+            "CFIT": { code: "CFIT", label: "Controlled Flight Into Terrain", desc: "Aircraft flown into terrain without pilot awareness" },
+            "LOC-I": { code: "LOC-I", label: "Loss of Control In-Flight", desc: "Loss of aircraft control in flight" },
+            "MAC": { code: "MAC", label: "Mid-Air Collision", desc: "Collision between aircraft in flight" },
+            "RE": { code: "RE", label: "Runway Excursion", desc: "Aircraft veering off or overrunning runway" },
+            "RI": { code: "RI", label: "Runway Incursion", desc: "Unauthorized presence on runway" }
+        };
+    }
+    getNepalTaxonomy() {
+        return {
+            "WX": { code: "WX", label: "Severe Weather", desc: "Monsoon, thunderstorms, wind shear, icing" },
+            "TER": { code: "TER", label: "Terrain", desc: "Mountainous terrain, CFIT risk in Nepal" },
+            "HEL": { code: "HEL", label: "Helicopter Operations", desc: "Dual-pilot requirements, terrain challenges" },
+            "GOV": { code: "GOV", label: "Governance", desc: "Institutional restructuring failures" },
+            "GNSS": { code: "GNSS", label: "GNSS Jamming/Spoofing", desc: "Navigation system interference" }
+        };
+    }
+    classifyRiskByKeywords(hazard) {
+        const text = ((hazard.title||"")+" "+(hazard.description||"")+" "+(hazard.category||"")+" "+(hazard.location||"")).toLowerCase();
+        const icao=[], nepal=[];
+        if (/terrain|mountain|cfit|controlled flight|navigation.*terrain/.test(text)) { if(!icao.includes("CFIT")) icao.push("CFIT"); if(!nepal.includes("TER")) nepal.push("TER"); }
+        if (/system failure|hydraulic|fuel|engine failure|human error|fatigue|loss of control/.test(text)) { if(!icao.includes("LOC-I")) icao.push("LOC-I"); }
+        if (/communication|atc|separation|mid-air|collision/.test(text)) { if(!icao.includes("MAC")) icao.push("MAC"); }
+        if (/runway|excursion|debris|fod|bird strike|overrun|veering/.test(text)) { if(!icao.includes("RE")) icao.push("RE"); }
+        if (/incursion|unauthorized.*runway|runway incursion/.test(text)) { if(!icao.includes("RI")) icao.push("RI"); }
+        if (/weather|monsoon|thunderstorm|wind shear|icing|de-icing|severe weather|storm/.test(text)) { if(!nepal.includes("WX")) nepal.push("WX"); }
+        if (/helicopter|dual-pilot|rotor/.test(text)) { if(!nepal.includes("HEL")) nepal.push("HEL"); }
+        if (/organizational|governance|drill|evacuation|institutional|restructuring/.test(text)) { if(!nepal.includes("GOV")) nepal.push("GOV"); }
+        if (/navigation|gps|gnss|jamming|spoofing|signal loss/.test(text)) { if(!nepal.includes("GNSS")) nepal.push("GNSS"); }
+        return { icao, nepal };
+    }
+    getHazardRiskMapping(hazard) {
+        if (hazard.risk_mapping) return hazard.risk_mapping;
+        const c = this.classifyRiskByKeywords(hazard);
+        return { icao: c.icao, nepal: c.nepal, ghrc: c.icao.length>0 };
+    }
+    getRiskCounts(hazards) {
+        const list = hazards || this.getAllHazards();
+        const ghrc = { "CFIT":0, "LOC-I":0, "MAC":0, "RE":0, "RI":0 };
+        const nepal = { "WX":0, "TER":0, "HEL":0, "GOV":0, "GNSS":0 };
+        let ghrcTotal=0, nepalTotal=0;
+        list.forEach(h=>{
+            const m=this.getHazardRiskMapping(h);
+            let hasGhrc=false, hasNepal=false;
+            (m.icao||[]).forEach(c=>{ if(ghrc[c]!==undefined){ ghrc[c]++; hasGhrc=true; }});
+            (m.nepal||[]).forEach(c=>{ if(nepal[c]!==undefined){ nepal[c]++; hasNepal=true; }});
+            if(hasGhrc) ghrcTotal++;
+            if(hasNepal) nepalTotal++;
+        });
+        return { ghrc, nepal, ghrcTotal, nepalTotal, total: list.length };
+    }
+    getRiskStatus(count) {
+        if (count===0) return { label:"✅ Clear", color:"#27ae60", bg:"#d5f0de", level:"clear" };
+        if (count<=2) return { label:"⚠️ Alert", color:"#d4ac0d", bg:"#fef9e7", level:"alert" };
+        return { label:"🔴 Critical", color:"#c0392b", bg:"#f9d5d3", level:"critical" };
     }
 
     getMockMetrics(tenantId) {

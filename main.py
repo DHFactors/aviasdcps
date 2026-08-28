@@ -57,6 +57,14 @@ async def serve_aviasdcps():
         return FileResponse(str(file_path))
     return {"error": "aviasdcps.html not found"}
 
+@app.get("/views/hazard-log.html")
+async def serve_hazard_log():
+    """Serve the Hazard Log master register"""
+    file_path = PUBLIC_DIR / "views" / "hazard-log.html"
+    if file_path.exists():
+        return FileResponse(str(file_path))
+    return {"error": "hazard-log.html not found"}
+
 # ==================== API ENDPOINTS ====================
 @app.get("/api")
 async def api_root():
