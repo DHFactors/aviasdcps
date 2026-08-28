@@ -211,9 +211,10 @@
                         <th style="text-align:center;">Corrective<small>Y/N</small></th>
                         <th style="text-align:center;">SRM<small>Y/N</small></th>
                         <th>Remarks</th>
+                        <th style="text-align:center;">Action</th>
                     </tr>
                 </thead>
-                <tbody id="hazardLogBody"><tr><td colspan="13" style="text-align:center;padding:30px;color:#999;"><div class="loading"><div class="spinner"></div><p>Loading hazard register…</p></div></td></tr></tbody>
+                <tbody id="hazardLogBody"><tr><td colspan="14" style="text-align:center;padding:30px;color:#999;"><div class="loading"><div class="spinner"></div><p>Loading hazard register…</p></div></td></tr></tbody>
             </table>
         </div>
         <div class="hazard-log-footer">
@@ -317,7 +318,7 @@
         }
         function renderHazardLog(hazards){
             const tbody=document.getElementById('hazardLogBody');
-            if(!hazards||hazards.length===0){ tbody.innerHTML='<tr><td colspan="13" style="padding:30px;text-align:center;color:#999;">No hazards match filters.</td></tr>'; return; }
+            if(!hazards||hazards.length===0){ tbody.innerHTML='<tr><td colspan="14" style="padding:30px;text-align:center;color:#999;">No hazards match filters.</td></tr>'; return; }
             tbody.innerHTML = hazards.map((h,idx)=>{
                 const sn=idx+1;
                 const date=formatDate(h.created_at);
@@ -336,7 +337,7 @@
                 const srm=h.risk_level?'<span class="yn-y">Y</span>':'<span class="yn-n">N</span>';
                 const remarks=escapeHtml(h.remarks||h.status||'—');
                 const globalIdx=allHazards.indexOf(h);
-                return '<tr class="'+rowCls+'" onclick="showHazardDetail('+globalIdx+')"><td style="text-align:center;font-weight:700;">'+sn+'</td><td style="white-space:nowrap;font-size:11px;">'+date+'</td><td>'+area+'</td><td>'+desc+'</td><td>'+event+'</td><td>'+consequence+'</td><td style="text-align:center;"><span class="priority-badge '+priCls+'">'+pri+'</span></td><td style="text-align:center;">'+icaoBadges+'</td><td style="text-align:center;">'+nepalBadges+'</td><td>'+mitigation+'</td><td style="text-align:center;">'+corrective+'</td><td style="text-align:center;">'+srm+'</td><td>'+remarks+'</td></tr>';
+                return '<tr class="'+rowCls+'" style="'+rowBg+' border-left:4px solid '+(pri==='H'?'#c0392b':pri==='M'?'#d4ac0d':'#27ae60')+';"><td style="text-align:center;font-weight:700;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+sn+'</td><td style="white-space:nowrap;font-size:11px;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+date+'</td><td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+area+'</td><td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+desc+'</td><td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+event+'</td><td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+consequence+'</td><td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')"><span class="priority-badge '+priCls+'">'+pri+'</span></td><td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+icaoBadges+'</td><td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+nepalBadges+'</td><td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+mitigation+'</td><td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+corrective+'</td><td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+srm+'</td><td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+remarks+'</td><td style="text-align:center;"><button class="btn-primary btn-sm" style="padding:4px 8px;font-size:11px;" onclick="event.stopPropagation(); generateCanFromHazard(\''+h.id+'\')">Generate CAN</button></td></tr>';
             }).join('');
         }
         function showHazardDetail(idx){
@@ -386,6 +387,7 @@
         }
         function closeHazardModal(){ document.getElementById('hlModal').style.display='none'; }
         function editHazardFromModal(idx){ showNotification('🔒 Read-only demo — viewing & filtering only','info'); }
+        function generateCanFromHazard(hazardId){ localStorage.setItem('canPrefillHazard', hazardId); location.href='/aviasdcps.html#can-cap'; }
         function exportHazardLogCSV(){
             const hazards=filteredHazards.length?filteredHazards:allHazards;
             if(!hazards.length){ showNotification('No data to export','warning'); return; }

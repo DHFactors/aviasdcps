@@ -25,6 +25,7 @@
     <!-- ==================== HEADER ==================== -->
     <header class="app-header">
         <div class="logo">
+            <button class="sidebar-toggle" id="sidebarToggle" onclick="document.getElementById('appSidebar').classList.toggle('open')" style="display:none;background:transparent;border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:6px;padding:6px 10px;font-size:16px;cursor:pointer;">☰</button>
             <h1>✈️ AVIA SDCPS</h1>
             <span>Safety Management Platform</span>
         </div>
@@ -39,16 +40,29 @@
         </div>
     </header>
     
-    <!-- ==================== NAVIGATION ==================== -->
-    <nav class="app-nav">
-        <button class="active" data-page="dashboard">📊 Dashboard</button>
-        <button data-page="hazards">⚠️ Hazards</button>
-        <button data-page="hazard-log">📋 Hazard Log</button>
-        <button data-page="state">📋 State Oversight</button>
-        <button data-page="declare">📝 Declare SPIs</button>
-        <button data-page="reports">📄 Reports</button>
-    </nav>
-    
+    <div class="app-layout">
+    <!-- ==================== SIDEBAR NAVIGATION ==================== -->
+    <aside class="app-sidebar" id="appSidebar">
+        <div class="sidebar-brand">
+            <h2>✈️ AVIA SDCPS</h2>
+            <span>Safety Management Platform</span>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="active" data-page="dashboard">📊 Dashboard</button>
+            <button data-page="hazard-log">📋 Hazard Log</button>
+            <button data-page="can-cap">🔄 CAN/CAP Workflow</button>
+            <button data-page="state">📊 State Oversight</button>
+            <button data-page="reports">📄 Reports</button>
+            <hr class="nav-divider">
+            <button data-page="hazards">⚠️ Hazards</button>
+            <button data-page="declare">📝 Declare SPIs</button>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="document.getElementById('page-audit')?.scrollIntoView()">⚙️ Admin</button>
+            <a href="/" onclick="event.preventDefault(); showNotification('AVIA SDCPS v1.0 — ICAO Annex 19 compliant Safety Management Platform','info')">📖 About</a>
+        </div>
+    </aside>
+
     <!-- ==================== MAIN CONTENT ==================== -->
     <div class="app-content">
     <!-- View Mode Indicator -->
@@ -75,6 +89,23 @@
             <div class="chart-card">
                 <h3>⚠️ Recent Hazards</h3>
                 <div class="hazard-list" id="recentHazards"><div class="loading"><div class="spinner"></div><p>Loading hazards...</p></div></div>
+            </div>
+
+            <!-- 🔄 CAN/CAP Summary Widget (Task 5) -->
+            <div class="chart-card" id="cancapWidget" style="border-top-color:#2e86c1;margin-top:20px;">
+                <h3>🔄 CAN/CAP Summary</h3>
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0;">
+                    <div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#5a6a7a;letter-spacing:0.06em;">Total</div><div id="widgetCanTotal" style="font-size:20px;font-weight:800;color:#0a1628;">3</div></div>
+                    <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#1e40af;">Issued</div><div id="widgetCanIssued" style="font-size:20px;font-weight:800;color:#1e40af;">1</div></div>
+                    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#92400e;">Review</div><div id="widgetCanReview" style="font-size:20px;font-weight:800;color:#92400e;">1</div></div>
+                    <div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#065f46;">Accepted</div><div id="widgetCanAccepted" style="font-size:20px;font-weight:800;color:#065f46;">0</div></div>
+                    <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;font-weight:700;color:#991b1b;">Escalated</div><div id="widgetCanEscalated" style="font-size:20px;font-weight:800;color:#991b1b;">1</div></div>
+                </div>
+                <div style="display:flex;gap:16px;font-size:12px;color:#1a2a4a;margin-bottom:10px;flex-wrap:wrap;">
+                    <span>⚠️ Pending Your Review: <strong id="widgetCanPending">1</strong></span>
+                    <span>🔴 Escalated: <strong id="widgetCanEscalated2">1</strong></span>
+                </div>
+                <button class="btn-primary btn-sm" onclick="switchPage('can-cap')">View All CANs →</button>
             </div>
 
             <!-- 🚨 ICAO High-Risk Categories — Dashboard Risk Section (Task 6/9) -->
@@ -200,16 +231,61 @@
                             <th style="background:#0a1628;color:white;text-align:center;">Corrective<br>Y/N</th>
                             <th style="background:#0a1628;color:white;text-align:center;">SRM<br>Y/N</th>
                             <th style="background:#0a1628;color:white;">Remarks</th>
+                            <th style="background:#0a1628;color:white;text-align:center;">Action</th>
                         </tr>
                     </thead>
                     <tbody id="hlBody">
-                        <tr><td colspan="13" style="text-align:center;padding:30px;color:#999;"><div class="loading"><div class="spinner"></div><p>Loading hazard register…</p></div></td></tr>
+                        <tr><td colspan="14" style="text-align:center;padding:30px;color:#999;"><div class="loading"><div class="spinner"></div><p>Loading hazard register…</p></div></td></tr>
                     </tbody>
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:12px;padding:10px 14px;background:#eaf2fb;border:1px solid #c9deef;border-radius:8px;font-size:12px;color:#5a6a7a;">
                 <span><strong id="hlFooterCount">0</strong> hazards · <span id="hlFooterFiltered">0</span> displayed</span>
                 <span style="font-size:11px;">ICAO Annex 19 · SSP · SRM · Master Hazard Register</span>
+            </div>
+        </div>
+
+        <!-- ======== CAN/CAP WORKFLOW ======== -->
+        <div id="page-can-cap" class="page-section">
+            <div style="background:#0a1628;color:white;padding:20px 24px;border-radius:12px;margin-bottom:20px;">
+                <h2 style="color:white;margin:0 0 4px;">🔄 CAN/CAP Workflow</h2>
+                <p style="color:rgba(255,255,255,0.75);font-size:13px;margin:0;">Complete corrective action lifecycle from hazard identification to closure — SMS closed-loop</p>
+            </div>
+            <!-- Workflow Diagram (SMS loop) -->
+            <div class="chart-card" style="border-top-color:#2e86c1;">
+                <h3>🔁 SMS Workflow — Hazard → CAN → RCA → CAP → Review → Close</h3>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:16px 0;overflow-x:auto;">
+                    <div style="background:#dbeafe;border:2px solid #2e86c1;border-radius:10px;padding:10px 14px;text-align:center;min-width:90px;"><div style="font-size:18px;">⚠️</div><div style="font-size:11px;font-weight:700;color:#0a1628;">Hazard</div></div>
+                    <span style="color:#2e86c1;font-weight:800;font-size:18px;">→</span>
+                    <div style="background:#fef9c3;border:2px solid #d4ac0d;border-radius:10px;padding:10px 14px;text-align:center;min-width:90px;"><div style="font-size:18px;">📋</div><div style="font-size:11px;font-weight:700;color:#0a1628;">CAN</div><div style="font-size:10px;color:#5a6a7a;">Corrective Action Notice</div></div>
+                    <span style="color:#2e86c1;font-weight:800;font-size:18px;">→</span>
+                    <div style="background:#ffedd5;border:2px solid #e67e22;border-radius:10px;padding:10px 14px;text-align:center;min-width:90px;"><div style="font-size:18px;">🔍</div><div style="font-size:11px;font-weight:700;color:#0a1628;">RCA</div><div style="font-size:10px;color:#5a6a7a;">Root Cause</div></div>
+                    <span style="color:#2e86c1;font-weight:800;font-size:18px;">→</span>
+                    <div style="background:#dcfce7;border:2px solid #27ae60;border-radius:10px;padding:10px 14px;text-align:center;min-width:90px;"><div style="font-size:18px;">✅</div><div style="font-size:11px;font-weight:700;color:#0a1628;">CAP</div><div style="font-size:10px;color:#5a6a7a;">Corrective Plan</div></div>
+                    <span style="color:#2e86c1;font-weight:800;font-size:18px;">→</span>
+                    <div style="background:#f3e8ff;border:2px solid #8e44ad;border-radius:10px;padding:10px 14px;text-align:center;min-width:90px;"><div style="font-size:18px;">👁️</div><div style="font-size:11px;font-weight:700;color:#0a1628;">Review</div></div>
+                    <span style="color:#2e86c1;font-weight:800;font-size:18px;">→</span>
+                    <div style="background:#d5f0de;border:2px solid #1e8449;border-radius:10px;padding:10px 14px;text-align:center;min-width:90px;"><div style="font-size:18px;">🔒</div><div style="font-size:11px;font-weight:700;color:#0a1628;">Close</div></div>
+                </div>
+            </div>
+            <!-- Active CANs Summary -->
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;">
+                <div style="background:white;border:1px solid #e3e8ef;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#5a6a7a;">Total CANs</div><div id="canTotal" style="font-size:24px;font-weight:800;color:#0a1628;">3</div></div>
+                <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#1e40af;">Issued</div><div id="canIssued" style="font-size:24px;font-weight:800;color:#1e40af;">1</div></div>
+                <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#92400e;">Under Review</div><div id="canReview" style="font-size:24px;font-weight:800;color:#92400e;">1</div></div>
+                <div style="background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#065f46;">Accepted</div><div id="canAccepted" style="font-size:24px;font-weight:800;color:#065f46;">0</div></div>
+                <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#991b1b;">Escalated</div><div id="canEscalated" style="font-size:24px;font-weight:800;color:#991b1b;">1</div></div>
+            </div>
+            <!-- CAN List Table -->
+            <div class="chart-card">
+                <h3>📋 Active CANs</h3>
+                <div style="overflow-x:auto;">
+                    <table class="audit-table" id="canTable" style="min-width:750px;">
+                        <thead><tr><th>CAN #</th><th>Hazard</th><th>Assigned To</th><th>Issued Date</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="canBody"><tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">Loading CANs…</td></tr></tbody>
+                    </table>
+                </div>
+                <button class="btn-primary btn-sm" style="margin-top:12px;" onclick="openCanForm()">+ New CAN</button>
             </div>
         </div>
         
@@ -475,12 +551,27 @@
         </div>
         
     </div>
+    </div><!-- /.app-layout -->
 
     <!-- Hazard Log Detail Modal -->
     <div id="hlModal" class="modal-overlay" aria-hidden="true" style="display:none;" onclick="if(event.target===this) closeHazardModal()">
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="hlModalTitle" style="max-width:620px;text-align:left;max-height:90vh;overflow-y:auto;">
             <button class="modal-close" aria-label="Close modal" onclick="closeHazardModal()">&times;</button>
             <div id="hlModalBody"></div>
+        </div>
+    </div>
+    <!-- CAN Detail Modal -->
+    <div id="canDetailModal" class="modal-overlay" aria-hidden="true" style="display:none;" onclick="if(event.target===this) closeCanDetail()">
+        <div class="modal-content" role="dialog" aria-modal="true" style="max-width:680px;text-align:left;max-height:90vh;overflow-y:auto;">
+            <button class="modal-close" aria-label="Close modal" onclick="closeCanDetail()">&times;</button>
+            <div id="canDetailBody"></div>
+        </div>
+    </div>
+    <!-- CAN Generation Form Modal -->
+    <div id="canFormModal" class="modal-overlay" aria-hidden="true" style="display:none;" onclick="if(event.target===this) closeCanForm()">
+        <div class="modal-content" role="dialog" aria-modal="true" style="max-width:520px;text-align:left;max-height:90vh;overflow-y:auto;">
+            <button class="modal-close" aria-label="Close modal" onclick="closeCanForm()">&times;</button>
+            <div id="canFormBody"></div>
         </div>
     </div>
 <!-- ==================== FOOTER ==================== -->
@@ -1034,26 +1125,38 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             }
         }
 
-        document.querySelectorAll('.app-nav button').forEach(btn => {
+        function switchPage(page){
+            if(page==='cancap') page='can-cap';
+            const btn = document.querySelector(`.app-sidebar button[data-page="${page}"]`) || document.querySelector(`.app-nav button[data-page="${page}"]`);
+            const allBtns = document.querySelectorAll('.app-sidebar button, .app-nav button');
+            allBtns.forEach(b=>b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            document.querySelectorAll('.page-section').forEach(p=>p.classList.remove('active'));
+            const target=document.getElementById(`page-${page}`);
+            if(target) target.classList.add('active');
+            else { showNotification('Page not found: '+page,'warning'); return; }
+            if(page==='dashboard'){ updateViewModeIndicator('tenant'); loadDashboard(); }
+            if(page==='hazards'){ updateViewModeIndicator('tenant'); loadHazards(); }
+            if(page==='hazard-log'){ updateViewModeIndicator('hazard-log'); loadHazardLogSPA(); }
+            if(page==='can-cap'){ loadCanCap(); updateViewModeIndicator('tenant'); }
+            if(page==='state'){ updateViewModeIndicator('state'); loadStateOversight(); }
+            if(page==='declare'){ updateViewModeIndicator('tenant'); loadDeclarations(); }
+            if(page==='audit'){ updateViewModeIndicator('tenant'); loadAudit(); }
+            if(page==='demo'){ updateViewModeIndicator('tenant'); loadDemoStatus(); }
+            if(page==='reports') updateViewModeIndicator('tenant');
+            location.hash=page;
+            document.getElementById('appSidebar')?.classList.remove('open');
+        }
+        window.switchPage=switchPage;
+        document.querySelectorAll('.app-sidebar button, .app-nav button').forEach(btn => {
             btn.addEventListener('click', function() {
                 if (!this.dataset.page) return;
-                document.querySelectorAll('.app-nav button').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-                const target = document.getElementById(`page-${this.dataset.page}`);
-                if (target) target.classList.add('active');
-                else { showNotification('Page not found: ' + this.dataset.page, 'warning'); return; }
-                const page = this.dataset.page;
-                if (page === 'dashboard') { updateViewModeIndicator('tenant'); loadDashboard(); }
-                if (page === 'hazards') { updateViewModeIndicator('tenant'); loadHazards(); }
-                if (page === 'hazard-log') { updateViewModeIndicator('hazard-log'); loadHazardLogSPA(); }
-                if (page === 'state') { updateViewModeIndicator('state'); loadStateOversight(); }
-                if (page === 'declare') { updateViewModeIndicator('tenant'); loadDeclarations(); }
-                if (page === 'audit') { updateViewModeIndicator('tenant'); loadAudit(); }
-                if (page === 'demo') { updateViewModeIndicator('tenant'); loadDemoStatus(); }
-                if (page === 'reports') updateViewModeIndicator('tenant');
+                switchPage(this.dataset.page);
             });
         });
+        // Hash routing per Task 6
+        window.addEventListener('hashchange',()=>{ const h=location.hash.replace('#',''); if(h) switchPage(h); });
+        document.addEventListener('DOMContentLoaded',()=>{ const h=location.hash.replace('#',''); if(h && document.getElementById(`page-${h}`)) switchPage(h); });
         
         // ==================== LOAD FUNCTIONS ====================
         async function loadDashboard() {
@@ -1066,6 +1169,7 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
                 updateRiskChart(hazardsData);
                 renderRecentHazards(hazardsData);
                 updateRiskDashboard(hazardsData);
+                try{ updateDashboardCanWidget(); }catch{}
                 updateViewModeIndicator('tenant');
             } catch (error) {
                 console.error('Error loading dashboard:', error);
@@ -1710,7 +1814,7 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             const tbody = document.getElementById('hlBody');
             if (!tbody) return;
             if (!hazards || hazards.length===0) {
-                tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:30px;color:#999;">No hazards match filters.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:30px;color:#999;">No hazards match filters.</td></tr>';
                 return;
             }
             tbody.innerHTML = hazards.map((h, idx)=>{
@@ -1732,20 +1836,21 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
                 const remarks = hlEscape(h.remarks||h.status||'—');
                 const rowBg = pri==='H' ? 'background:#fdf0ef;' : pri==='M' ? 'background:#fef9e7;' : 'background:#eafaf1;';
                 const globalIdx = hlData.indexOf(h);
-                return '<tr onclick="showHazardDetail('+globalIdx+')" style="cursor:pointer;'+rowBg+' border-left:4px solid '+priColor+';">'
-                    + '<td style="text-align:center;font-weight:700;">'+sn+'</td>'
-                    + '<td style="white-space:nowrap;font-size:11px;">'+date+'</td>'
-                    + '<td>'+area+'</td>'
-                    + '<td>'+desc+'</td>'
-                    + '<td>'+event+'</td>'
-                    + '<td>'+consequence+'</td>'
-                    + '<td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:'+priBg+';color:'+priColor+';font-weight:800;border:2px solid '+priColor+';font-size:12px;">'+pri+'</span></td>'
-                    + '<td style="text-align:center;">'+icaoBadges+'</td>'
-                    + '<td style="text-align:center;">'+nepalBadges+'</td>'
-                    + '<td>'+mitigation+'</td>'
-                    + '<td style="text-align:center;">'+corrective+'</td>'
-                    + '<td style="text-align:center;">'+srm+'</td>'
-                    + '<td>'+remarks+'</td>'
+                return '<tr style="'+rowBg+' border-left:4px solid '+priColor+';">'
+                    + '<td style="text-align:center;font-weight:700;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+sn+'</td>'
+                    + '<td style="white-space:nowrap;font-size:11px;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+date+'</td>'
+                    + '<td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+area+'</td>'
+                    + '<td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+desc+'</td>'
+                    + '<td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+event+'</td>'
+                    + '<td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+consequence+'</td>'
+                    + '<td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:'+priBg+';color:'+priColor+';font-weight:800;border:2px solid '+priColor+';font-size:12px;">'+pri+'</span></td>'
+                    + '<td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+icaoBadges+'</td>'
+                    + '<td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+nepalBadges+'</td>'
+                    + '<td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+mitigation+'</td>'
+                    + '<td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+corrective+'</td>'
+                    + '<td style="text-align:center;cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+srm+'</td>'
+                    + '<td style="cursor:pointer;" onclick="showHazardDetail('+globalIdx+')">'+remarks+'</td>'
+                    + '<td style="text-align:center;"><button class="btn-primary btn-sm" style="padding:4px 8px;font-size:11px;" onclick="event.stopPropagation(); openCanFormWithHazard(\''+h.id+'\')">Generate CAN</button></td>'
                     + '</tr>';
             }).join('');
         }
@@ -1900,6 +2005,130 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
         window.showHazardDetail=showHazardDetail;
         window.closeHazardModal=closeHazardModal;
         window.editHazardFromModal=editHazardFromModal;
+
+        // ==================== CAN/CAP WORKFLOW (Tasks 2-5) ====================
+        const CAN_STATUSES = ['Issued','Under Review','Accepted','Escalated','Closed'];
+        function getDefaultCans(){
+            return [
+                { canId:'CAN-001', hazardId:'haz-001', hazardTitle:'Bird strike risk on runway 27L', assignedTo:'Operations', issuedDate:new Date(Date.now()-2*24*60*60*1000).toISOString(), status:'Under Review', cap:{ plan:'Coordinate with wildlife control, install deterrents', dept:'Operations', targetDate:new Date(Date.now()+14*24*60*60*1000).toISOString(), rca:'Inadequate wildlife hazard management', bowtie:{causes:['Seasonal migration','Nearby waste disposal'], consequences:['Engine ingestion','Rejected takeoff'], controls:['Wildlife patrol','NOTAM issuance']}, srma:{initial:'High', residual:'Medium'} } },
+                { canId:'CAN-002', hazardId:'haz-003', hazardTitle:'Fuel contamination discovered', assignedTo:'Maintenance', issuedDate:new Date(Date.now()-1*24*60*60*1000).toISOString(), status:'Issued', cap:{ plan:'Quarantine affected batch, audit fuel farm, retrain staff', dept:'Maintenance', targetDate:new Date(Date.now()+7*24*60*60*1000).toISOString(), rca:'Quality control failure', bowtie:{causes:['Supplier contamination','Filter failure'], consequences:['Engine failure','In-flight shutdown'], controls:['Fuel testing','Supplier audit']}, srma:{initial:'High', residual:'Medium'} } },
+                { canId:'CAN-003', hazardId:'haz-010', hazardTitle:'Navigation system anomaly', assignedTo:'Engineering', issuedDate:new Date(Date.now()-3*24*60*60*1000).toISOString(), status:'Escalated', cap:{ plan:'Install backup GNSS, update approach procedures', dept:'Engineering', targetDate:new Date(Date.now()+30*24*60*60*1000).toISOString(), rca:'GNSS interference in mountainous terrain', bowtie:{causes:['GNSS interference','System malfunction'], consequences:['CFIT','Route deviation','Missed approach'], controls:['Backup Navigation System'], srmaInitial:'High', srmaResidual:'Medium'}, srma:{initial:'High', residual:'Medium'} } }
+            ];
+        }
+        function getCans(){
+            try{ const v=localStorage.getItem('cans'); if(v) return JSON.parse(v); }catch{}
+            const d=getDefaultCans(); localStorage.setItem('cans',JSON.stringify(d)); return d;
+        }
+        function saveCans(arr){ localStorage.setItem('cans',JSON.stringify(arr)); updateCanCounts(); updateDashboardCanWidget(); }
+        function updateCanCounts(){
+            const cans=getCans();
+            const by={Issued:0,'Under Review':0,Accepted:0,Escalated:0,Closed:0,Total:cans.length};
+            cans.forEach(c=>{ if(by[c.status]!==undefined) by[c.status]++; });
+            [['canTotal','Total'],['canIssued','Issued'],['canReview','Under Review'],['canAccepted','Accepted'],['canEscalated','Escalated']].forEach(([id,k])=>{
+                const el=document.getElementById(id); if(el) el.textContent=by[k];
+            });
+            [['widgetCanTotal','Total'],['widgetCanIssued','Issued'],['widgetCanReview','Under Review'],['widgetCanAccepted','Accepted'],['widgetCanEscalated','Escalated']].forEach(([id,k])=>{
+                const el=document.getElementById(id); if(el) el.textContent=by[k];
+            });
+            const pend=document.getElementById('widgetCanPending'); if(pend) pend.textContent=by['Under Review'];
+            const esc=document.getElementById('widgetCanEscalated2'); if(esc) esc.textContent=by['Escalated'];
+        }
+        function loadCanCap(){
+            const cans=getCans();
+            updateCanCounts();
+            // handle prefill from Hazard Log Generate CAN (cross-page)
+            const prefill=localStorage.getItem('canPrefillHazard');
+            if(prefill){
+                localStorage.removeItem('canPrefillHazard');
+                setTimeout(()=>openCanForm(prefill), 400);
+            }
+            const tbody=document.getElementById('canBody');
+            if(!tbody) return;
+            if(!cans.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">No CANs yet — generate from Hazard Log</td></tr>'; return; }
+            const badge={Issued:'badge-info', 'Under Review':'badge-warning', Accepted:'badge-success', Escalated:'badge-danger', Closed:'badge-secondary'};
+            tbody.innerHTML=cans.map(c=>`
+                <tr>
+                    <td><strong>${c.canId}</strong></td>
+                    <td>${hlEscape(c.hazardTitle)}<br><small style="color:#5a6a7a;">${c.hazardId}</small></td>
+                    <td>${hlEscape(c.assignedTo)}</td>
+                    <td>${hlFormatDate(c.issuedDate)}</td>
+                    <td><span class="badge ${badge[c.status]||'badge-secondary'}">${c.status}</span></td>
+                    <td><button class="btn-outline btn-sm" onclick="openCanDetail('${c.canId}')">View</button></td>
+                </tr>`).join('');
+        }
+        function bowTieSvg(can){
+            const cap=can.cap||{}; const bt=cap.bowtie||{causes:['Cause A','Cause B'], consequences:['Consequence A','Consequence B'], controls:['Control A']};
+            const causes=(bt.causes||[]).slice(0,3); const cons=(bt.consequences||[]).slice(0,3);
+            const controls=(bt.controls||[]).join(', ');
+            // CSS flex bow-tie
+            let html='<div style="border:2px solid #0a1628;border-radius:10px;overflow:hidden;background:white;">';
+            html+='<div style="background:#0a1628;color:white;text-align:center;padding:8px;font-weight:800;font-size:12px;letter-spacing:0.04em;">Bow-Tie Analysis</div>';
+            html+='<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:center;padding:12px;">';
+            html+='<div style="display:flex;flex-direction:column;gap:8px;">';
+            html+='<div style="font-size:10px;font-weight:700;color:#5a6a7a;text-align:center;">CAUSES</div>';
+            causes.forEach(c=>{ html+='<div style="background:#ffedd5;border:1px solid #e67e22;border-radius:6px;padding:8px;font-size:11px;text-align:center;">'+hlEscape(c)+'<div style="margin-top:4px;color:#2e86c1;font-size:14px;">→</div></div>'; });
+            html+='</div>';
+            html+='<div style="text-align:center;padding:0 8px;"><div style="background:#0a1628;color:white;border-radius:8px;padding:12px 16px;font-weight:800;font-size:12px;">'+hlEscape(can.hazardTitle.substring(0,22))+'</div><div style="font-size:10px;color:#5a6a7a;margin-top:4px;">TOP EVENT</div></div>';
+            html+='<div style="display:flex;flex-direction:column;gap:8px;">';
+            html+='<div style="font-size:10px;font-weight:700;color:#5a6a7a;text-align:center;">CONSEQUENCES</div>';
+            cons.forEach(c=>{ html+='<div style="background:#fee2e2;border:1px solid #c0392b;border-radius:6px;padding:8px;font-size:11px;text-align:center;">'+hlEscape(c)+'</div>'; });
+            html+='</div>';
+            html+='</div>';
+            html+='<div style="background:#eaf2fb;border-top:1px solid #c9deef;padding:8px 12px;font-size:11px;"><strong>🛡️ Controls:</strong> '+hlEscape(controls||'—')+'<br><strong>📊 SRMA:</strong> Initial: '+(cap.srma?.initial||'High')+' → Residual: '+(cap.srma?.residual||'Medium')+'</div>';
+            html+='</div>';
+            return html;
+        }
+        function openCanDetail(canId){
+            const cans=getCans(); const can=cans.find(c=>c.canId===canId); if(!can) return;
+            const hazard = api.getAllHazards().find(h=>h.id===can.hazardId) || {title:can.hazardTitle, description:'—', category:'—', location:'—', severity:'—', probability:'—', risk_level:'—',owner:'—', created_at:can.issuedDate};
+            let html='<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0a1628;padding-bottom:8px;margin-bottom:12px;"><h3 style="margin:0;color:#0a1628;">📋 '+can.canId+' — '+hlEscape(can.hazardTitle)+'</h3><button onclick="closeCanDetail()" style="background:none;border:none;font-size:22px;cursor:pointer;">×</button></div>';
+            html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-bottom:12px;"><div><strong>Assigned To:</strong> '+hlEscape(can.assignedTo)+'</div><div><strong>Status:</strong> <span class="badge '+(can.status==='Under Review'?'badge-warning':can.status==='Issued'?'badge-info':can.status==='Escalated'?'badge-danger':'badge-success')+'">'+can.status+'</span></div><div><strong>Issued Date:</strong> '+hlFormatDate(can.issuedDate)+'</div><div><strong>Hazard:</strong> '+can.hazardId+'</div></div>';
+            html+='<div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:8px;padding:10px;margin-bottom:12px;"><strong>Hazard Details</strong><br><div style="font-size:12px;line-height:1.6;">Title: '+hlEscape(hazard.title)+'<br>Description: '+hlEscape(hazard.description)+'<br>Category: '+hlEscape(hazard.category)+' | Location: '+hlEscape(hazard.location)+'<br>Severity: '+hlEscape(hazard.severity)+' | Probability: '+hlEscape(hazard.probability)+' | Risk: '+hlEscape(hazard.risk_level)+'</div></div>';
+            html+='<div style="margin-bottom:12px;"><strong>RCA Section</strong></div>';
+            html+=bowTieSvg(can);
+            html+='<div style="margin:12px 0 8px;"><strong>CAP Section</strong></div>';
+            html+='<div style="background:#f8f9fc;border:1px solid #e3e8ef;border-radius:8px;padding:10px;font-size:12px;line-height:1.6;">Plan: '+hlEscape(can.cap?.plan||'—')+'<br>Responsible Dept: '+hlEscape(can.cap?.dept||can.assignedTo)+'<br>Target Date: '+hlFormatDate(can.cap?.targetDate)+'<br>Root Cause: '+hlEscape(can.cap?.rca||'—')+'</div>';
+            html+='<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;"><button class="btn-success btn-sm" onclick="canReviewAction(\''+can.canId+'\',\'Accepted\')">✅ Accept</button><button class="btn-outline btn-sm" onclick="canReviewAction(\''+can.canId+'\',\'Under Review\')">↩️ Send Back</button><button class="btn-danger btn-sm" onclick="canReviewAction(\''+can.canId+'\',\'Escalated\')">⬆️ Escalate</button><button class="btn-outline btn-sm" onclick="closeCanDetail()">Close</button></div>';
+            const overlay=document.getElementById('canDetailModal'); const body=document.getElementById('canDetailBody');
+            if(body) body.innerHTML=html; if(overlay) overlay.style.display='flex';
+        }
+        function closeCanDetail(){ const o=document.getElementById('canDetailModal'); if(o) o.style.display='none'; }
+        function canReviewAction(canId, newStatus){
+            const cans=getCans(); const idx=cans.findIndex(c=>c.canId===canId); if(idx<0) return;
+            cans[idx].status=newStatus; saveCans(cans); loadCanCap(); openCanDetail(canId); showNotification('CAN '+canId+' → '+newStatus,'success');
+        }
+        function openCanForm(hazardId){
+            const hazard = hazardId ? api.getAllHazards().find(h=>h.id===hazardId) : null;
+            const nextId='CAN-'+String(getCans().length+1).padStart(3,'0');
+            const overlay=document.getElementById('canFormModal'); const body=document.getElementById('canFormBody');
+            if(!overlay||!body) return;
+            body.innerHTML='<h3 style="margin-bottom:12px;">📋 New CAN — '+nextId+'</h3>'
+                +'<div style="display:grid;gap:10px;font-size:13px;">'
+                +'<label>Hazard<select id="canFormHazard" style="width:100%;padding:8px;border:1px solid #e3e8ef;border-radius:6px;">'+api.getAllHazards().map(h=>`<option value="${h.id}" ${hazard && h.id===hazard.id?'selected':''}>${h.id} — ${h.title}</option>`).join('')+'</select></label>'
+                +'<label>Assigned To<select id="canFormAssigned" style="width:100%;padding:8px;border:1px solid #e3e8ef;border-radius:6px;"><option>Operations</option><option>Maintenance</option><option>Engineering</option><option>Safety</option><option>Flight Ops</option></select></label>'
+                +'<label>CAN Number<input id="canFormId" value="'+nextId+'" readonly style="width:100%;padding:8px;border:1px solid #e3e8ef;border-radius:6px;background:#f8f9fc;"></label>'
+                +'<label>Description<textarea id="canFormDesc" style="width:100%;padding:8px;border:1px solid #e3e8ef;border-radius:6px;min-height:70px;">'+hlEscape(hazard?hazard.description:'')+'</textarea></label>'
+                +'</div>'
+                +'<div style="display:flex;gap:8px;margin-top:14px;"><button class="btn-primary btn-sm" onclick="submitCanForm()">Create CAN</button><button class="btn-outline btn-sm" onclick="closeCanForm()">Cancel</button></div>';
+            overlay.style.display='flex';
+            if(hazard) document.getElementById('canFormAssigned').value='Operations';
+        }
+        function openCanFormWithHazard(hazardId){ switchPage('can-cap'); setTimeout(()=>openCanForm(hazardId),200); }
+        function closeCanForm(){ const o=document.getElementById('canFormModal'); if(o) o.style.display='none'; }
+        function submitCanForm(){
+            const hid=document.getElementById('canFormHazard')?.value;
+            const assigned=document.getElementById('canFormAssigned')?.value||'Operations';
+            const canId=document.getElementById('canFormId')?.value;
+            const desc=document.getElementById('canFormDesc')?.value;
+            const hazard=api.getAllHazards().find(h=>h.id===hid);
+            if(!hazard){ showNotification('Select hazard','warning'); return; }
+            const cans=getCans();
+            cans.push({ canId, hazardId:hid, hazardTitle:hazard.title, assignedTo:assigned, issuedDate:new Date().toISOString(), status:'Issued', cap:{ plan:desc||hazard.description, dept:assigned, targetDate:new Date(Date.now()+14*24*60*60*1000).toISOString(), rca:'Pending RCA', bowtie:{causes:['Cause TBD'], consequences:['Consequence TBD'], controls:['Control TBD']}, srma:{initial:hazard.risk_level||'Medium', residual:'Medium'} } });
+            saveCans(cans); closeCanForm(); loadCanCap(); updateDashboardCanWidget(); showNotification('✅ CAN '+canId+' created for '+hid,'success');
+        }
+        function updateDashboardCanWidget(){ updateCanCounts(); }
+        window.openCanDetail=openCanDetail; window.closeCanDetail=closeCanDetail; window.canReviewAction=canReviewAction;
+        window.openCanForm=openCanForm; window.openCanFormWithHazard=openCanFormWithHazard; window.closeCanForm=closeCanForm; window.submitCanForm=submitCanForm; window.loadCanCap=loadCanCap;
 
         // ==================== AUDIT RENDERING ====================
         function renderAuditTable(audit) {
@@ -2199,8 +2428,8 @@ function viewAuditTrail() {
         showNotification('⚠️ Admin access required', 'warning');
         return;
     }
-    // Switch to audit page
-    document.querySelectorAll('.app-nav button').forEach(b => b.classList.remove('active'));
+    // Switch to audit page via sidebar
+    document.querySelectorAll('.app-sidebar button, .app-nav button').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
     const auditPage = document.getElementById('page-audit');
     if (auditPage) auditPage.classList.add('active');
