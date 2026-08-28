@@ -95,6 +95,8 @@ from app.api.v1.demo import router as demo_router
 from app.api.v1.lead_capture import router as lead_capture_router
 from app.api.v1.leads import router as leads_router
 from app.api.v1.email_preview import router as email_preview_router
+from app.api.v1.nlp import router as nlp_router
+from app.api.v1.hfacs import router as hfacs_router
 
 app.include_router(hazards_router, prefix="/api/v1")
 app.include_router(state_risk_router, prefix="/api/v1")
@@ -102,6 +104,8 @@ app.include_router(demo_router, prefix="/api/v1")
 app.include_router(lead_capture_router, prefix="/api/v1")
 app.include_router(leads_router, prefix="/api/v1")
 app.include_router(email_preview_router, prefix="/api/v1")
+app.include_router(nlp_router, prefix="/api/v1")
+app.include_router(hfacs_router, prefix="/api/v1")
 
 if __name__ == "__main__":
     import uvicorn

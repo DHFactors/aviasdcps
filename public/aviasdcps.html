@@ -174,6 +174,11 @@
                 </div>
             </div>
 
+            <div class="report-submit-section" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;background:white;border:1px solid #e3e8ef;border-radius:10px;padding:12px 16px;">
+                <button class="btn-primary" onclick="openReportModal()">📝 Submit Safety Report</button>
+                <span class="report-hint" style="font-size:13px;color:#5a6a7a;">Describe a safety event in plain language</span>
+            </div>
+
             <!-- Filter/Search Bar + Export/Import -->
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;background:white;border:1px solid #e3e8ef;border-radius:10px;padding:14px 16px;">
                 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -584,6 +589,45 @@
             <div id="canFormBody"></div>
         </div>
     </div>
+<!-- Report Submission Modal -->
+<div id="reportModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeReportModal()">
+    <div class="modal-container report-modal" role="dialog" aria-modal="true" style="max-width:700px;">
+        <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="margin:0;color:#0a1628;">📝 Submit Safety Report</h2>
+            <button class="modal-close" onclick="closeReportModal()" style="position:static;">✕</button>
+        </div>
+        <div class="modal-body">
+            <p class="report-instruction" style="font-size:14px;color:#666;margin-bottom:16px;">
+                Describe a safety event or hazard in plain language.
+                <span class="example" style="font-weight:600;color:#0a1628;">Like NASA's CALLBACK reports:</span>
+                <em style="display:block;background:#f5f5f5;padding:8px 12px;border-radius:6px;margin-top:6px;font-style:italic;color:#555;">"During approach, I noticed multiple bird strikes near the threshold..."</em>
+            </p>
+            <textarea id="reportText" rows="6" placeholder="Describe the safety event or hazard..." style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;resize:vertical;min-height:120px;"></textarea>
+            <div class="report-actions" style="display:flex;gap:10px;margin:16px 0;">
+                <button class="btn-primary" onclick="analyzeReport()">🔍 Analyze Report</button>
+                <button class="btn-secondary btn-outline" onclick="clearReport()">Clear</button>
+            </div>
+            <div id="analysisResult" style="display:none;"></div>
+            <!-- HFACS Hybrid Selector: searchable, filtered by category, manual select any of 109 -->
+            <div id="hfacsHybridSelector" style="display:none; margin-top:16px; border:1px solid #e0e0e0; border-radius:8px; padding:16px; background:#f8f9fc;">
+                <label style="font-size:13px; font-weight:600; color:#0a1628; display:block; margin-bottom:8px;">🔢 HFACS Nanocode (Hybrid — search any of 109, AI suggestion highlighted)</label>
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <select id="hfacsCategoryFilter" onchange="filterHfacsCodes()" style="padding:8px 10px; border-radius:6px; border:1px solid #e0e0e0; font-size:13px;">
+                        <option value="">All Categories</option>
+                        <option value="ACT">ACT (Acts)</option>
+                        <option value="PRECOND">PRECOND (Preconditions)</option>
+                        <option value="SUPER">SUPER (Supervision)</option>
+                        <option value="ORG">ORG (Organizational)</option>
+                    </select>
+                    <input id="hfacsSearch" placeholder="Search code or description..." oninput="searchHfacs()" style="flex:1; padding:8px 10px; border-radius:6px; border:1px solid #e0e0e0; font-size:13px;">
+                </div>
+                <div id="hfacsResults" style="max-height:160px; overflow-y:auto; border:1px solid #eee; border-radius:6px; background:white;"></div>
+                <div style="margin-top:8px; font-size:12px;">Selected: <span id="hfacsSelected" style="font-weight:600; color:#2e86c1;">None (AI suggestion will be used)</span></div>
+            </div>
+            <div class="demo-note" style="background:#fff3cd;padding:12px 16px;border-radius:8px;font-size:13px;color:#856404;text-align:center;margin-top:16px;">⚠️ This demo is not saved. Results are for demonstration only.</div>
+        </div>
+    </div>
+</div>
 <!-- ==================== FOOTER ==================== -->
 <footer class="app-footer" style="background:#0a1628;color:white;padding:30px;margin-top:40px;border-top:3px solid #2e86c1;">
     <div style="max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;">
@@ -2256,6 +2300,232 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
         function updateDashboardCanWidget(){ updateCanCounts(); }
         window.openCanDetail=openCanDetail; window.closeCanDetail=closeCanDetail; window.canReviewAction=canReviewAction;
         window.openCanForm=openCanForm; window.openCanFormWithHazard=openCanFormWithHazard; window.closeCanForm=closeCanForm; window.submitCanForm=submitCanForm; window.loadCanCap=loadCanCap;
+
+        // ==================== REPORT SUBMISSION (NLP) ====================
+        function openReportModal(){ document.getElementById('reportModal').style.display='flex'; const t=document.getElementById('reportText'); if(t) setTimeout(()=>t.focus(),100); }
+        function closeReportModal(){ const m=document.getElementById('reportModal'); if(m) m.style.display='none'; const r=document.getElementById('analysisResult'); if(r) r.style.display='none'; const t=document.getElementById('reportText'); if(t) t.value=''; }
+        function clearReport(){ const t=document.getElementById('reportText'); if(t) t.value=''; const r=document.getElementById('analysisResult'); if(r) r.style.display='none'; }
+        window.openReportModal=openReportModal; window.closeReportModal=closeReportModal; window.clearReport=clearReport;
+        async function analyzeReport(){
+            const textEl=document.getElementById('reportText'); const text=(textEl?textEl.value:'').trim();
+            if(!text){ showNotification('Please describe a safety event.', 'warning'); return; }
+            const resultDiv=document.getElementById('analysisResult');
+            if(resultDiv){ resultDiv.style.display='block'; resultDiv.innerHTML='<div class="loading-spinner"><div class="spinner"></div><p>Analyzing report with AI...</p></div>'; }
+            try{
+                const resp=await fetch('/api/v1/nlp/analyze', {
+                    method:'POST',
+                    headers:{ 'Content-Type':'application/json', 'X-Tenant-Id': localStorage.getItem('tenantId')||'tenant-001', 'X-API-Key':'demo-key-001' },
+                    body: JSON.stringify({ text: text, tenant_id: localStorage.getItem('tenantId')||'tenant-001' })
+                });
+                if(!resp.ok) throw new Error('Analysis failed: '+resp.status);
+                const data=await resp.json();
+                displayAnalysisResult(data);
+            }catch(e){
+                console.error('Analysis error:', e);
+                if(resultDiv) resultDiv.innerHTML='<div class="analysis-error">❌ Analysis failed. Please try again.<br><small>'+(e.message||'')+'</small></div>';
+            }
+        }
+        window.analyzeReport=analyzeReport;
+        function displayAnalysisResult(data){
+            const resultDiv=document.getElementById('analysisResult');
+            if(!resultDiv) return;
+            const severityColors={'Low':'#28a745','Medium':'#ffc107','High':'#fd7e14','Critical':'#dc3545'};
+            const esc=(s)=> String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            const jsonForBtn=JSON.stringify(data).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+            resultDiv.innerHTML=`
+                <div class="analysis-result">
+                    <h3>✅ Hazard Extracted from Report</h3>
+                    <div class="result-grid">
+                        <div class="result-item"><label>📌 Hazard Title</label><div class="result-value">${esc(data.title)}</div></div>
+                        <div class="result-item"><label>📂 Category</label><div class="result-value">${esc(data.category)}</div></div>
+                        <div class="result-item"><label>🔢 Nano-Code (HFACS)</label><div class="result-value">${esc(data.nano_code)} - ${esc(data.nano_description)}</div></div>
+                        <div class="result-item"><label>⚠️ Severity</label><div class="result-value" style="color:${severityColors[data.severity]||'#333'};font-weight:700;">${esc(data.severity)}</div></div>
+                        <div class="result-item"><label>📊 Probability</label><div class="result-value">${esc(data.probability)}</div></div>
+                        <div class="result-item"><label>📈 Risk Level</label><div class="result-value" style="color:${severityColors[data.risk_level]||'#333'};font-weight:700;">${esc(data.risk_level)}</div></div>
+                        <div class="result-item full-width"><label>📝 Description</label><div class="result-value">${esc(data.description)}</div></div>
+                    </div>
+                    <div class="result-actions">
+                        <button class="btn-secondary btn-outline" onclick="closeReportModal()">Close</button>
+                        <button class="btn-primary" onclick="addHazardFromReport(${JSON.stringify(data).replace(/"/g,'&quot;')})">➕ Add to Hazard Log</button>
+                    </div>
+                </div>`;
+            resultDiv.style.display='block';
+            // Hybrid HFACS: show selector, AI suggestion highlighted, allow manual override
+            window.lastAnalysisData = data;
+            window.selectedHfacsCode = data.nano_code;
+            window.selectedHfacsDesc = data.nano_description;
+            const selEl=document.getElementById('hfacsHybridSelector');
+            if(selEl) selEl.style.display='block';
+            const selDisplay=document.getElementById('hfacsSelected');
+            if(selDisplay) selDisplay.textContent = (data.nano_code||'None') + (data.nano_description?' — '+data.nano_description:'') + ' (AI suggestion)';
+            // Load initial HFACS list (category filtered, suggest via text)
+            if(typeof loadHfacsSelector==='function') loadHfacsSelector(data);
+        }
+        window.displayAnalysisResult=displayAnalysisResult;
+        function addHazardFromReport(data){
+            try{
+                if(typeof data==='string'){ try{ data=JSON.parse(data.replace(/&quot;/g,'"')); }catch{} }
+                const hazard={
+                    id:'haz-'+Date.now(),
+                    title: data.title||'Extracted Hazard',
+                    description: data.description||'From safety report',
+                    category: data.category||'Operational',
+                    severity: data.severity||'Medium',
+                    probability: data.probability||'Possible',
+                    risk_level: data.risk_level||'Medium',
+                    nano_code: data.nano_code||null,
+                    nano_description: data.nano_description||null,
+                    status:'Open',
+                    owner:'AI Extracted',
+                    location:'Report Submission',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    risk_mapping: { icao: [], nepal: [], ghrc: false }
+                };
+                // classify via existing logic if available
+                try{
+                    const rm = api.classifyRiskByKeywords ? api.classifyRiskByKeywords(hazard) : {icao:[], nepal:[]};
+                    hazard.risk_mapping = { icao: rm.icao, nepal: rm.nepal, ghrc: rm.icao.length>0 };
+                }catch{}
+                // push to in-memory + localStorage for persistence in demo
+                if(typeof hazardsData!=='undefined' && Array.isArray(hazardsData)) hazardsData.push(hazard);
+                // also persist to localStorage hazardLog_imported so reload keeps it
+                try{
+                    const imp=JSON.parse(localStorage.getItem('hazardLog_imported')||'[]');
+                    imp.push(Object.assign({},hazard,{_imported:true}));
+                    localStorage.setItem('hazardLog_imported', JSON.stringify(imp));
+                }catch{}
+                if(typeof renderAllHazards==='function' && typeof hazardsData!=='undefined') try{ renderAllHazards(hazardsData); }catch{}
+                if(typeof updateKPIs==='function' && typeof hazardsData!=='undefined') try{ updateKPIs(hazardsData); }catch{}
+                if(typeof loadHazardLogSPA==='function') try{ loadHazardLogSPA(); }catch{}
+                if(typeof updateRiskDashboard==='function' && typeof hazardsData!=='undefined') try{ updateRiskDashboard(hazardsData); }catch{}
+                if(typeof loadDashboard==='function') try{ loadDashboard(); }catch{}
+                showNotification('✅ Hazard added from report!', 'success');
+                closeReportModal();
+            }catch(e){ console.error(e); showNotification('Failed to add hazard','error'); }
+        }
+        window.addHazardFromReport=addHazardFromReport;
+        // Hybrid HFACS helpers: searchable, filtered by category, any of 109
+        let hfacsCache=null;
+        async function fetchHfacsAll(){ if(hfacsCache) return hfacsCache; try{ const r=await fetch('/api/v1/hfacs/codes?limit=200'); const j=await r.json(); hfacsCache=j.codes||[]; return hfacsCache; }catch{ return []; } }
+        async function loadHfacsSelector(data){
+            const catEl=document.getElementById('hfacsCategoryFilter');
+            const searchEl=document.getElementById('hfacsSearch');
+            if(catEl) catEl.value='';
+            if(searchEl) searchEl.value='';
+            // If NLP text available, try suggest endpoint for relevance
+            try{
+                const txt=document.getElementById('reportText')?.value||data.description||'';
+                if(txt){
+                    const r=await fetch('/api/v1/hfacs/suggest?text='+encodeURIComponent(txt.substring(0,120))+'&limit=10');
+                    const j=await r.json();
+                    if(j.suggestions && j.suggestions.length){ renderHfacsResults(j.suggestions, data.nano_code); return; }
+                }
+            }catch{}
+            const all=await fetchHfacsAll();
+            // Show filtered subset: if category known from AI, show that category first, else all
+            let subset=all;
+            if(data.category){
+                const catMap={'Operational':'ACT','Technical':'PRECOND','Human Factors':'PRECOND','Environmental':'PRECOND','Organizational':'ORG'};
+                const cat=catMap[data.category];
+                if(cat) { const filtered=all.filter(c=>c.category===cat); if(filtered.length) subset=filtered.slice(0,20); }
+            }
+            renderHfacsResults(subset.slice(0,30), data.nano_code);
+        }
+        async function filterHfacsCodes(){
+            const cat=document.getElementById('hfacsCategoryFilter')?.value||'';
+            const q=document.getElementById('hfacsSearch')?.value||'';
+            let url='/api/v1/hfacs/codes?limit=50';
+            if(cat) url+='&category='+encodeURIComponent(cat);
+            if(q) url+='&search='+encodeURIComponent(q);
+            try{ const r=await fetch(url); const j=await r.json(); renderHfacsResults(j.codes||[], window.selectedHfacsCode); }catch{}
+        }
+        async function searchHfacs(){ return filterHfacsCodes(); }
+        function renderHfacsResults(codes, highlightCode){
+            const cont=document.getElementById('hfacsResults'); if(!cont) return;
+            if(!codes.length){ cont.innerHTML='<div style="padding:12px;color:#999;text-align:center;">No matches — try different search or category.</div>'; return; }
+            cont.innerHTML=codes.map(c=>{
+                const isSel=c.code===highlightCode;
+                const isAI=c.code===window.lastAnalysisData?.nano_code;
+                return `<div onclick="selectHfacs('${c.code}','${c.description.replace(/'/g,'&#39;').replace(/"/g,'&quot;')}')" style="padding:8px 10px; border-bottom:1px solid #f0f0f0; cursor:pointer; background:${isSel?'#eaf2fb':isAI?'#fff3cd':'white'}; display:flex; justify-content:space-between; align-items:center;">
+                    <div><strong style="font-size:12px;">${c.code}</strong> <span style="font-size:11px; color:#666;">[${c.category}/${c.subcategory}]</span><br><span style="font-size:12px; color:#333;">${c.description}</span>${isAI?' <span style="font-size:10px; background:#ffc107; padding:1px 5px; border-radius:4px; margin-left:6px;">AI suggestion</span>':''}</div>
+                    <div style="font-size:11px; color:#2e86c1;">${isSel?'✓ Selected':''}</div>
+                </div>`;
+            }).join('');
+        }
+        function selectHfacs(code, desc){
+            window.selectedHfacsCode=code; window.selectedHfacsDesc=desc;
+            const sel=document.getElementById('hfacsSelected');
+            if(sel) sel.textContent=code+' — '+desc+' (manual)';
+            // re-render to highlight
+            const cat=document.getElementById('hfacsCategoryFilter')?.value||'';
+            const q=document.getElementById('hfacsSearch')?.value||'';
+            // update lastAnalysisData for Add action
+            if(window.lastAnalysisData){ window.lastAnalysisData.nano_code=code; window.lastAnalysisData.nano_description=desc; }
+            // also update displayed result's nano code line if present
+            const resultDiv=document.getElementById('analysisResult');
+            if(resultDiv){
+                // quick patch: replace nano code display
+                resultDiv.innerHTML=resultDiv.innerHTML.replace(/🔢 Nano-Code \(HFACS\)<\/label><div class="result-value">[^<]*/,`🔢 Nano-Code (HFACS)</label><div class="result-value">${code} - ${desc}`);
+            }
+            filterHfacsCodes();
+        }
+        window.filterHfacsCodes=filterHfacsCodes; window.searchHfacs=searchHfacs; window.selectHfacs=selectHfacs; window.loadHfacsSelector=loadHfacsSelector;
+        // Spec Task 4 aliases: filterHFACS / selectHFACS / clearHFACS / loadHFACSCodes
+        function filterHFACS(query){
+            const inp=document.getElementById('hfacsSearch');
+            if(inp && query!==undefined) inp.value=query;
+            return filterHfacsCodes();
+        }
+        function selectHFACS(code, description){ return selectHfacs(code, description); }
+        function clearHFACS(){
+            const sel=document.getElementById('hfacsSelected'); if(sel) sel.style.display='none';
+            const inp=document.getElementById('hfacsSearch'); if(inp) inp.value='';
+            const res=document.getElementById('hfacsResults'); if(res) res.style.display='none';
+            window.selectedHfacsCode=null; window.selectedHfacsDesc=null;
+            const disp=document.getElementById('hfacsSelected'); if(disp) disp.textContent='None';
+        }
+        async function loadHFACSCodes(){
+            const r=await fetch('/api/v1/hfacs/codes?limit=109');
+            const j=await r.json();
+            window.HFACS_ALL_CODES=j.codes||[];
+            return window.HFACS_ALL_CODES;
+        }
+        function fallbackHFACSSearch(query){
+            const results=document.getElementById('hfacsResults');
+            if(!results) return;
+            const all=window.HFACS_ALL_CODES||[];
+            const q=(query||'').toLowerCase();
+            const matches=all.filter(c=> c.code.toLowerCase().includes(q) || c.description.toLowerCase().includes(q) || c.subcategory.toLowerCase().includes(q));
+            if(!matches.length){ results.innerHTML='<div class="no-results">No matching codes found</div>'; }
+            else {
+                results.innerHTML=matches.slice(0,10).map(code=>`
+                    <div class="hfacs-item" onclick="selectHFACS('${code.code}', '${code.description.replace(/'/g,'&#39;')}')">
+                        <span class="code">${code.code}</span>
+                        <span class="desc">${code.description}</span>
+                        <span class="badge">${code.category}</span>
+                    </div>`).join('');
+            }
+            results.style.display='block';
+        }
+        window.filterHFACS=filterHFACS; window.selectHFACS=selectHFACS; window.clearHFACS=clearHFACS; window.loadHFACSCodes=loadHFACSCodes; window.fallbackHFACSSearch=fallbackHFACSSearch;
+        // Preload all codes for fallback
+        loadHFACSCodes().catch(()=>{});
+        // Override addHazard to respect manual HFACS selection
+        const originalAddHazard=window.addHazardFromReport;
+        window.addHazardFromReport=function(data){
+            try{
+                if(typeof data==='string'){ try{ data=JSON.parse(data.replace(/&quot;/g,'"')); }catch{} }
+                if(window.selectedHfacsCode){
+                    data.nano_code=window.selectedHfacsCode;
+                    data.nano_description=window.selectedHfacsDesc||data.nano_description;
+                } else if(window.lastAnalysisData && window.lastAnalysisData.nano_code){
+                    data.nano_code=window.lastAnalysisData.nano_code;
+                    data.nano_description=window.lastAnalysisData.nano_description;
+                }
+            }catch{}
+            return originalAddHazard(data);
+        };
 
         // ==================== AUDIT RENDERING ====================
         function renderAuditTable(audit) {

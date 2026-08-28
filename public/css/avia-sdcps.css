@@ -674,6 +674,59 @@ strong { font-weight: 700; }
 @keyframes fadeIn { from {opacity:0} to {opacity:1} }
 @keyframes scaleIn { from {transform:scale(0.96); opacity:0} to {transform:scale(1); opacity:1} }
 
+/* ==================== REPORT MODAL ==================== */
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  position: relative;
+  text-align: left;
+  animation: scaleIn 0.22s ease;
+}
+.report-modal .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.report-modal .modal-header h2 { margin: 0; color: #0a1628; }
+.report-instruction { font-size: 14px; color: #666; margin-bottom: 16px; }
+.report-instruction .example { font-weight: 600; color: #0a1628; }
+.report-instruction em { display: block; background: #f5f5f5; padding: 8px 12px; border-radius: 6px; margin-top: 6px; font-style: italic; color: #555; }
+#reportText { width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; resize: vertical; min-height: 120px; }
+#reportText:focus { outline: none; border-color: #2e86c1; }
+.report-actions { display: flex; gap: 10px; margin: 16px 0; }
+.demo-note { background: #fff3cd; padding: 12px 16px; border-radius: 8px; font-size: 13px; color: #856404; text-align: center; margin-top: 16px; }
+.analysis-result { background: #f8f9fc; border-radius: 12px; padding: 20px; margin-top: 16px; border: 2px solid #2e86c1; }
+.analysis-result h3 { margin: 0 0 16px; color: #0a1628; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.result-item { background: white; padding: 10px 14px; border-radius: 8px; }
+.result-item.full-width { grid-column: 1 / -1; }
+.result-item label { font-size: 11px; text-transform: uppercase; color: #999; font-weight: 600; display: block; }
+.result-item .result-value { font-size: 15px; font-weight: 500; margin-top: 2px; }
+.result-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+.loading-spinner { text-align: center; padding: 30px; }
+.loading-spinner .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #1a237e; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.analysis-error { color: #dc3545; padding: 20px; text-align: center; background: #f8d7da; border-radius: 8px; }
+
+/* ==================== HFACS SELECTOR ==================== */
+.hfacs-selector { margin: 12px 0; }
+.hfacs-selector label { display: block; font-weight: 600; font-size: 14px; color: #0a1628; margin-bottom: 6px; }
+.hfacs-search { position: relative; }
+.hfacs-search input { width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; }
+.hfacs-search input:focus { outline: none; border-color: #2e86c1; }
+.hfacs-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e0e0e0; border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.hfacs-item { display: flex; align-items: center; padding: 8px 14px; cursor: pointer; gap: 12px; border-bottom: 1px solid #f5f5f5; }
+.hfacs-item:hover { background: #eaf2fb; }
+.hfacs-item .code { font-family: monospace; font-weight: 700; font-size: 13px; color: #1a237e; min-width: 60px; }
+.hfacs-item .desc { flex: 1; font-size: 13px; color: #333; }
+.hfacs-item .badge { font-size: 10px; padding: 2px 8px; border-radius: 12px; background: #e0e0e0; color: #666; font-weight: 600; }
+.hfacs-selected { display: none; background: #eaf2fb; padding: 10px 14px; border-radius: 8px; border: 1px solid #2e86c1; margin-top: 6px; }
+.hfacs-selected .code { font-family: monospace; font-weight: 700; font-size: 14px; color: #1a237e; }
+.hfacs-selected .description { font-size: 14px; color: #333; margin-left: 10px; }
+.hfacs-selected button { background: none; border: none; color: #999; cursor: pointer; float: right; font-size: 16px; }
+
 /* FAQ */
 .faq-section { background: var(--avia-white); }
 .faq-section h2 { text-align: center; color: var(--avia-primary-dark); margin-bottom: 8px; }
