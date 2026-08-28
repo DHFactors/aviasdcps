@@ -1105,19 +1105,19 @@ table tbody tr:last-child td, .audit-table tbody tr:last-child td { border-botto
 table tbody tr:hover td, .audit-table tbody tr:hover td, .avia-table tbody tr:hover td { background: #f6f8fb; }
 table .cell-muted, .avia-table .cell-muted { color: var(--avia-text-gray); font-size: 13px; }
 
-/* ==================== RESPONSIVE TABLE (Task 1) ==================== */
+/* ==================== RESPONSIVE HAZARD TABLE ==================== */
 .hazard-table-container {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     margin: 16px 0;
-    border-radius: 10px;
     border: 1px solid #e0e0e0;
     background: white;
+    border-radius: 10px;
 }
 .hazard-table-container table {
     width: 100%;
-    min-width: 900px;
+    table-layout: auto;
     border-collapse: collapse;
     font-size: 13px;
 }
@@ -1127,35 +1127,35 @@ table .cell-muted, .avia-table .cell-muted { color: var(--avia-text-gray); font-
     font-weight: 600;
     padding: 10px 12px;
     text-align: left;
-    white-space: nowrap;
     border-bottom: 2px solid #e0e0e0;
     position: sticky;
     top: 0;
     z-index: 10;
+    white-space: nowrap;
 }
 .hazard-table-container td {
     padding: 10px 12px;
     border-bottom: 1px solid #f0f0f0;
     vertical-align: middle;
-    max-width: 200px;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    hyphens: auto;
+    max-width: 250px;
 }
-.hazard-table-container .col-sn { width: 40px; min-width: 40px; }
-.hazard-table-container .col-date { width: 110px; min-width: 110px; }
-.hazard-table-container .col-area { width: 120px; min-width: 120px; }
-.hazard-table-container .col-description { min-width: 180px; max-width: 250px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
-.hazard-table-container .col-event { width: 120px; min-width: 120px; }
-.hazard-table-container .col-consequence { width: 100px; min-width: 100px; }
-.hazard-table-container .col-priority { width: 70px; min-width: 70px; }
-.hazard-table-container .col-icao { width: 80px; min-width: 80px; }
-.hazard-table-container .col-nepal { width: 80px; min-width: 80px; }
-.hazard-table-container .col-actions { width: 140px; min-width: 140px; }
-.hazard-table-container .col-corrective { width: 70px; min-width: 70px; }
-.hazard-table-container .col-srm { width: 60px; min-width: 60px; }
-.hazard-table-container .col-remarks { width: 80px; min-width: 80px; }
-.hazard-table-container .col-action { width: 70px; min-width: 70px; }
+/* ==================== FLEXIBLE COLUMN WIDTHS ==================== */
+.hazard-table-container .col-sn { width: 4%; min-width: 35px; max-width: 50px; text-align: center; }
+.hazard-table-container .col-date { width: 10%; min-width: 90px; max-width: 120px; }
+.hazard-table-container .col-area { width: 10%; min-width: 100px; max-width: 140px; }
+.hazard-table-container .col-description { width: 18%; min-width: 150px; max-width: 280px; }
+.hazard-table-container .col-event { width: 10%; min-width: 90px; max-width: 130px; }
+.hazard-table-container .col-consequence { width: 8%; min-width: 70px; max-width: 100px; }
+.hazard-table-container .col-priority { width: 6%; min-width: 55px; max-width: 75px; }
+.hazard-table-container .col-icao { width: 6%; min-width: 55px; max-width: 75px; }
+.hazard-table-container .col-nepal { width: 6%; min-width: 55px; max-width: 75px; }
+.hazard-table-container .col-actions { width: 12%; min-width: 120px; max-width: 180px; }
+.hazard-table-container .col-corrective { width: 5%; min-width: 50px; max-width: 65px; }
+.hazard-table-container .col-srm { width: 4%; min-width: 45px; max-width: 60px; }
+.hazard-table-container .col-remarks { width: 6%; min-width: 55px; max-width: 80px; }
+.hazard-table-container .col-action { width: 5%; min-width: 60px; max-width: 80px; }
 .table-controls {
     display: flex;
     justify-content: space-between;
@@ -1167,13 +1167,44 @@ table .cell-muted, .avia-table .cell-muted { color: var(--avia-text-gray); font-
     color: #666;
 }
 .table-scroll-hint { font-size: 12px; color: #999; font-style: italic; }
+.table-scroll-indicator { text-align: center; padding: 4px 0 8px; font-size: 12px; color: #999; font-style: italic; display: none; }
+.hazard-table-container { position: relative; }
+.hazard-table-container:hover .table-scroll-indicator { display: block; }
 @media (max-width: 600px) {
     .table-controls { flex-direction: column; align-items: flex-start; }
     .table-scroll-hint { font-size: 11px; }
 }
-@media (max-width: 768px) {
-    .hazard-table-container table { font-size: 12px; min-width: 800px; }
+/* ==================== RESPONSIVE BREAKPOINTS ==================== */
+@media (max-width: 1024px) {
+    .hazard-table-container table { font-size: 12px; }
     .hazard-table-container th, .hazard-table-container td { padding: 6px 8px; }
+    .hazard-table-container .col-description { min-width: 120px; max-width: 180px; }
+}
+@media (max-width: 768px) {
+    .hazard-table-container table { font-size: 11px; }
+    .hazard-table-container th, .hazard-table-container td { padding: 4px 6px; }
+    .hazard-table-container .col-sn { min-width: 28px; }
+    .hazard-table-container .col-date { min-width: 70px; }
+    .hazard-table-container .col-area { min-width: 70px; }
+    .hazard-table-container .col-description { min-width: 100px; max-width: 140px; }
+    .hazard-table-container .col-event { min-width: 70px; }
+    .hazard-table-container .col-consequence { min-width: 55px; }
+    .hazard-table-container .col-priority { min-width: 45px; }
+    .hazard-table-container .col-icao { min-width: 45px; }
+    .hazard-table-container .col-nepal { min-width: 45px; }
+    .hazard-table-container .col-actions { min-width: 80px; }
+    .hazard-table-container .col-corrective { min-width: 40px; }
+    .hazard-table-container .col-srm { min-width: 35px; }
+    .hazard-table-container .col-remarks { min-width: 45px; }
+    .hazard-table-container .col-action { min-width: 45px; }
+}
+@media (max-width: 480px) {
+    .hazard-table-container table { font-size: 10px; }
+    .hazard-table-container th, .hazard-table-container td { padding: 3px 4px; }
+    .hazard-table-container .col-remarks { display: none; }
+    .hazard-table-container .col-nepal { display: none; }
+    .hazard-table-container .col-corrective { display: none; }
+    .hazard-table-container .col-srm { display: none; }
 }
 /* Apply to all table pages (Task 4) */
 [class*="-table-container"] {
