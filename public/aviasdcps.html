@@ -2342,20 +2342,42 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             const resultDiv=document.getElementById('analysisResult');
             if(resultDiv){ resultDiv.style.display='block'; resultDiv.innerHTML='<div class="loading-spinner"><div class="spinner"></div><p>Analyzing report with AI...</p></div>'; }
             try{
-                const resp=await fetch('/api/v1/nlp/analyze', {
+                const response=await fetch('/api/v1/nlp/analyze', {
                     method:'POST',
                     headers:{ 'Content-Type':'application/json', 'X-Tenant-Id': localStorage.getItem('tenantId')||'tenant-001', 'X-API-Key':'demo-key-001' },
                     body: JSON.stringify({ text: text, tenant_id: localStorage.getItem('tenantId')||'tenant-001' })
                 });
-                if(!resp.ok) throw new Error('Analysis failed: '+resp.status);
-                const data=await resp.json();
+                if(!response.ok){
+                    const errorText=await response.text();
+                    console.error('API Error:', response.status, errorText);
+                    throw new Error('Server error: '+response.status);
+                }
+                const data=await response.json();
                 displayAnalysisResult(data);
-            }catch(e){
-                console.error('Analysis error:', e);
-                if(resultDiv) resultDiv.innerHTML='<div class="analysis-error">❌ Analysis failed. Please try again.<br><small>'+(e.message||'')+'</small></div>';
+            }catch(error){
+                console.error('Analysis error:', error);
+                if(resultDiv) resultDiv.innerHTML=`<div class="analysis-error">❌ Analysis failed: ${error.message}<br><small>Using fallback mode for demo.</small></div>`;
+                setTimeout(()=>{ const fallbackData=getLocalMockAnalysis(text); displayFallbackResult(fallbackData); }, 1000);
             }
         }
         window.analyzeReport=analyzeReport;
+        function getLocalMockAnalysis(text){
+            const keywords={ 'bird':{category:'Environmental',severity:'High',probability:'Likely'},'fatigue':{category:'Human Factors',severity:'Medium',probability:'Possible'},'weather':{category:'Environmental',severity:'Medium',probability:'Possible'},'fuel':{category:'Technical',severity:'Critical',probability:'Rare'},'communication':{category:'Human Factors',severity:'High',probability:'Unlikely'},'runway':{category:'Operational',severity:'Medium',probability:'Possible'},'navigation':{category:'Technical',severity:'Critical',probability:'Rare'}};
+            let matched=null, wordFound='';
+            for(const [word,data] of Object.entries(keywords)){
+                if(text.toLowerCase().includes(word)){ matched=data; wordFound=word; break; }
+            }
+            if(matched){
+                return { title: `Hazard: ${wordFound}`, description: text.substring(0,200), category: matched.category, nano_code:'PC307', nano_description:'Fatigue', severity: matched.severity, probability: matched.probability, risk_level: matched.severity==='Critical'?'High':'Medium' };
+            }
+            return { title:'Safety Concern', description: text.substring(0,200), category:'Operational', nano_code:'PC208', nano_description:'Complacency', severity:'Medium', probability:'Possible', risk_level:'Medium' };
+        }
+        function displayFallbackResult(data){
+            const resultDiv=document.getElementById('analysisResult');
+            if(!resultDiv) return;
+            resultDiv.innerHTML=`<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:16px;"><h3 style="margin:0 0 12px;">⚠️ Fallback Analysis (Demo)</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">TITLE</label><div style="font-weight:600;">${data.title}</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">CATEGORY</label><div style="font-weight:600;">${data.category}</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">HFACS</label><div style="font-weight:600;">${data.nano_code} - ${data.nano_description}</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">RISK</label><div style="font-weight:700;">${data.risk_level}</div></div><div style="background:white;padding:10px;border-radius:8px;grid-column:1/-1;"><label style="font-size:11px;color:#999;">DESCRIPTION</label><div>${data.description}</div></div></div><div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;"><button class="btn-outline" onclick="closeReportModal()">Close</button><button class="btn-primary" onclick="addHazardFromReport(lastFallbackData)">➕ Add to Hazard Log</button></div></div>`;
+            window.lastFallbackData=data; window.lastAnalysisData=data; window.selectedHfacsCode=data.nano_code; window.selectedHfacsDesc=data.nano_description;
+        }
         function displayAnalysisResult(data){
             const resultDiv=document.getElementById('analysisResult');
             if(!resultDiv) return;

@@ -149,16 +149,55 @@
         function closeReportModal(){ document.getElementById('reportModal').style.display='none'; document.getElementById('analysisResult').style.display='none'; document.getElementById('reportText').value=''; const sel=document.getElementById('hfacsHybridSelector'); if(sel) sel.style.display='none'; }
         function clearReport(){ document.getElementById('reportText').value=''; document.getElementById('analysisResult').style.display='none'; const sel=document.getElementById('hfacsHybridSelector'); if(sel) sel.style.display='none'; }
         async function analyzeReport(){
-            const text=(document.getElementById('reportText').value||'').trim(); if(!text) return alert('Please describe a safety event.');
-            const resDiv=document.getElementById('analysisResult'); resDiv.style.display='block'; resDiv.innerHTML='<div style="text-align:center;padding:20px;"><div class="spinner" style="width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #1a237e;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;"></div><p>Analyzing with AI...</p></div>';
+            const text=(document.getElementById('reportText').value||'').trim();
+            if(!text){ if(typeof showNotification==='function') showNotification('Please describe a safety event.', 'warning'); else alert('Please describe a safety event.'); return; }
+            const resultDiv=document.getElementById('analysisResult');
+            resultDiv.style.display='block';
+            resultDiv.innerHTML='<div class="loading-spinner"><div class="spinner"></div><p>Analyzing report with AI...</p></div>';
             try{
-                const resp=await fetch('/api/v1/nlp/analyze',{method:'POST',headers:{'Content-Type':'application/json','X-Tenant-Id':localStorage.getItem('tenantId')||'tenant-001'},body:JSON.stringify({text, tenant_id:localStorage.getItem('tenantId')||'tenant-001'})});
-                const data=await resp.json();
+                const response=await fetch('/api/v1/nlp/analyze', {
+                    method:'POST',
+                    headers:{ 'Content-Type':'application/json', 'X-Tenant-Id': localStorage.getItem('tenantId')||'tenant-001', 'X-API-Key':'demo-key-001' },
+                    body: JSON.stringify({ text: text, tenant_id: localStorage.getItem('tenantId')||'tenant-001' })
+                });
+                if(!response.ok){
+                    const errorText=await response.text();
+                    console.error('API Error:', response.status, errorText);
+                    throw new Error('Server error: '+response.status);
+                }
+                const data=await response.json();
+                if(typeof displayAnalysisResult==='function' && document.getElementById('analysisResult') && !document.getElementById('analysisResult').innerHTML.includes('Hazard Extracted')){
+                    // use shared display if available
+                }
                 window.lastAnalysisData=data; window.selectedHfacsCode=data.nano_code; window.selectedHfacsDesc=data.nano_description;
-                resDiv.innerHTML='<div style="background:#f8f9fc;border:2px solid #2e86c1;border-radius:12px;padding:16px;"><h3 style="margin:0 0 12px;">✅ Hazard Extracted</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">TITLE</label><div style="font-weight:600;">'+hlEscape(data.title)+'</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">CATEGORY</label><div style="font-weight:600;">'+hlEscape(data.category)+'</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">HFACS</label><div style="font-weight:600;">'+hlEscape(data.nano_code)+' - '+hlEscape(data.nano_description)+'</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">RISK</label><div style="font-weight:700;color:'+(data.risk_level==='High'||data.risk_level==='Critical'?'#dc3545':'#28a745')+'">'+hlEscape(data.risk_level)+' ('+hlEscape(data.severity)+' × '+hlEscape(data.probability)+')</div></div><div style="background:white;padding:10px;border-radius:8px;grid-column:1/-1;"><label style="font-size:11px;color:#999;">DESCRIPTION</label><div>'+hlEscape(data.description)+'</div></div></div><div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;"><button class="btn-outline" onclick="closeReportModal()">Close</button><button class="btn-primary" onclick="addHazardFromReport(lastAnalysisData)">➕ Add to Hazard Log</button></div></div>';
-                document.getElementById('hfacsHybridSelector').style.display='block';
-                document.getElementById('hfacsSelected').textContent=data.nano_code+' — '+data.nano_description+' (AI suggestion)';
-            }catch(e){ resDiv.innerHTML='<div style="color:#dc3545;padding:20px;text-align:center;background:#f8d7da;border-radius:8px;">❌ Analysis failed</div>'; }
+                resultDiv.innerHTML='<div style="background:#f8f9fc;border:2px solid #2e86c1;border-radius:12px;padding:16px;"><h3 style="margin:0 0 12px;">✅ Hazard Extracted</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">TITLE</label><div style="font-weight:600;">'+hlEscape(data.title)+'</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">CATEGORY</label><div style="font-weight:600;">'+hlEscape(data.category)+'</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">HFACS</label><div style="font-weight:600;">'+hlEscape(data.nano_code)+' - '+hlEscape(data.nano_description)+'</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">RISK</label><div style="font-weight:700;color:'+(data.risk_level==='High'||data.risk_level==='Critical'?'#dc3545':'#28a745')+'">'+hlEscape(data.risk_level)+' ('+hlEscape(data.severity)+' × '+hlEscape(data.probability)+')</div></div><div style="background:white;padding:10px;border-radius:8px;grid-column:1/-1;"><label style="font-size:11px;color:#999;">DESCRIPTION</label><div>'+hlEscape(data.description)+'</div></div></div><div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;"><button class="btn-outline" onclick="closeReportModal()">Close</button><button class="btn-primary" onclick="addHazardFromReport(lastAnalysisData)">➕ Add to Hazard Log</button></div></div>';
+                const sel=document.getElementById('hfacsHybridSelector'); if(sel) sel.style.display='block';
+                const selTxt=document.getElementById('hfacsSelected'); if(selTxt) selTxt.textContent=data.nano_code+' — '+data.nano_description+' (AI suggestion)';
+            }catch(error){
+                console.error('Analysis error:', error);
+                resultDiv.innerHTML='<div class="analysis-error">❌ Analysis failed: '+(error.message||'')+'<br><small>Using fallback mode for demo.</small></div>';
+                setTimeout(()=>{ const fallbackData=getLocalMockAnalysis(text); displayFallbackResult(fallbackData); }, 1000);
+            }
+        }
+        function displayFallbackResult(data){
+            const resultDiv=document.getElementById('analysisResult');
+            if(!resultDiv) return;
+            resultDiv.innerHTML='<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:16px;"><h3 style="margin:0 0 12px;">⚠️ Fallback Analysis (Demo)</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">TITLE</label><div style="font-weight:600;">'+hlEscape(data.title)+'</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">CATEGORY</label><div style="font-weight:600;">'+hlEscape(data.category)+'</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">HFACS</label><div style="font-weight:600;">'+hlEscape(data.nano_code)+' - '+hlEscape(data.nano_description)+'</div></div><div style="background:white;padding:10px;border-radius:8px;"><label style="font-size:11px;color:#999;">RISK</label><div style="font-weight:700;">'+hlEscape(data.risk_level)+'</div></div><div style="background:white;padding:10px;border-radius:8px;grid-column:1/-1;"><label style="font-size:11px;color:#999;">DESCRIPTION</label><div>'+hlEscape(data.description)+'</div></div></div><div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;"><button class="btn-outline" onclick="closeReportModal()">Close</button><button class="btn-primary" onclick="addHazardFromReport(lastFallbackData)">➕ Add to Hazard Log</button></div></div>';
+            window.lastFallbackData=data; window.lastAnalysisData=data; window.selectedHfacsCode=data.nano_code; window.selectedHfacsDesc=data.nano_description;
+            const sel=document.getElementById('hfacsHybridSelector'); if(sel) sel.style.display='block';
+            const selTxt=document.getElementById('hfacsSelected'); if(selTxt) selTxt.textContent=data.nano_code+' — '+data.nano_description+' (fallback)';
+        }
+        function getLocalMockAnalysis(text){
+            const keywords={ 'bird':{category:'Environmental',severity:'High',probability:'Likely'},'fatigue':{category:'Human Factors',severity:'Medium',probability:'Possible'},'weather':{category:'Environmental',severity:'Medium',probability:'Possible'},'fuel':{category:'Technical',severity:'Critical',probability:'Rare'},'communication':{category:'Human Factors',severity:'High',probability:'Unlikely'},'runway':{category:'Operational',severity:'Medium',probability:'Possible'},'navigation':{category:'Technical',severity:'Critical',probability:'Rare'}};
+            let matched=null, wordFound='';
+            for(const [word,data] of Object.entries(keywords)){
+                if(text.toLowerCase().includes(word)){ matched=data; wordFound=word; break; }
+            }
+            if(matched){
+                return { title: `Hazard: ${wordFound}`, description: text.substring(0,200), category: matched.category, nano_code:'PC307', nano_description:'Fatigue', severity: matched.severity, probability: matched.probability, risk_level: matched.severity==='Critical'?'High':'Medium' };
+            }
+            return { title:'Safety Concern', description: text.substring(0,200), category:'Operational', nano_code:'PC208', nano_description:'Complacency', severity:'Medium', probability:'Possible', risk_level:'Medium' };
+        }
         }
         function addHazardFromReport(data){
             if(typeof data==='string') try{ data=JSON.parse(data.replace(/&quot;/g,'"'));}catch{}
