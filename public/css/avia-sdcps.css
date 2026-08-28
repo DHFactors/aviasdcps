@@ -1557,7 +1557,8 @@ input.is-invalid:focus, select.is-invalid:focus, textarea.is-invalid:focus { box
   gap: 0;
 }
 .sidebar-nav button,
-.nav-item {
+.nav-item,
+.sidebar-nav .nav-item {
   width: 100%;
   display: flex;
   align-items: center;
@@ -1573,6 +1574,9 @@ input.is-invalid:focus, select.is-invalid:focus, textarea.is-invalid:focus { box
   font-weight: 500;
   text-align: left;
   cursor: pointer;
+  pointer-events: auto;
+  z-index: 10;
+  position: relative;
   transition: all 0.2s;
   white-space: nowrap;
   text-decoration: none;

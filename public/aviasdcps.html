@@ -52,15 +52,15 @@
             </select>
         </div>
         <nav class="sidebar-nav">
-            <button class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></button>
-            <button class="nav-item" data-page="hazard-log"><span class="nav-icon">📋</span><span class="nav-text">Hazard Log</span></button>
-            <button class="nav-item" data-page="can-cap"><span class="nav-icon">🔄</span><span class="nav-text">CAN/CAP Workflow</span></button>
-            <button class="nav-item" data-page="state"><span class="nav-icon">📊</span><span class="nav-text">State Oversight</span></button>
-            <button class="nav-item" data-page="reports"><span class="nav-icon">📄</span><span class="nav-text">Reports</span></button>
+            <a href="#" class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a>
+            <a href="#" class="nav-item" data-page="hazard-log"><span class="nav-icon">📋</span><span class="nav-text">Hazard Log</span></a>
+            <a href="#" class="nav-item" data-page="can-cap"><span class="nav-icon">🔄</span><span class="nav-text">CAN/CAP Workflow</span></a>
+            <a href="#" class="nav-item" data-page="state"><span class="nav-icon">📊</span><span class="nav-text">State Oversight</span></a>
+            <a href="#" class="nav-item" data-page="reports"><span class="nav-icon">📄</span><span class="nav-text">Reports</span></a>
         </nav>
         <div class="sidebar-footer">
-            <button class="nav-item" onclick="viewAuditTrail(); closeSidebar()"><span class="nav-icon">⚙️</span><span class="nav-text">Admin</span></button>
-            <a class="nav-item" href="/" onclick="event.preventDefault(); showNotification('AVIA SDCPS v1.0 — ICAO Annex 19 compliant Safety Management Platform','info'); closeSidebar()"><span class="nav-icon">📖</span><span class="nav-text">About</span></a>
+            <a href="#" class="nav-item" onclick="viewAuditTrail(); closeSidebar(); return false;"><span class="nav-icon">⚙️</span><span class="nav-text">Admin</span></a>
+            <a href="#" class="nav-item" onclick="event.preventDefault(); showNotification('AVIA SDCPS v1.0 — ICAO Annex 19 compliant Safety Management Platform','info'); closeSidebar(); return false;"><span class="nav-icon">📖</span><span class="nav-text">About</span></a>
             <button class="logout-btn" onclick="logoutAdmin(); closeSidebar()"><span>🚪</span> Logout</button>
         </div>
     </aside>
@@ -1155,29 +1155,65 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             }
         }
 
-        function switchPage(page){
-            if(page==='cancap') page='can-cap';
-            const btn = document.querySelector(`.app-sidebar button[data-page="${page}"]`) || document.querySelector(`.app-nav button[data-page="${page}"]`);
-            const allBtns = document.querySelectorAll('.app-sidebar button, .app-nav button');
-            allBtns.forEach(b=>b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
-            document.querySelectorAll('.page-section').forEach(p=>p.classList.remove('active'));
-            const target=document.getElementById(`page-${page}`);
-            if(target) target.classList.add('active');
-            else { showNotification('Page not found: '+page,'warning'); return; }
-            if(page==='dashboard'){ updateViewModeIndicator('tenant'); loadDashboard(); }
-            if(page==='hazards'){ updateViewModeIndicator('tenant'); loadHazards(); }
-            if(page==='hazard-log'){ updateViewModeIndicator('hazard-log'); loadHazardLogSPA(); }
-            if(page==='can-cap'){ loadCanCap(); updateViewModeIndicator('tenant'); }
-            if(page==='state'){ updateViewModeIndicator('state'); loadStateOversight(); }
-            if(page==='declare'){ updateViewModeIndicator('tenant'); loadDeclarations(); }
-            if(page==='audit'){ updateViewModeIndicator('tenant'); loadAudit(); }
-            if(page==='demo'){ updateViewModeIndicator('tenant'); loadDemoStatus(); }
-            if(page==='reports') updateViewModeIndicator('tenant');
-            location.hash=page;
+        function switchPage(pageId){
+            console.log('🔄 switchPage called with:', pageId);
+            if(pageId==='cancap') pageId='can-cap';
+            // Hide all pages (both methods)
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.remove('active');
+                page.style.display = 'none';
+            });
+            // Show target
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                targetPage.style.display = 'block';
+            } else {
+                console.warn('⚠️ Page not found:', pageId);
+                const fallback=document.getElementById('page-dashboard');
+                if(fallback){ fallback.classList.add('active'); fallback.style.display='block'; }
+                return;
+            }
+            // Update active nav item
+            document.querySelectorAll('.sidebar-nav .nav-item, .app-sidebar button, .app-nav button').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.page === pageId) {
+                    item.classList.add('active');
+                }
+            });
+            if(pageId==='dashboard'){ updateViewModeIndicator('tenant'); loadDashboard(); }
+            if(pageId==='hazards'){ updateViewModeIndicator('tenant'); loadHazards(); }
+            if(pageId==='hazard-log'){ updateViewModeIndicator('hazard-log'); loadHazardLogSPA(); }
+            if(pageId==='can-cap'){ loadCanCap(); updateViewModeIndicator('tenant'); }
+            if(pageId==='state'){ updateViewModeIndicator('state'); loadStateOversight(); }
+            if(pageId==='declare'){ updateViewModeIndicator('tenant'); loadDeclarations(); }
+            if(pageId==='audit'){ updateViewModeIndicator('tenant'); loadAudit(); }
+            if(pageId==='demo'){ updateViewModeIndicator('tenant'); loadDemoStatus(); }
+            if(pageId==='reports') updateViewModeIndicator('tenant');
+            updateSidebarView(pageId, localStorage.getItem('tenantId'));
+            window.location.hash = pageId;
             closeSidebar();
         }
         window.switchPage=switchPage;
+        function reinitSidebarNavigation(){
+            console.log('🔄 Re-initializing sidebar navigation...');
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+                const newItem = item.cloneNode(true);
+                item.parentNode.replaceChild(newItem, item);
+            });
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🖱️ Nav item clicked:', this.dataset.page);
+                    const page = this.dataset.page;
+                    if (page) {
+                        switchPage(page);
+                        window.location.hash = page;
+                    }
+                });
+            });
+        }
+        window.reinitSidebarNavigation=reinitSidebarNavigation;
         // Task 5: Sidebar toggle helpers (spec)
         function toggleSidebar(){
             const sidebar=document.querySelector('.sidebar')||document.getElementById('sidebar')||document.getElementById('appSidebar');
@@ -1194,19 +1230,60 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             if(overlay) overlay.classList.remove('active');
         }
         window.toggleSidebar=toggleSidebar; window.closeSidebar=closeSidebar;
-        document.querySelectorAll('.sidebar-nav button, .sidebar-nav a').forEach(el=>{
-            el.addEventListener('click', function(){ if(window.innerWidth < 1024) closeSidebar(); });
+        // Auto-close sidebar when clicking a nav link (mobile) + ensure nav remains clickable (Task 3)
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(el=>{
+            el.addEventListener('click', function(){ if(window.innerWidth < 1024) setTimeout(closeSidebar, 150); });
         });
         document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSidebar(); });
+        // Task 2: Verify JavaScript Event Handlers — direct + delegated
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('🖱️ Nav item clicked:', this.dataset.page);
+                const page = this.dataset.page;
+                if (page) {
+                    switchPage(page);
+                    window.location.hash = page;
+                }
+            });
+        });
+        document.querySelector('.sidebar-nav')?.addEventListener('click', function(e) {
+            const item = e.target.closest('.nav-item');
+            if (item && item.dataset.page) {
+                // delegated already handled by direct, but ensure fallback
+                if (!item._handled) {
+                    e.preventDefault();
+                    console.log('🖱️ Delegated nav clicked:', item.dataset.page);
+                }
+            }
+        });
+        // Legacy compat for old app-nav buttons (if any)
         document.querySelectorAll('.app-sidebar button, .app-nav button').forEach(btn => {
+            if(btn.classList.contains('nav-item')) return;
             btn.addEventListener('click', function() {
                 if (!this.dataset.page) return;
+                console.log('🖱️ Legacy nav clicked:', this.dataset.page);
                 switchPage(this.dataset.page);
             });
         });
-        // Hash routing per Task 6
-        window.addEventListener('hashchange',()=>{ const h=location.hash.replace('#',''); if(h) switchPage(h); });
-        document.addEventListener('DOMContentLoaded',()=>{ const h=location.hash.replace('#',''); if(h && document.getElementById(`page-${h}`)) switchPage(h); });
+        // Task 5: Initialize Event Handlers with debug + hash handling
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing sidebar navigation...');
+            const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+            console.log('📊 Found nav items:', navItems.length);
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById(`page-${hash}`)) {
+                console.log('🔗 Initial hash:', hash);
+                switchPage(hash);
+            }
+        });
+        window.addEventListener('hashchange', function() {
+            const hash = window.location.hash.replace('#', '');
+            console.log('🔗 Hash changed:', hash);
+            if (hash) {
+                switchPage(hash);
+            }
+        });
         
         // ==================== LOAD FUNCTIONS ====================
         async function loadDashboard() {
