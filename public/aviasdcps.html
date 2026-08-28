@@ -226,25 +226,35 @@
                 <span style="margin-left:auto;color:#5a6a7a;">Click row to view hazard (read-only)</span>
             </div>
 
-            <!-- Hazard Log Table (13 cols incl ICAO/Nepal Risk) -->
-            <div style="background:white;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.04);border:1px solid #e3e8ef;overflow-x:auto;padding:0;">
-                <table class="audit-table" id="hlTable" style="min-width:1450px;font-size:12px;">
+            <div class="table-controls">
+                <div class="table-info">
+                    <span>Showing <strong id="hazardCount">0</strong> hazards</span>
+                    <span class="table-scroll-hint">↔ Scroll horizontally for more columns</span>
+                </div>
+                <div class="table-actions">
+                    <button class="btn-outline btn-sm" onclick="if(window.toggleColumns) toggleColumns(); else alert('Columns toggled')">📋 Columns</button>
+                    <button class="btn-outline btn-sm" onclick="exportHazardLogSPA()">📥 Export CSV</button>
+                </div>
+            </div>
+            <!-- Hazard Log Table (14 cols incl ICAO/Nepal Risk + Action) - responsive -->
+            <div class="hazard-table-container">
+                <table id="hlTable">
                     <thead>
                         <tr>
-                            <th style="background:#0a1628;color:white;text-align:center;width:45px;">S.N.</th>
-                            <th style="background:#0a1628;color:white;white-space:nowrap;">Identified Date</th>
-                            <th style="background:#0a1628;color:white;">Area / Operation</th>
-                            <th style="background:#0a1628;color:white;min-width:180px;">Description of Hazard</th>
-                            <th style="background:#0a1628;color:white;">Unsafe Event / Top Event</th>
-                            <th style="background:#0a1628;color:white;">Consequence</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">Priority</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">ICAO Risk</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">Nepal Risk</th>
-                            <th style="background:#0a1628;color:white;min-width:150px;">Recommended Actions</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">Corrective<br>Y/N</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">SRM<br>Y/N</th>
-                            <th style="background:#0a1628;color:white;">Remarks</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">Action</th>
+                            <th class="col-sn">S.N.</th>
+                            <th class="col-date">Identified Date</th>
+                            <th class="col-area">Area / Operation</th>
+                            <th class="col-description">Description of Hazard</th>
+                            <th class="col-event">Unsafe Event</th>
+                            <th class="col-consequence">Consequence</th>
+                            <th class="col-priority">Priority</th>
+                            <th class="col-icao">ICAO Risk</th>
+                            <th class="col-nepal">Nepal Risk</th>
+                            <th class="col-actions">Recommended Actions</th>
+                            <th class="col-corrective">Corrective Y/N</th>
+                            <th class="col-srm">SRM Y/N</th>
+                            <th class="col-remarks">Remarks</th>
+                            <th class="col-action">Action</th>
                         </tr>
                     </thead>
                     <tbody id="hlBody">
@@ -1980,7 +1990,24 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             });
             renderHazardLogSPA(hlFiltered);
             const ff = document.getElementById('hlFooterFiltered'); if(ff) ff.textContent = hlFiltered.length;
+            const hc = document.getElementById('hazardCount'); if(hc) hc.textContent = hlFiltered.length;
+            const alt = document.getElementById('hazardTableBody'); if(alt) alt.innerHTML = document.getElementById('hlBody') ? document.getElementById('hlBody').innerHTML : '';
         }
+        function toggleColumns(){
+            const cols=document.querySelectorAll('.hazard-table-container .col-icao, .hazard-table-container .col-nepal, .hazard-table-container .col-remarks');
+            const hidden = cols[0] && cols[0].style.display==='none';
+            cols.forEach(c=> c.style.display = hidden ? '' : 'none');
+            // also hide corresponding td nth-child? For simplicity toggle header only; table will auto hide via CSS display none on th will hide column
+            const idxs=[8,9,13]; // 1-indexed for icao, nepal, remarks (8,9,13 in 14-col table)
+            document.querySelectorAll('.hazard-table-container tr').forEach(tr=>{
+                idxs.forEach(i=>{
+                    const cell=tr.children[i-1];
+                    if(cell) cell.style.display = hidden ? '' : 'none';
+                });
+            });
+            if(typeof showNotification==='function') showNotification(hidden ? '📋 All columns visible' : '📋 Columns hidden (ICAO/Nepal/Remarks)', 'info');
+        }
+        window.toggleColumns=toggleColumns;
         function renderHazardLogSPA(hazards) {
             const tbody = document.getElementById('hlBody');
             if (!tbody) return;

@@ -33,25 +33,38 @@
                         <button class="btn-outline btn-sm" onclick="exportHazardLogCSV()">📥 Export CSV</button>
                     </div>
                 </div>
-                <div style="background:white;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.04);border:1px solid #e3e8ef;overflow-x:auto;padding:0;">
-                    <table class="audit-table" id="hlTable" style="min-width:1450px;font-size:12px;">
-                        <thead><tr>
-                            <th style="background:#0a1628;color:white;text-align:center;width:45px;">S.N.</th>
-                            <th style="background:#0a1628;color:white;white-space:nowrap;">Identified Date</th>
-                            <th style="background:#0a1628;color:white;">Area / Operation</th>
-                            <th style="background:#0a1628;color:white;min-width:180px;">Description of Hazard</th>
-                            <th style="background:#0a1628;color:white;">Unsafe Event / Top Event</th>
-                            <th style="background:#0a1628;color:white;">Consequence</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">Priority</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">ICAO Risk</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">Nepal Risk</th>
-                            <th style="background:#0a1628;color:white;min-width:150px;">Recommended Actions</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">Corrective<br>Y/N</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">SRM<br>Y/N</th>
-                            <th style="background:#0a1628;color:white;">Remarks</th>
-                            <th style="background:#0a1628;color:white;text-align:center;">Action</th>
-                        </tr></thead>
+                <div class="table-controls">
+                    <div class="table-info">
+                        <span>Showing <strong id="hazardCount">0</strong> hazards</span>
+                        <span class="table-scroll-hint">↔ Scroll horizontally for more columns</span>
+                    </div>
+                    <div class="table-actions">
+                        <button class="btn-outline btn-sm" onclick="toggleColumns()">📋 Columns</button>
+                        <button class="btn-outline btn-sm" onclick="exportHazardLogCSV()">📥 Export CSV</button>
+                    </div>
+                </div>
+                <div class="hazard-table-container">
+                    <table id="hlTable">
+                        <thead>
+                            <tr>
+                                <th class="col-sn">S.N.</th>
+                                <th class="col-date">Identified Date</th>
+                                <th class="col-area">Area/Operation</th>
+                                <th class="col-description">Description of Hazard</th>
+                                <th class="col-event">Unsafe Event</th>
+                                <th class="col-consequence">Consequence</th>
+                                <th class="col-priority">Priority</th>
+                                <th class="col-icao">ICAO Risk</th>
+                                <th class="col-nepal">Nepal Risk</th>
+                                <th class="col-actions">Recommended Actions</th>
+                                <th class="col-corrective">Corrective Y/N</th>
+                                <th class="col-srm">SRM Y/N</th>
+                                <th class="col-remarks">Remarks</th>
+                                <th class="col-action">Action</th>
+                            </tr>
+                        </thead>
                         <tbody id="hlBody"><tr><td colspan="14" style="text-align:center;padding:30px;color:#999;">Loading…</td></tr></tbody>
+                        <tbody id="hazardTableBody" style="display:none;"></tbody>
                     </table>
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:12px;padding:10px 14px;background:#eaf2fb;border:1px solid #c9deef;border-radius:8px;font-size:12px;color:#5a6a7a;">
@@ -97,6 +110,9 @@
             });
             renderHazardLog(hlFiltered);
             document.getElementById('hlFooterFiltered').textContent=hlFiltered.length;
+            const hc=document.getElementById('hazardCount'); if(hc) hc.textContent=hlFiltered.length;
+            // sync spec tbody
+            const alt=document.getElementById('hazardTableBody'); if(alt) alt.innerHTML=document.getElementById('hlBody').innerHTML;
         }
         function renderHazardLog(hazards){
             const tbody=document.getElementById('hlBody');
@@ -117,6 +133,12 @@
         }
         function closeHazardModal(){ document.getElementById('hlModal').style.display='none'; }
         function generateCanFromHazard(id){ localStorage.setItem('canPrefillHazard', id); location.href='/can-cap.html'; }
+        function toggleColumns(){
+            const cols=document.querySelectorAll('.hazard-table-container .col-icao, .hazard-table-container .col-nepal, .hazard-table-container .col-remarks');
+            cols.forEach(c=> c.style.display = c.style.display==='none' ? '' : 'none');
+            showNotification(cols[0] && cols[0].style.display==='none' ? '📋 Columns hidden (ICAO/Nepal/Remarks)' : '📋 All columns visible','info');
+        }
+        window.toggleColumns=toggleColumns;
         function exportHazardLogCSV(){ const hazards=hlFiltered.length?hlFiltered:hlData; if(!hazards.length) return; const headers=['S.N.','Identified Date','Area/Operation','Description','Unsafe Event','Consequence','Priority','ICAO Risk','Nepal Risk','Recommended Actions','Corrective','SRM','Remarks']; const rows=hazards.map((h,i)=>{const m=getRiskMapping(h); return [i+1,hlFormatDate(h.created_at),h.location||'',h.title+' - '+h.description,h.category||'',h.severity+' × '+h.probability,hlPriority(h.risk_level),(m.icao||[]).join(','),(m.nepal||[]).join(','),h.mitigation_plan||'',h.mitigation_plan?'Y':'N',h.risk_level?'Y':'N',h.status||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"');}); const csv=[headers.map(h=>'"'+h+'"').join(','),...rows.map(r=>r.join(','))].join('\\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='hazard_log-'+new Date().toISOString().split('T')[0]+'.csv'; a.click(); URL.revokeObjectURL(url); }
         function importHazardLogCSV(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const lines=r.result.split(/\\r?\\n/).filter(l=>l.trim()); if(lines.length<2) return; alert('Imported '+ (lines.length-1)+' rows (demo)'); loadHazardLog(); }catch{} }; r.readAsText(f); }
         // Report modal (reused)
