@@ -40,8 +40,8 @@
             <button data-page="declare">📝 Declare SPIs</button>
         </nav>
         <div class="sidebar-footer">
-            <button onclick="switchPage('reports'); showNotification('AVIA SDCPS — Admin footer','info')">⚙️ Admin</button>
-            <a href="/" onclick="event.preventDefault(); showNotification('AVIA SDCPS v1.0 — ICAO Annex 19 compliant Safety Management Platform','info')">📖 About</a>
+            <button onclick="viewAuditTrail(); closeSidebar()">⚙️ Admin</button>
+            <a href="/" onclick="event.preventDefault(); showNotification('AVIA SDCPS v1.0 — ICAO Annex 19 compliant Safety Management Platform','info'); closeSidebar()">📖 About</a>
         </div>
     </aside>
 
@@ -2455,14 +2455,19 @@ function switchTenant(tenantId) {
 
 function viewAuditTrail() {
     if (!isAdmin) {
-        showNotification('⚠️ Admin access required', 'warning');
+        showNotification('⚠️ Admin access required — please log in below', 'warning');
+        const loginBox=document.getElementById('adminLoginContainer');
+        if(loginBox){ loginBox.style.display='block'; loginBox.scrollIntoView({behavior:'smooth', block:'center'}); const input=document.getElementById('adminEmail'); if(input) input.focus(); }
+        closeSidebar();
         return;
     }
     // Switch to audit page via sidebar
-    document.querySelectorAll('.app-sidebar button, .app-nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.app-sidebar button, .app-nav button, .sidebar button').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
     const auditPage = document.getElementById('page-audit');
     if (auditPage) auditPage.classList.add('active');
+    location.hash='audit';
+    closeSidebar();
     loadAudit();
 }
 
