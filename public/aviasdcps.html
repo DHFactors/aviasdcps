@@ -23,52 +23,54 @@
     </div>
     
     <div class="app-container">
-    <!-- ==================== SIDEBAR ==================== -->
-    <aside class="sidebar app-sidebar" id="sidebar">
+    <!-- ==================== SIDEBAR (Full Height, Task 1) ==================== -->
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <h2>✈️ AVIA SDCPS</h2>
-            <span>Safety Management Platform</span>
+            <div class="brand-icon">✈️</div>
+            <div class="brand-text">
+                <h1>AVIA SDCPS</h1>
+                <span>Safety Management Platform</span>
+            </div>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar">👤</div>
+            <div class="user-info">
+                <span class="user-name" id="sidebarUserName">John Smith</span>
+                <span class="user-tenant" id="sidebarUserTenant">Southern Hemisphere Airlines</span>
+            </div>
+        </div>
+        <div class="sidebar-view">
+            <span class="view-label">📊 Viewing:</span>
+            <span class="view-detail" id="sidebarViewDetail">3 hazards · Tenant view</span>
+        </div>
+        <div class="sidebar-tenant-selector">
+            <label for="tenantSelector">🏢 Tenant:</label>
+            <select id="tenantSelector" onchange="switchTenant(this.value)">
+                <option value="tenant-001">Pacific Air Services</option>
+                <option value="tenant-002">Nordic Aviation Group</option>
+                <option value="tenant-003">Southern Hemisphere Airlines</option>
+            </select>
         </div>
         <nav class="sidebar-nav">
-            <button class="active" data-page="dashboard">📊 Dashboard</button>
-            <button data-page="can-cap">🔄 CAN/CAP Workflow</button>
-            <button data-page="hazard-log">📋 Hazard Log</button>
-            <button data-page="state">📊 State Oversight</button>
-            <button data-page="reports">📄 Reports</button>
-            <hr class="nav-divider">
-            <button data-page="hazards">⚠️ Hazards</button>
-            <button data-page="declare">📝 Declare SPIs</button>
+            <button class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></button>
+            <button class="nav-item" data-page="hazard-log"><span class="nav-icon">📋</span><span class="nav-text">Hazard Log</span></button>
+            <button class="nav-item" data-page="can-cap"><span class="nav-icon">🔄</span><span class="nav-text">CAN/CAP Workflow</span></button>
+            <button class="nav-item" data-page="state"><span class="nav-icon">📊</span><span class="nav-text">State Oversight</span></button>
+            <button class="nav-item" data-page="reports"><span class="nav-icon">📄</span><span class="nav-text">Reports</span></button>
         </nav>
         <div class="sidebar-footer">
-            <button onclick="viewAuditTrail(); closeSidebar()">⚙️ Admin</button>
-            <a href="/" onclick="event.preventDefault(); showNotification('AVIA SDCPS v1.0 — ICAO Annex 19 compliant Safety Management Platform','info'); closeSidebar()">📖 About</a>
+            <button class="nav-item" onclick="viewAuditTrail(); closeSidebar()"><span class="nav-icon">⚙️</span><span class="nav-text">Admin</span></button>
+            <a class="nav-item" href="/" onclick="event.preventDefault(); showNotification('AVIA SDCPS v1.0 — ICAO Annex 19 compliant Safety Management Platform','info'); closeSidebar()"><span class="nav-icon">📖</span><span class="nav-text">About</span></a>
+            <button class="logout-btn" onclick="logoutAdmin(); closeSidebar()"><span>🚪</span> Logout</button>
         </div>
     </aside>
 
     <!-- ==================== MAIN AREA ==================== -->
     <div class="main-area">
-        <!-- ==================== HEADER (Task 6) ==================== -->
-        <header class="app-header">
-            <div class="header-left">
-                <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-                <span class="header-title">✈️ AVIA SDCPS</span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.6);margin-left:8px;align-self:center;">Safety Management Platform</span>
-            </div>
-            <div class="header-right">
-                <span class="view-indicator" style="font-size:12px;color:rgba(255,255,255,0.75);display:flex;align-items:center;gap:6px;">
-                    <span style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);padding:4px 8px;border-radius:999px;font-size:11px;color:#fff;">
-                        Viewing: <span id="headerViewModeText">Pacific Air Services</span> <span id="headerViewModeSubtext" style="opacity:0.7;">• 4 hazards</span>
-                    </span>
-                </span>
-                <select id="tenantSelector" onchange="switchTenant(this.value)" style="padding:8px 32px 8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.12);color:white;font-size:13px;">
-                    <option value="tenant-001">Pacific Air Services</option>
-                    <option value="tenant-002">Nordic Aviation Group</option>
-                    <option value="tenant-003">Southern Hemisphere Airlines</option>
-                </select>
-                <button class="btn-refresh btn-outline" onclick="location.reload()" style="padding:7px 10px;font-size:13px;">🔄</button>
-            </div>
-        </header>
-
+        <div class="mobile-topbar" style="display:none; padding:10px 16px; background:white; border-bottom:1px solid #e3e8ef; align-items:center; gap:12px;">
+            <button class="sidebar-toggle" onclick="toggleSidebar()" style="background:none;border:1px solid #e3e8ef;border-radius:6px;padding:6px 10px;font-size:18px;cursor:pointer;">☰</button>
+            <span style="font-weight:800;color:#0a1628;">✈️ AVIA SDCPS</span>
+        </div>
         <!-- ==================== CONTENT ==================== -->
         <main class="app-content">
     <!-- View Mode Indicator -->
@@ -1112,6 +1114,21 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
         }, 1000);
         
         // ==================== NAVIGATION ====================
+        function getHazardCountForTenant(tenant){ try{ return api.getMockHazards(tenant).length;}catch{ return 0;} }
+        function updateSidebarView(page, tenant){
+            const viewDetail=document.getElementById('sidebarViewDetail');
+            if(!viewDetail) return;
+            const t=tenant||api.tenantId;
+            if(page==='state'){ viewDetail.textContent='10 hazards · State Oversight (All Tenants)'; }
+            else { const count=getHazardCountForTenant(t); viewDetail.textContent=`${count} hazards · Tenant view`; }
+        }
+        function updateSidebarUser(tenantId, userName){
+            const userTenant=document.getElementById('sidebarUserTenant');
+            const userNameEl=document.getElementById('sidebarUserName');
+            const tenantNames={'tenant-001':'Pacific Air Services','tenant-002':'Nordic Aviation Group','tenant-003':'Southern Hemisphere Airlines'};
+            if(userTenant) userTenant.textContent=tenantNames[tenantId]||tenantId;
+            if(userNameEl) userNameEl.textContent=userName || localStorage.getItem('userName') || 'Guest User';
+        }
         function updateViewModeIndicator(mode) {
             const textEl = document.getElementById('viewModeText');
             const subEl = document.getElementById('viewModeSubtext');
@@ -1124,14 +1141,17 @@ console.log('📊 Mode:', api.useMock ? 'MOCK DATA (multi-tenant)' : 'REAL API')
             if (mode === 'state') {
                 const all = api.getAllHazards();
                 setAll('State Oversight (All Tenants)', all.length + ' hazards • Aggregated across 3 tenants');
+                updateSidebarView('state', api.tenantId);
             } else if (mode === 'hazard-log') {
                 const all = api.getAllHazards();
                 setAll('Hazard Log — Master Register', all.length + ' hazards • ICAO-style • All tenants');
                 const d = document.getElementById('hlDate'); if (d) d.textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+                updateSidebarView('hazard-log', api.tenantId);
             } else {
                 const name = api.getTenantName();
                 const count = api.getMockHazards().length;
                 setAll(name, count + ' hazards • Tenant view');
+                updateSidebarView('tenant', api.tenantId);
             }
         }
 
@@ -2440,19 +2460,23 @@ document.addEventListener('DOMContentLoaded', function() {
 function switchTenant(tenantId) {
     localStorage.setItem('tenantId', tenantId);
     api.tenantId = tenantId;
+    const sel=document.getElementById('tenantSelector'); if(sel) sel.value=tenantId;
     const name = api.getTenantName(tenantId);
     const el = document.getElementById('sessionTenant');
     if (el) el.textContent = tenantId;
+    updateSidebarUser(tenantId);
+    updateSidebarView('tenant', tenantId);
     showNotification('🔄 Switched to ' + name + ' (' + tenantId + ')', 'info');
     updateViewModeIndicator('tenant');
-    // Reload tenant-filtered data
     loadDashboard();
     loadHazards();
-    // Also update session role display if needed
     const statusEl = document.getElementById('sessionStatus');
     if (statusEl) statusEl.textContent = 'Active — ' + name;
 }
 
+document.addEventListener('DOMContentLoaded', function(){
+    try{ updateSidebarUser(api.tenantId); updateSidebarView('tenant', api.tenantId); const sel=document.getElementById('tenantSelector'); if(sel) sel.value=api.tenantId; }catch{}
+});
 function viewAuditTrail() {
     if (!isAdmin) {
         showNotification('⚠️ Admin access required — please log in below', 'warning');
