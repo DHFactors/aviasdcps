@@ -1,4 +1,13 @@
-﻿from fastapi import FastAPI
+﻿"""
+================================================================================
+ FILE: main.py
+ VERSION: 1.2.0
+ DATE: 2026-08-29
+ PURPOSE: FastAPI Application Gateway & Multi-Page Application (MPA) Static Router.
+================================================================================
+"""
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -12,7 +21,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="AVIA SDCPS API",
     description="Aviation Safety Data Collection and Processing System",
-    version="1.0.0",
+    version="1.2.0",
     docs_url="/docs"
 )
 
@@ -43,25 +52,54 @@ if views_dir.exists():
 if components_dir.exists():
     app.mount("/components", StaticFiles(directory=str(components_dir)), name="components")
 
-# Helper to serve MPA pages
 def _serve_page(filename: str):
     file_path = PUBLIC_DIR / filename
     if file_path.exists():
         return FileResponse(str(file_path))
     return {"error": f"{filename} not found"}
 
-# ==================== HTML PAGES ====================
+# ==================== MPA HTML ROUTES ====================
 @app.get("/")
 async def serve_index():
-    """Serve the landing page"""
     return _serve_page("index.html")
 
-@app.get("/aviasdcps.html")
-async def serve_aviasdcps():
-    """Legacy SPA — keep for backward compat, redirect to MPA dashboard preferred"""
-    return _serve_page("aviasdcps.html")
+@app.get("/ae-view")
+@app.get("/ae-view.html")
+async def serve_ae_view():
+    return _serve_page("ae-view.html")
 
-# MPA pages - both clean URLs and .html
+@app.get("/sms-maturity")
+@app.get("/sms-maturity.html")
+async def serve_sms_maturity():
+    return _serve_page("sms-maturity.html")
+
+# 4 Dedicated Registers
+@app.get("/hazard-register")
+@app.get("/hazard-register.html")
+async def serve_hazard_register():
+    return _serve_page("hazard-register.html")
+
+@app.get("/risk-register")
+@app.get("/risk-register.html")
+async def serve_risk_register():
+    return _serve_page("risk-register.html")
+
+@app.get("/can-register")
+@app.get("/can-register.html")
+async def serve_can_register():
+    return _serve_page("can-register.html")
+
+@app.get("/cap-register")
+@app.get("/cap-register.html")
+async def serve_cap_register():
+    return _serve_page("cap-register.html")
+
+@app.get("/state-oversight")
+@app.get("/state-oversight.html")
+async def serve_state_oversight():
+    return _serve_page("state-oversight.html")
+
+# Backward Compatibility Aliases
 @app.get("/dashboard")
 @app.get("/dashboard.html")
 async def serve_dashboard():
@@ -69,56 +107,18 @@ async def serve_dashboard():
 
 @app.get("/hazard-log")
 @app.get("/hazard-log.html")
-async def serve_hazard_log_mpa():
-    return _serve_page("hazard-log.html")
-
-@app.get("/hazard-analysis")
-@app.get("/hazard-analysis.html")
-async def serve_hazard_analysis():
-    return _serve_page("hazard-analysis.html")
+async def serve_hazard_log_alias():
+    return _serve_page("hazard-register.html")
 
 @app.get("/can-cap")
 @app.get("/can-cap.html")
-async def serve_can_cap():
-    return _serve_page("can-cap.html")
-
-@app.get("/state-oversight")
-@app.get("/state-oversight.html")
-async def serve_state_oversight():
-    return _serve_page("state-oversight.html")
-
-@app.get("/reports")
-@app.get("/reports.html")
-async def serve_reports():
-    return _serve_page("reports.html")
-
-@app.get("/about")
-@app.get("/about.html")
-async def serve_about():
-    return _serve_page("about.html")
-
-@app.get("/login")
-@app.get("/login.html")
-async def serve_login():
-    return _serve_page("login.html")
-
-# Legacy view path
-@app.get("/views/hazard-log.html")
-async def serve_hazard_log():
-    """Legacy Hazard Log view path"""
-    file_path = PUBLIC_DIR / "views" / "hazard-log.html"
-    if file_path.exists():
-        return FileResponse(str(file_path))
-    return _serve_page("hazard-log.html")
-
-# Clean URLs for hazards/state aliases (Task 7)
-@app.get("/hazards")
-async def serve_hazards_alias():
-    return _serve_page("hazard-log.html")
-
-@app.get("/state")
-async def serve_state_alias():
-    return _serve_page("state-oversight.html")
+async def serve_can_cap_alias():
+    return _serve_page("can-register.html")
+    
+@app.get("/onboarding-guide")
+@app.get("/onboarding-guide.html")
+async def serve_onboarding_guide():
+    return _serve_page("onboarding-guide.html")
 
 # ==================== API ENDPOINTS ====================
 @app.get("/api")
@@ -126,13 +126,7 @@ async def api_root():
     return {
         "message": "AVIA SDCPS API is running!",
         "demo_mode": os.getenv("DEMO_MODE", "true"),
-        "version": "1.0.0",
-        "endpoints": {
-            "docs": "/docs",
-            "health": "/health",
-            "hazards": "/api/v1/hazards",
-            "state_risk": "/api/v1/state-risk"
-        }
+        "version": "1.2.0"
     }
 
 @app.get("/health")
@@ -140,10 +134,10 @@ async def health_check():
     return {
         "status": "healthy",
         "demo_mode": os.getenv("DEMO_MODE", "true"),
-        "version": "1.0.0"
+        "version": "1.2.0"
     }
 
-# ==================== IMPORT AND REGISTER ROUTERS ====================
+# Router imports
 from app.api.v1.hazards import router as hazards_router
 from app.api.v1.state_risk import router as state_risk_router
 from app.api.v1.demo import router as demo_router

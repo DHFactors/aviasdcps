@@ -1,0 +1,327 @@
+<!--
+================================================================================
+ FILE: public/hazard-register.html
+ VERSION: 1.2.0
+ DATE: 2026-08-29
+ PURPOSE: Hazard Identification & Intake Register with 100+ reports per tenant
+          (80% VSR / 20% MOR ratio), pagination, live search, and dynamic ingestion.
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazard Intake Register - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+</head>
+<body>
+    <div class="demo-banner" id="demoBanner">
+        <span>⚠️ DEMO MODE — Hazard Intake Register (VSR / MOR 80:20 Ratio)</span>
+        <span class="demo-timer">Evaluation Environment</span>
+        <a href="#" onclick="resetDemoData()">Reset Data</a>
+    </div>
+
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+
+        <div class="main-area">
+            <div class="app-content">
+                <!-- Header Banner -->
+                <div style="background:#0a1628;color:white;padding:22px 26px;border-radius:12px;margin-bottom:16px;border:3px solid #2e86c1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <h1 style="color:white;margin:0 0 4px;font-size:1.6rem;">📋 Hazard Intake Register</h1>
+                        <p style="color:rgba(255,255,255,0.85);margin:0;font-size:13px;">
+                            Ingestion repository for Voluntary Safety Reports (VSR 80%) &amp; Mandatory Occurrence Reports (MOR 20%) &middot; CAR 19
+                        </p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.08);padding:8px 14px;border-radius:8px;font-size:13px;border:1px solid rgba(255,255,255,0.15);">
+                        Scope: <strong id="scopeDisplay" style="color:#38bdf8;">All Fleets (Aggregated)</strong>
+                    </div>
+                </div>
+
+                <!-- KPI Ratio Summary Banner -->
+                <div class="kpi-banner" style="margin-bottom:16px;">
+                    <div class="kpi-item" style="border-left-color:#3b82f6;">
+                        <div class="kpi-label">TOTAL INTAKE REPORTS</div>
+                        <div class="kpi-value" id="kpiTotal" style="color:#2563eb;">300</div>
+                        <div class="kpi-target" id="kpiScope">Across 3 Tenants</div>
+                    </div>
+                    <div class="kpi-item" style="border-left-color:#10b981;">
+                        <div class="kpi-label">VOLUNTARY SAFETY REPORTS (VSR)</div>
+                        <div class="kpi-value" id="kpiVsr" style="color:#059669;">240 (80%)</div>
+                        <div class="kpi-target">Leading Safety Indicator</div>
+                    </div>
+                    <div class="kpi-item" style="border-left-color:#ef4444;">
+                        <div class="kpi-label">MANDATORY OCCURRENCE REPORTS (MOR)</div>
+                        <div class="kpi-value" id="kpiMor" style="color:#dc2626;">60 (20%)</div>
+                        <div class="kpi-target">Statutory CAAN Regulatory Filing</div>
+                    </div>
+                </div>
+
+                <!-- Action Bar & Search -->
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;background:white;border:1px solid #e2e8f0;border-radius:10px;padding:12px 18px;flex-wrap:wrap;">
+                    <button class="btn-primary" onclick="openReportModal()">📝 Log New Safety Occurrence</button>
+                    <div style="display:flex;gap:8px;flex:1;max-width:550px;">
+                        <select id="streamFilter" onchange="filterHazards()" style="padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;">
+                            <option value="ALL">All Streams (VSR + MOR)</option>
+                            <option value="VSR">VSR Only (Voluntary)</option>
+                            <option value="MOR">MOR Only (Mandatory)</option>
+                        </select>
+                        <input type="text" id="hazardSearch" placeholder="🔍 Search by ID, Title, Location, Keyword..." oninput="filterHazards()" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;width:100%;">
+                    </div>
+                    <button class="btn-outline btn-sm" onclick="exportHazardsCSV()">📥 Export CSV</button>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container" style="box-shadow:none;border:1px solid #e2e8f0;padding:0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:16%;">HAZARD ID</th>
+                                <th style="width:12%;">DATE &amp; STREAM</th>
+                                <th style="width:16%;">AREA / LOCATION</th>
+                                <th style="width:36%;">OCCURRENCE SUMMARY &amp; DESCRIPTION</th>
+                                <th style="width:10%;">PRIORITY</th>
+                                <th style="width:10%;text-align:right;">ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hazardBody">
+                            <tr><td colspan="6" style="text-align:center;padding:25px;color:#94a3b8;">Loading intake reports...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:8px 4px;">
+                    <div style="font-size:13px;color:#64748b;" id="paginationInfo">Showing 1-20 of 300 reports</div>
+                    <div style="display:flex;gap:6px;" id="paginationButtons"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hazard Detail Modal -->
+    <div id="hazardModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeHazardModal()">
+        <div class="modal-content" style="max-width:580px;text-align:left;">
+            <div id="hazardModalBody"></div>
+        </div>
+    </div>
+
+    <script src="/js/aviasdcps-api.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        let allHazardsData = [];
+        let filteredHazards = [];
+        let currentPage = 1;
+        const pageSize = 20;
+
+        // Generate seeded 100+ reports per tenant (80% VSR / 20% MOR)
+        function generate100ReportsPerTenant() {
+            const tenants = ['tenant-001', 'tenant-002', 'tenant-003'];
+            const areas = [
+                { prefix: 'FLT', cat: 'Flight Operations', loc: ['Lukla (VNLK)', 'Kathmandu (VNKT)', 'Pokhara (VNPK)', 'Bhairahawa (VNBW)', 'Simikot (VNST)'], samples: ['Unstabilized visual approach on short final', 'Tailwind shear excursion precursor', 'Late gear configuration alert', 'GPWS terrain clearance warning', 'Flap overspeed warning during turbulent descent'] },
+                { prefix: 'ENV', cat: 'Environmental & Wildlife', loc: ['Kathmandu (VNKT)', 'Biratnagar (VNVT)', 'Nepalgunj (VNNG)'], samples: ['Bird strike near threshold on rotate', 'Runway standing water hydroplaning risk', 'Monsoon convective cloud penetration', 'Reduced visibility due to valley haze'] },
+                { prefix: 'HF', cat: 'Human Factors', loc: ['Kathmandu Base', 'Pokhara Base', 'In-Flight'], samples: ['Multi-sector fatigue & duty exceedance trap', 'Cockpit distraction during departure brief', 'Checklist challenge-response communication error', 'Spatial disorientation during night visual turn'] },
+                { prefix: 'MNT', cat: 'Maintenance & Technical', loc: ['Kathmandu Hangar', 'Line Maintenance Base'], samples: ['Hydraulic B-system reservoir seal seep', 'Fuel nozzle particulate contamination', 'Brake wear pin near limit threshold', 'Pitot-static probe moisture accumulation'] },
+                { prefix: 'NAV', cat: 'Avionics & Navigation', loc: ['En-route Mountain Sector', 'RNAV Arrival Route'], samples: ['GPS spoofing / Loss of RAIM integrity', 'VOR radial deviation during valley tracking', 'TCAS Resolution Advisory near airway corridor', 'Altimeter barometric mis-setting during climb'] }
+            ];
+
+            const list = [];
+            tenants.forEach(tid => {
+                for (let i = 1; i <= 105; i++) {
+                    const isVsr = i <= 84; // 80% VSR (84/105 = 80%)
+                    const stream = isVsr ? 'VSR' : 'MOR';
+                    const areaObj = areas[Math.floor(Math.random() * areas.length)];
+                    const loc = areaObj.loc[Math.floor(Math.random() * areaObj.loc.length)];
+                    const sample = areaObj.samples[Math.floor(Math.random() * areaObj.samples.length)];
+                    const pri = (!isVsr || Math.random() > 0.7) ? 'High' : (Math.random() > 0.5 ? 'Medium' : 'Low');
+                    const month = Math.floor(Math.random() * 8 + 1).toString().padStart(2, '0');
+                    const day = Math.floor(Math.random() * 28 + 1).toString().padStart(2, '0');
+
+                    list.push({
+                        id: `${areaObj.prefix}/${String(i).padStart(3, '0')}/${pri[0]}/2026`,
+                        date: `2026-${month}-${day}`,
+                        source: stream,
+                        area: areaObj.cat,
+                        loc: loc,
+                        title: `${sample} &mdash; ${loc}`,
+                        desc: `${sample} observed during operational sector. Logged under safety reporting framework.`,
+                        priority: pri,
+                        tenant: tid
+                    });
+                }
+            });
+            return list;
+        }
+
+        function getStoredHazards() {
+            let base = [];
+            try {
+                const s = localStorage.getItem('seeded_hazards_300');
+                if (s) {
+                    base = JSON.parse(s);
+                } else {
+                    base = generate100ReportsPerTenant();
+                    localStorage.setItem('seeded_hazards_300', JSON.stringify(base));
+                }
+            } catch {
+                base = generate100ReportsPerTenant();
+            }
+
+            let custom = [];
+            try {
+                custom = JSON.parse(localStorage.getItem('custom_hazards') || '[]');
+            } catch {}
+
+            return [...custom, ...base];
+        }
+
+        function loadHazardRegister() {
+            const currentTenant = localStorage.getItem('tenantId') || 'all';
+            const all = getStoredHazards();
+
+            // Tenant filter
+            if (currentTenant === 'all') {
+                allHazardsData = all;
+                document.getElementById('scopeDisplay').textContent = 'All Fleets (Aggregated &bull; 300+ Reports)';
+                document.getElementById('kpiScope').textContent = 'Across 3 Operators';
+            } else {
+                allHazardsData = all.filter(h => h.tenant === currentTenant);
+                const tName = getTenantName(currentTenant);
+                document.getElementById('scopeDisplay').textContent = `${tName} (100+ Reports)`;
+                document.getElementById('kpiScope').textContent = `${tName} Scope`;
+            }
+
+            // Update KPI Banner (80% VSR / 20% MOR)
+            const vsrCount = allHazardsData.filter(h => h.source === 'VSR').length;
+            const morCount = allHazardsData.filter(h => h.source === 'MOR').length;
+            const total = allHazardsData.length;
+
+            document.getElementById('kpiTotal').textContent = total;
+            document.getElementById('kpiVsr').textContent = `${vsrCount} (${total ? Math.round((vsrCount/total)*100) : 0}%)`;
+            document.getElementById('kpiMor').textContent = `${morCount} (${total ? Math.round((morCount/total)*100) : 0}%)`;
+
+            filterHazards();
+        }
+
+        function filterHazards() {
+            const q = (document.getElementById('hazardSearch').value || '').toLowerCase();
+            const stream = document.getElementById('streamFilter').value;
+
+            filteredHazards = allHazardsData.filter(h => {
+                const matchStream = (stream === 'ALL') || (h.source === stream);
+                const matchQuery = `${h.id} ${h.title} ${h.desc} ${h.area} ${h.loc}`.toLowerCase().includes(q);
+                return matchStream && matchQuery;
+            });
+
+            currentPage = 1;
+            renderPage();
+        }
+
+        function renderPage() {
+            const total = filteredHazards.length;
+            const start = (currentPage - 1) * pageSize;
+            const end = Math.min(start + pageSize, total);
+            const pageItems = filteredHazards.slice(start, end);
+
+            const tbody = document.getElementById('hazardBody');
+            if (!pageItems.length) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:25px;color:#94a3b8;">No safety reports match current filter criteria.</td></tr>`;
+            } else {
+                tbody.innerHTML = pageItems.map(h => `
+                    <tr>
+                        <td>
+                            <button onclick="openHazardDetailModal('${h.id}')" style="font-weight:800;color:#2563eb;font-size:13px;background:none;border:none;padding:0;cursor:pointer;text-decoration:underline;white-space:nowrap;">
+                                ${h.id}
+                            </button>
+                        </td>
+                        <td>
+                            <div style="font-weight:700;color:#0f172a;">${h.date}</div>
+                            <span class="badge ${h.source==='MOR'?'badge-danger':'badge-info'}" style="font-size:10px;">${h.source}</span>
+                        </td>
+                        <td>
+                            <div style="font-weight:600;">${h.area}</div>
+                            <div style="font-size:11px;color:#64748b;">📍 ${h.loc}</div>
+                        </td>
+                        <td>
+                            <strong style="color:#0f172a;">${h.title}</strong>
+                            <div style="font-size:12px;color:#475569;margin-top:2px;">${h.desc}</div>
+                        </td>
+                        <td>
+                            <span class="badge ${h.priority==='Critical'||h.priority==='High'?'badge-danger':(h.priority==='Medium'?'badge-warning':'badge-success')}">${h.priority}</span>
+                        </td>
+                        <td style="text-align:right;">
+                            <a href="/risk-register.html" class="btn-primary btn-sm">SRM &rarr;</a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('paginationInfo').textContent = total ? `Showing ${start + 1}-${end} of ${total} reports` : `Showing 0 of 0`;
+            renderPaginationButtons(total);
+        }
+
+        function renderPaginationButtons(total) {
+            const totalPages = Math.ceil(total / pageSize) || 1;
+            const container = document.getElementById('paginationButtons');
+            let btns = '';
+
+            if (currentPage > 1) {
+                btns += `<button class="btn-outline btn-sm" onclick="changePage(${currentPage - 1})">&larr; Prev</button>`;
+            }
+            btns += `<span style="font-size:12px;font-weight:700;padding:6px 10px;color:#0f172a;">Page ${currentPage} / ${totalPages}</span>`;
+            if (currentPage < totalPages) {
+                btns += `<button class="btn-outline btn-sm" onclick="changePage(${currentPage + 1})">Next &rarr;</button>`;
+            }
+            container.innerHTML = btns;
+        }
+
+        function changePage(p) {
+            currentPage = p;
+            renderPage();
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        function openHazardDetailModal(id) {
+            const h = allHazardsData.find(x => x.id === id) || { id: id, title: 'Report Details', area: 'Flight Ops', loc: 'Nepal', date: '2026', source: 'VSR', priority: 'High', desc: 'Detailed report narrative.' };
+            document.getElementById('hazardModalBody').innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0a1628;padding-bottom:8px;margin-bottom:12px;">
+                    <h3 style="margin:0;color:#0a1628;">🔍 Hazard Details: ${h.id}</h3>
+                    <button onclick="closeHazardModal()" style="background:none;border:none;font-size:22px;cursor:pointer;">&times;</button>
+                </div>
+                <div style="display:grid;gap:10px;font-size:13px;line-height:1.5;">
+                    <div><strong>Title:</strong> ${h.title}</div>
+                    <div><strong>Category / Area:</strong> ${h.area} &bull; 📍 ${h.loc}</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div><strong>Report Date:</strong> ${h.date}</div>
+                        <div><strong>Intake Stream:</strong> <span class="badge ${h.source==='MOR'?'badge-danger':'badge-info'}">${h.source} (${h.source==='VSR'?'Voluntary':'Mandatory'})</span></div>
+                    </div>
+                    <div><strong>Risk Priority:</strong> <span class="badge badge-danger">${h.priority}</span></div>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:12px;border-radius:8px;">
+                        <strong>Narrative / Occurrence Description:</strong><br>${h.desc}
+                    </div>
+                </div>
+                <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+                    <button class="btn-outline btn-sm" onclick="closeHazardModal()">Close</button>
+                </div>
+            `;
+            document.getElementById('hazardModal').style.display = 'flex';
+        }
+
+        function closeHazardModal() {
+            document.getElementById('hazardModal').style.display = 'none';
+        }
+
+        function exportHazardsCSV() {
+            showNotification(`📥 Exported ${filteredHazards.length} VSR/MOR records to CSV`, 'success');
+        }
+
+        window.reloadHazardRegister = loadHazardRegister;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHazardRegister();
+        });
+    </script>
+</body>
+</html>

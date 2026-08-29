@@ -1,0 +1,218 @@
+<!--
+================================================================================
+ FILE: public/cap-register.html
+ VERSION: 1.1.0
+ DATE: 2026-08-29
+ PURPOSE: Corrective Action Plan (CAP) Master Register linking directly to Hazard
+          IDs with clickable hazard view modals and multi-section CAP forms.
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAP Master Register - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+</head>
+<body>
+    <div class="demo-banner" id="demoBanner">
+        <span>⚠️ DEMO MODE — Department Corrective Action Plan (CAP) Register</span>
+        <span class="demo-timer">Data refreshes in 5:00</span>
+        <a href="#" onclick="resetDemoData()">Reset Data</a>
+    </div>
+
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+
+        <div class="main-area">
+            <div class="app-content">
+                <!-- Header Banner -->
+                <div style="background:#0a1628;color:white;padding:22px 26px;border-radius:12px;margin-bottom:16px;border:3px solid #2e86c1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <h1 style="color:white;margin:0 0 4px;font-size:1.6rem;">🛠️ Departmental CAP Register</h1>
+                        <p style="color:rgba(255,255,255,0.85);margin:0;font-size:13px;">
+                            Department-owned action plans, Root Cause Analysis (RCA) &amp; verification milestones
+                        </p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.08);padding:8px 14px;border-radius:8px;font-size:13px;border:1px solid rgba(255,255,255,0.15);">
+                        Scope: <strong id="scopeDisplay" style="color:#38bdf8;">All Fleets (Aggregated)</strong>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container" style="box-shadow:none;border:1px solid #e2e8f0;padding:0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:14%;">CAP REF #</th>
+                                <th style="width:16%;">HAZARD ID</th>
+                                <th style="width:16%;">RESPONSIBLE DEPT</th>
+                                <th style="width:30%;">CORRECTIVE PLAN &amp; ROOT CAUSE (RCA)</th>
+                                <th style="width:12%;">TARGET / VERIFY</th>
+                                <th style="width:12%;text-align:right;">ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong style="white-space:nowrap;">CAP-2026-001</strong></td>
+                                <td>
+                                    <button onclick="openHazardModal('FLT/001/H/2026')" style="font-weight:800;color:#2563eb;font-size:13px;background:none;border:none;padding:0;cursor:pointer;text-decoration:underline;white-space:nowrap;">
+                                        FLT/001/H/2026
+                                    </button>
+                                </td>
+                                <td><strong>Flight Operations</strong></td>
+                                <td>
+                                    <div style="font-weight:700;color:#1e40af;">Mandate simulator mountain windshear training &amp; 500ft gate SOP</div>
+                                    <div style="font-size:11px;color:#64748b;margin-top:2px;"><strong>RCA:</strong> Microburst downdraft coupled with cockpit workload.</div>
+                                </td>
+                                <td style="font-size:12px;color:#64748b;">
+                                    <div style="white-space:nowrap;">Target: 10 Sep 2026</div>
+                                    <div style="color:#059669;font-weight:700;white-space:nowrap;">Audit: 30d Post</div>
+                                </td>
+                                <td style="text-align:right;">
+                                    <button class="btn-primary btn-sm" onclick="openCapFormModal('CAP-2026-001', 'FLT/001/H/2026', 'Flight Operations')">Open Form &rarr;</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong style="white-space:nowrap;">CAP-2026-002</strong></td>
+                                <td>
+                                    <button onclick="openHazardModal('MNT/004/M/2026')" style="font-weight:800;color:#2563eb;font-size:13px;background:none;border:none;padding:0;cursor:pointer;text-decoration:underline;white-space:nowrap;">
+                                        MNT/004/M/2026
+                                    </button>
+                                </td>
+                                <td><strong>Maintenance</strong></td>
+                                <td>
+                                    <div style="font-weight:700;color:#1e40af;">Quarantine refuel batch; replace 5-micron filters; supplier audit</div>
+                                    <div style="font-size:11px;color:#64748b;margin-top:2px;"><strong>RCA:</strong> Storage filtration seal fatigue allowing micro-particulate bypass.</div>
+                                </td>
+                                <td style="font-size:12px;color:#64748b;">
+                                    <div style="white-space:nowrap;">Target: 04 Sep 2026</div>
+                                    <div style="color:#d97706;font-weight:700;white-space:nowrap;">Audit: Pending</div>
+                                </td>
+                                <td style="text-align:right;">
+                                    <button class="btn-primary btn-sm" onclick="openCapFormModal('CAP-2026-002', 'MNT/004/M/2026', 'Maintenance')">Open Form &rarr;</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hazard Detail Modal -->
+    <div id="hazardModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeHazardModal()">
+        <div class="modal-content" style="max-width:580px;text-align:left;">
+            <div id="hazardModalBody"></div>
+        </div>
+    </div>
+
+    <!-- CAP Form Modal -->
+    <div id="capModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeCapModal()">
+        <div class="modal-content" style="max-width:620px;text-align:left;max-height:85vh;overflow-y:auto;">
+            <div id="capModalBody"></div>
+        </div>
+    </div>
+
+    <script src="/js/aviasdcps-api.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        const hazardDetails = {
+            'FLT/001/H/2026': {
+                id: 'FLT/001/H/2026',
+                title: 'Unstabilized Approach during monsoon convective activity',
+                area: 'Flight Operations &bull; Lukla (VNLK)',
+                date: '20 Aug 2026',
+                source: 'Mandatory (MIRS)',
+                priority: 'High (5A)',
+                desc: 'Tailwind shift on short final; go-around executed below 400ft AGL gate due to sudden terrain windshear.',
+                controls: 'Windshear recognition training & revised 500ft gate SOP.'
+            },
+            'MNT/004/M/2026': {
+                id: 'MNT/004/M/2026',
+                title: 'Fuel contamination & particulate discovery in refuel rig',
+                area: 'Maintenance &bull; Kathmandu Base',
+                date: '25 Aug 2026',
+                source: 'Maintenance Log',
+                priority: 'Medium (3B)',
+                desc: 'Storage filtration seal degradation allowing micro-particulate bypass into mobile fuel dispenser rig.',
+                controls: 'Quarantine refuel batch, replace 5-micron separator filters & supplier audit.'
+            }
+        };
+
+        function openHazardModal(id) {
+            const h = hazardDetails[id] || { id: id, title: 'Operational Safety Event', area: 'General', date: 'Recent', source: 'Internal Report', priority: 'High', desc: 'Detailed hazard report.', controls: 'Standard SOP' };
+            document.getElementById('hazardModalBody').innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0a1628;padding-bottom:8px;margin-bottom:12px;">
+                    <h3 style="margin:0;color:#0a1628;">🔍 Hazard Details: ${h.id}</h3>
+                    <button onclick="closeHazardModal()" style="background:none;border:none;font-size:22px;cursor:pointer;">&times;</button>
+                </div>
+                <div style="display:grid;gap:10px;font-size:13px;line-height:1.5;">
+                    <div><strong>Title:</strong> ${h.title}</div>
+                    <div><strong>Area / Location:</strong> ${h.area}</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div><strong>Report Date:</strong> ${h.date}</div>
+                        <div><strong>Source:</strong> ${h.source}</div>
+                    </div>
+                    <div><strong>Risk Priority:</strong> <span class="badge badge-danger">${h.priority}</span></div>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:12px;border-radius:8px;">
+                        <strong>Description of Occurrence:</strong><br>${h.desc}
+                    </div>
+                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:12px;border-radius:8px;">
+                        <strong>Required Mitigations:</strong><br>${h.controls}
+                    </div>
+                </div>
+                <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+                    <button class="btn-outline btn-sm" onclick="closeHazardModal()">Close</button>
+                </div>
+            `;
+            document.getElementById('hazardModal').style.display = 'flex';
+        }
+
+        function closeHazardModal() {
+            document.getElementById('hazardModal').style.display = 'none';
+        }
+
+        function openCapFormModal(capRef, hazardId, dept) {
+            document.getElementById('capModalBody').innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0a1628;padding-bottom:8px;margin-bottom:12px;">
+                    <h3 style="margin:0;color:#0a1628;">📋 Corrective Action Plan Form &mdash; ${capRef}</h3>
+                    <button onclick="closeCapModal()" style="background:none;border:none;font-size:22px;cursor:pointer;">&times;</button>
+                </div>
+                <div style="display:grid;gap:10px;font-size:12px;">
+                    <div style="background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #e2e8f0;">
+                        <div><strong>Hazard ID:</strong> <span style="color:#2563eb;font-weight:700;">${hazardId}</span> &bull; <strong>Department:</strong> ${dept}</div>
+                    </div>
+                    <label>1. Root Cause Analysis (RCA)
+                        <textarea style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;min-height:55px;">Systemic root cause identified during technical review.</textarea>
+                    </label>
+                    <label>2. Permanent Corrective Actions (PCA)
+                        <textarea style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;min-height:65px;">Revising SOP manual, scheduling simulator sessions, and deploying upgraded barrier controls.</textarea>
+                    </label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <label>Target Completion
+                            <input type="date" value="2026-09-15" style="width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px;">
+                        </label>
+                        <label>Target Residual Risk
+                            <select style="width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px;">
+                                <option>1C (Low)</option>
+                                <option selected>2C (Medium - Tolerable)</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px;">
+                    <button class="btn-outline btn-sm" onclick="closeCapModal()">Cancel</button>
+                    <button class="btn-primary btn-sm" onclick="alert('CAP updated successfully'); closeCapModal();">💾 Save &amp; Submit</button>
+                </div>
+            `;
+            document.getElementById('capModal').style.display = 'flex';
+        }
+
+        function closeCapModal() {
+            document.getElementById('capModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

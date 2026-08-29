@@ -1,26 +1,82 @@
+<!--
+================================================================================
+ FILE: public/onboarding-guide.html
+ VERSION: 1.0.0
+ DATE: 2026-08-29
+ PURPOSE: Evaluation & Onboarding Walkthrough for Operators and State Regulators
+          explaining the Three-Tier Tenancy, 4 Registers, and Phase 1 Maturity.
+================================================================================
+-->
 <!DOCTYPE html>
-<html lang=\"en\">
+<html lang="en">
 <head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>AVIA SDCPS - Onboarding Guide</title>
-    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">
-    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>
-    <link rel=\"stylesheet\" href=\"/css/avia-sdcps.css\">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding & Evaluation Guide - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
 </head>
 <body>
-    <div class=\"demo-banner\"><span class=\"demo-icon\">⚠️</span> DEMO MODE — For Evaluation Only</div>
-    <header class=\"app-header\"><div class=\"logo\"><h1>✈️ AVIA SDCPS</h1><span>Safety Management Platform</span></div></header>
-    <div class=\"app-content\">
-        <h2>📖 Onboarding Guide</h2>
-        <p style=\"margin:12px 0 24px;\">ICAO Annex 19 compliant onboarding for State Safety Oversight.</p>
-        <div class=\"avia-grid-2\">
-            <div class=\"card\"><h3>1. Configure Tenant</h3><p>Select your State/Operator tenant in the header. All data is isolated per tenant.</p></div>
-            <div class=\"card\"><h3>2. Report Hazards</h3><p>Use Hazards → New Hazard. Severity and probability map to the risk matrix.</p></div>
-            <div class=\"card\"><h3>3. State Oversight</h3><p>Monitor HRC Rate, SPT Score and ALoSP in State Oversight. Charts are tenant-scoped.</p></div>
-            <div class=\"card\"><h3>4. Audit & Reports</h3><p>Export audit CSV, generate State Oversight PDF, and trigger scheduled dispatch.</p></div>
-        </div>
-        <div style=\"margin-top:24px;\" class=\"btn-group\"><a href=\"/aviasdcps.html\" class=\"btn-primary\">Go to Dashboard</a><a href=\"/index.html\" class=\"btn-outline\">Landing Page</a></div>
+    <div class="demo-banner" id="demoBanner">
+        <span>⚠️ DEMO MODE — Platform Evaluation &amp; Onboarding Guide</span>
+        <span class="demo-timer">Evaluation Environment</span>
+        <a href="#" onclick="resetDemoData()">Reset Data</a>
     </div>
+
+    <div class="app-container">
+        <!-- Top App Navigation -->
+        <div id="sidebar-container"></div>
+
+        <div class="main-area">
+            <div class="app-content">
+                <!-- Header Banner -->
+                <div style="background:#0a1628;color:white;padding:24px 28px;border-radius:12px;margin-bottom:20px;border:3px solid #2e86c1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <h1 style="color:white;margin:0 0 4px;font-size:1.6rem;">📖 Evaluator &amp; Onboarding Guide</h1>
+                        <p style="color:rgba(255,255,255,0.85);margin:0;font-size:13px;">
+                            Structured walkthrough of the Three-Tier Architecture, 4 Core Registers &amp; CAAN CAR 19 Compliance
+                        </p>
+                    </div>
+                    <a href="/ae-view.html" class="btn-primary">🚀 Enter AE Portal &rarr;</a>
+                </div>
+
+                <!-- 4 Step Onboarding Grid -->
+                <div class="avia-grid-2" style="margin-bottom:24px;">
+                    <div class="card" style="border-top-color:#2e86c1;">
+                        <h3>1. Multi-Tenant Scope Selection</h3>
+                        <p style="font-size:13px;color:#64748b;line-height:1.6;">
+                            Use the top-right <strong>VIEWING:</strong> dropdown to switch between <strong>All Fleets (Aggregated State View)</strong> and individual operator tenants (<em>Pacific Air Services</em>, <em>Nordic Aviation</em>, <em>Southern Hemisphere</em>). Data isolation is strictly maintained across all modules.
+                        </p>
+                    </div>
+                    <div class="card" style="border-top-color:#2563eb;">
+                        <h3>2. Phase 1 SMS Maturity Assessment</h3>
+                        <p style="font-size:13px;color:#64748b;line-height:1.6;">
+                            Navigate to <strong>🛡️ SMS Maturity</strong> to review the ICAO 4-Pillar / 12-Element scorecard. Ratings (1–5) automatically roll up to calculate the organizational SMS Health Index and provide an auditable quarterly trend.
+                        </p>
+                    </div>
+                    <div class="card" style="border-top-color:#d4ac0d;">
+                        <h3>3. Four Dedicated Safety Registers</h3>
+                        <p style="font-size:13px;color:#64748b;line-height:1.6;">
+                            Explore the decoupled registers: <strong>📋 Hazards</strong> (Intake &amp; VIRS), <strong>⚡ Risks</strong> (7 Impact Area Matrix &amp; Bow-Tie), <strong>📋 CANs</strong> (Deficiency Notices), and <strong>🛠️ CAPs</strong> (Department Action Plans &amp; CAAN App. 6/7 Forms).
+                        </p>
+                    </div>
+                    <div class="card" style="border-top-color:#1e8449;">
+                        <h3>4. State Oversight &amp; ALoSP Baselines</h3>
+                        <p style="font-size:13px;color:#64748b;line-height:1.6;">
+                            Open <strong>🏛️ State View</strong> to examine national benchmarking: HRC reporting culture rates, SPT 30-day resolution percentages, ALoSP risk indices, and multi-operator variance analysis under CAAN CAR 19.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Bottom Navigation Actions -->
+                <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                    <a href="/ae-view.html" class="btn-primary">👔 Go to AE Executive View</a>
+                    <a href="/hazard-register.html" class="btn-outline">📋 View Hazard Register</a>
+                    <a href="/state-oversight.html" class="btn-outline">🏛️ State Oversight Portal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/common.js"></script>
 </body>
 </html>

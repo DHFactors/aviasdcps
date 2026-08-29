@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AE View - Accountable Executive Dashboard | AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="demo-banner" id="demoBanner">
+        <span>⚠️ DEMO MODE — Accountable Executive (AE) Portal</span>
+        <span class="demo-timer">Evaluation Environment</span>
+        <a href="#" onclick="resetDemoData()">Reset Data</a>
+    </div>
+
+    <div class="app-container">
+        <!-- Top App Navigation -->
+        <div id="sidebar-container"></div>
+
+        <div class="main-area">
+            <div class="app-content">
+                <!-- AE Executive Banner -->
+                <div style="background:#0a1628;color:#ffffff;padding:24px 28px;border-radius:12px;margin-bottom:24px;border:3px solid #2e86c1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+                    <div>
+                        <h1 style="color:#ffffff;margin:0 0 6px;font-size:1.75rem;">👔 Accountable Executive (AE) Safety Portal</h1>
+                        <p style="color:rgba(255,255,255,0.85);margin:0;font-size:13px;">
+                            Executive Risk Acceptance, Critical Precursors &amp; SMS Resource Allocation (CAR 19 / ICAO Doc 9859)
+                        </p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.08);padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);text-align:right;">
+                        <div style="font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;">Role / Scope</div>
+                        <div style="font-size:14px;font-weight:800;color:#38bdf8;" id="aeScopeText">Accountable Manager &bull; All Fleets</div>
+                    </div>
+                </div>
+
+                <!-- AE Decision KPIs -->
+                <div class="kpi-banner">
+                    <div class="kpi-item" style="border-left-color:#ef4444;">
+                        <div class="kpi-label">Residual Risks Awaiting AE Acceptance</div>
+                        <div class="kpi-value" style="color:#dc2626;">2</div>
+                        <div class="kpi-target">Above company risk tolerance</div>
+                    </div>
+                    <div class="kpi-item" style="border-left-color:#f59e0b;">
+                        <div class="kpi-label">Open Corrective Actions (CAN/CAP)</div>
+                        <div class="kpi-value" style="color:#d97706;">3</div>
+                        <div class="kpi-target">1 Escalated to executive review</div>
+                    </div>
+                    <div class="kpi-item" style="border-left-color:#3b82f6;">
+                        <div class="kpi-label">SMS Health &amp; Maturity Index</div>
+                        <div class="kpi-value" style="color:#2563eb;">80%</div>
+                        <div class="kpi-target">Level 4 &mdash; Predictive</div>
+                    </div>
+                    <div class="kpi-item" style="border-left-color:#10b981;">
+                        <div class="kpi-label">Training &amp; Competency Rate</div>
+                        <div class="kpi-value" style="color:#059669;">94%</div>
+                        <div class="kpi-target">Leading Indicator Target: &ge;90%</div>
+                    </div>
+                </div>
+
+                <!-- High Priority Decisions for Accountable Executive -->
+                <div class="card" style="border-top-color:#c0392b;">
+                    <h3>🚨 Pending Executive Risk Sign-Offs &amp; Escalations</h3>
+                    <p style="font-size:13px;color:#64748b;margin-bottom:14px;">
+                        Mandatory Accountable Executive review for occurrences with residual risk above defined tolerance.
+                    </p>
+                    <div class="table-container" style="box-shadow:none;border:1px solid #e2e8f0;padding:0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>CAAN HAZARD ID</th>
+                                    <th>OPERATIONAL HAZARD</th>
+                                    <th>INITIAL &rarr; RESIDUAL</th>
+                                    <th>ASSIGNED DEPT</th>
+                                    <th>EXECUTIVE ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>FLT/001/H/2026</strong></td>
+                                    <td>Unstabilized Approach during monsoon windshear &mdash; Lukla (VNLK)</td>
+                                    <td><span class="badge badge-danger">5A &rarr; 4B (High)</span></td>
+                                    <td>Flight Operations</td>
+                                    <td>
+                                        <button class="btn-primary btn-sm" onclick="alert('Residual risk accepted by AE with additional training mitigation.')">✍️ Formal Accept</button>
+                                        <a href="/can-cap.html" class="btn-outline btn-sm">Review CAN</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>NAV/008/C/2026</strong></td>
+                                    <td>GNSS Primary Navigation Spoofing on Mountain Arrival Sector</td>
+                                    <td><span class="badge badge-danger">5A &rarr; 4B (High)</span></td>
+                                    <td>Engineering &amp; Avionics</td>
+                                    <td>
+                                        <button class="btn-primary btn-sm" onclick="alert('Residual risk accepted by AE with dual VOR/DME mandate.')">✍️ Formal Accept</button>
+                                        <a href="/can-cap.html" class="btn-outline btn-sm">Review CAN</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2-Column Analytics for Accountable Exec -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>📈 Leading vs. Lagging Safety Trends</h3>
+                        <div style="position:relative;height:240px;width:100%;">
+                            <canvas id="aeTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>📊 Risk Exposure by Department</h3>
+                        <div style="position:relative;height:240px;width:100%;">
+                            <canvas id="aeDeptChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/aviasdcps-api.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx1 = document.getElementById('aeTrendChart');
+            if (ctx1) {
+                new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                        datasets: [
+                            { label: 'Leading: Voluntary Reports', data: [14, 22, 19, 28, 34], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.08)', tension: 0.3, fill: true },
+                            { label: 'Lagging: SPI Exceedances', data: [3, 2, 4, 1, 2], borderColor: '#dc2626', borderDash: [5, 5], tension: 0.3 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+
+            const ctx2 = document.getElementById('aeDeptChart');
+            if (ctx2) {
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Flight Operations', 'Maintenance & Engineering', 'Ground & Ramp', 'Cabin Safety'],
+                        datasets: [{
+                            data: [4, 3, 2, 1],
+                            backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#dc2626']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

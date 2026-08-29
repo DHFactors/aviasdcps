@@ -1,0 +1,109 @@
+<!--
+================================================================================
+ FILE: public/risk-register.html
+ VERSION: 1.0.0
+ DATE: 2026-08-29
+ PURPOSE: Master Safety Risk Register & Assessment Engine (7 Impact Areas,
+          Pre- & Post-Control Scoring, Bow-Tie Barrier Links, and AE Tolerance).
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Risk Register - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+</head>
+<body>
+    <div class="demo-banner" id="demoBanner">
+        <span>⚠️ DEMO MODE — Master Safety Risk Register (SRM Engine)</span>
+        <span class="demo-timer">Data refreshes in 5:00</span>
+        <a href="#" onclick="resetDemoData()">Reset Data</a>
+    </div>
+
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+
+        <div class="main-area">
+            <div class="app-content">
+                <!-- Header Banner -->
+                <div style="background:#0a1628;color:white;padding:22px 26px;border-radius:12px;margin-bottom:16px;border:3px solid #2e86c1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <h1 style="color:white;margin:0 0 4px;font-size:1.6rem;">⚡ Master Risk Register</h1>
+                        <p style="color:rgba(255,255,255,0.85);margin:0;font-size:13px;">
+                            Safety Risk Assessment, 7 Impact Area weighting, Barrier Quality &amp; Residual Risk Codes &middot; ICAO Doc 9859
+                        </p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.08);padding:8px 14px;border-radius:8px;font-size:13px;border:1px solid rgba(255,255,255,0.15);">
+                        Scope: <strong id="scopeDisplay" style="color:#38bdf8;">All Fleets (Aggregated)</strong>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container" style="box-shadow:none;border:1px solid #e2e8f0;padding:0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:12%;">RISK ID &amp; REF</th>
+                                <th style="width:34%;">TOP EVENT &amp; IMPACT PROFILE</th>
+                                <th style="width:12%;">INITIAL RISK</th>
+                                <th style="width:18%;">BARRIERS / CONTROLS</th>
+                                <th style="width:12%;">RESIDUAL RISK</th>
+                                <th style="width:12%;text-align:right;">ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riskBody">
+                            <tr>
+                                <td>
+                                    <strong>RSK-2026-001</strong>
+                                    <div style="font-size:11px;color:#2563eb;font-weight:700;">FLT/001/H/2026</div>
+                                </td>
+                                <td>
+                                    <strong style="color:#0f172a;">Runway Excursion / Hard Landing on Short Mountain Strip</strong>
+                                    <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                                        Weighted Impacts: Pax Safety (x4), Asset (x1), Reputation (x1)
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-danger">5A (Critical)</span></td>
+                                <td style="font-size:12px;color:#334155;">
+                                    <div>&bull; Windshear SOP Training</div>
+                                    <div>&bull; 500ft Gate Go-around rule</div>
+                                </td>
+                                <td><span class="badge badge-warning">2C (Medium)</span></td>
+                                <td style="text-align:right;">
+                                    <a href="/can-register.html" class="btn-primary btn-sm">Issue CAN &rarr;</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>RSK-2026-002</strong>
+                                    <div style="font-size:11px;color:#2563eb;font-weight:700;">MNT/004/M/2026</div>
+                                </td>
+                                <td>
+                                    <strong style="color:#0f172a;">Fuel Starvation / In-Flight Flameout via Filter Particulate</strong>
+                                    <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                                        Weighted Impacts: Pax Safety (x4), Asset (x1), Quality (x2)
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-danger">5A (Critical)</span></td>
+                                <td style="font-size:12px;color:#334155;">
+                                    <div>&bull; 5-Micron Separator Filter</div>
+                                    <div>&bull; Supplier Fuel Audit</div>
+                                </td>
+                                <td><span class="badge badge-success">1C (Low)</span></td>
+                                <td style="text-align:right;">
+                                    <a href="/can-register.html" class="btn-primary btn-sm">Issue CAN &rarr;</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/aviasdcps-api.js"></script>
+    <script src="/js/common.js"></script>
+</body>
+</html>

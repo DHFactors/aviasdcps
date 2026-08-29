@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Health & Maturity Assessment - AVIA SDCPS</title>
+    <link rel="stylesheet" href="/css/avia-sdcps.css">
+    <style>
+        .maturity-header {
+            background: #0a1628;
+            color: #ffffff;
+            padding: 24px 28px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 3px solid #2e86c1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .pillar-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .pillar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .element-row {
+            display: grid;
+            grid-template-columns: 2.5fr 1.2fr 2.3fr;
+            gap: 16px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f8fafc;
+        }
+        .element-row:last-child {
+            border-bottom: none;
+        }
+        .maturity-score-display {
+            font-size: 52px;
+            font-weight: 900;
+            color: #0a1628;
+            line-height: 1;
+        }
+        .maturity-select {
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #ffffff;
+            font-weight: 600;
+            outline: none;
+        }
+        .maturity-comment {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-banner" id="demoBanner">
+        <span>⚠️ DEMO MODE — Phase 1 Maturity Monitoring</span>
+        <span class="demo-timer">Evaluation Environment</span>
+        <a href="#" onclick="resetDemoData()">Reset Data</a>
+    </div>
+
+    <div class="app-container">
+        <!-- Top App Navigation -->
+        <div id="sidebar-container"></div>
+
+        <div class="main-area">
+            <div class="app-content">
+                <!-- Header Banner -->
+                <div class="maturity-header">
+                    <div>
+                        <h1 style="color:#ffffff;margin:0 0 6px;font-size:1.75rem;">🛡️ Phase 1 — SMS Health &amp; Maturity Assessment</h1>
+                        <p style="color:rgba(255,255,255,0.85);margin:0;font-size:13px;">
+                            4 Pillars &middot; 12 ICAO Elements Periodic Maturity Self-Assessment (ICAO Annex 19 / CAAN CAR 19)
+                        </p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.08);padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);text-align:right;">
+                        <div style="font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;">Current Operator Scope</div>
+                        <div style="font-size:14px;font-weight:800;color:#38bdf8;" id="operatorScopeText">Pacific Air Services</div>
+                    </div>
+                </div>
+
+                <!-- Overall Health Index Scoreboard -->
+                <div class="card" style="border-top-color:#0a1628;margin-bottom:24px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
+                        <div style="display:flex;align-items:center;gap:24px;">
+                            <div class="maturity-score-display" id="overallScoreDisplay">78%</div>
+                            <div>
+                                <h3 style="margin:0 0 4px;font-size:1.2rem;">Organizational SMS Health Index</h3>
+                                <div style="font-size:13px;color:#64748b;">
+                                    Maturity Rating: <strong id="maturityBandLabel" style="color:#2563eb;">Level 4 &mdash; Predictive</strong>
+                                </div>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Cadence: Quarterly &bull; Last Submitted: Q3 2026</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <button class="btn-primary" onclick="submitAssessment()">💾 Save &amp; Submit Q3 Survey</button>
+                            <button class="btn-outline" onclick="exportMaturityReport()">📄 Export PDF Report</button>
+                        </div>
+                    </div>
+
+                    <!-- 4 Pillars Quick Progress Bars -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:20px;border-top:1px solid #f1f5f9;padding-top:16px;">
+                        <div>
+                            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px;">
+                                <span>Pillar 1: Safety Policy</span>
+                                <span id="p1Score">80%</span>
+                            </div>
+                            <div style="background:#eef2f7;border-radius:4px;height:6px;overflow:hidden;">
+                                <div id="p1Bar" style="height:100%;background:#2563eb;width:80%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px;">
+                                <span>Pillar 2: SRM Engine</span>
+                                <span id="p2Score">85%</span>
+                            </div>
+                            <div style="background:#eef2f7;border-radius:4px;height:6px;overflow:hidden;">
+                                <div id="p2Bar" style="height:100%;background:#10b981;width:85%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px;">
+                                <span>Pillar 3: Safety Assurance</span>
+                                <span id="p3Score">73%</span>
+                            </div>
+                            <div style="background:#eef2f7;border-radius:4px;height:6px;overflow:hidden;">
+                                <div id="p3Bar" style="height:100%;background:#f59e0b;width:73%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px;">
+                                <span>Pillar 4: Safety Promotion</span>
+                                <span id="p4Score">75%</span>
+                            </div>
+                            <div style="background:#eef2f7;border-radius:4px;height:6px;overflow:hidden;">
+                                <div id="p4Bar" style="height:100%;background:#0284c7;width:75%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 12 ICAO Elements Breakdown -->
+                <div id="surveyContainer"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/aviasdcps-api.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        const icaoElements = [
+            {
+                pillar: 1,
+                pillarTitle: 'Pillar 1 — Safety Policy & Objectives',
+                elements: [
+                    { id: 'e1_1', name: '1.1 Management commitment and responsibility', desc: 'Safety policy signed by Accountable Executive, defined safety accountabilities across all levels.', score: 4, comment: 'Safety policy updated and endorsed by CEO in January 2026.' },
+                    { id: 'e1_2', name: '1.2 Safety accountabilities', desc: 'Defined authorities and responsibilities for safety throughout the organization.', score: 4, comment: 'Job descriptions incorporate specific CAR 19 SMS responsibilities.' },
+                    { id: 'e1_3', name: '1.3 Appointment of key safety personnel', desc: 'Designation of qualified Safety Manager and operational Safety Action Group leads.', score: 4, comment: 'Dedicated Safety Director appointed and approved by CAAN.' },
+                    { id: 'e1_4', name: '1.4 Coordination of emergency response planning', desc: 'Integrated and regularly exercised Emergency Response Plan (ERP).', score: 4, comment: 'Annual full-scale simulated exercise completed in June 2026.' },
+                    { id: 'e1_5', name: '1.5 SMS documentation', desc: 'Approved Safety Management Manual (SMM) and document control records.', score: 4, comment: 'SMM Revision 4.1 distributed to all operating bases.' }
+                ]
+            },
+            {
+                pillar: 2,
+                pillarTitle: 'Pillar 2 — Safety Risk Management (SRM)',
+                elements: [
+                    { id: 'e2_1', name: '2.1 Hazard identification', desc: 'Multi-source hazard reporting (mandatory & voluntary VIRS), flight data monitoring.', score: 4, comment: 'Active voluntary reporting with automated NLP triage pipeline.' },
+                    { id: 'e2_2', name: '2.2 Safety risk assessment and mitigation', desc: '5x5 risk matrix scoring, Bow-Tie barrier analysis, and mitigation tracking.', score: 5, comment: 'All high-risk occurrences linked to Bow-Tie verification.' }
+                ]
+            },
+            {
+                pillar: 3,
+                pillarTitle: 'Pillar 3 — Safety Assurance',
+                elements: [
+                    { id: 'e3_1', name: '3.1 Safety performance monitoring and measurement', desc: 'Statistical SPI/SPT tracking with alert thresholds (AV0 + 1σ/2σ/3σ).', score: 4, comment: 'Monthly SPI tracking active across flight operations and maintenance.' },
+                    { id: 'e3_2', name: '3.2 The management of change (MOC)', desc: 'Formal 10-step auditable process for operational, procedural, or fleet changes.', score: 3, comment: 'MOC workflow active for new route validations.' },
+                    { id: 'e3_3', name: '3.3 Continuous improvement of the SMS', desc: 'Internal audits, Safety Review Board (SRB) oversight, and external audit closeouts.', score: 4, comment: 'Quarterly SRB meetings held with documented action item follow-ups.' }
+                ]
+            },
+            {
+                pillar: 4,
+                pillarTitle: 'Pillar 4 — Safety Promotion',
+                elements: [
+                    { id: 'e4_1', name: '4.1 Training and education', desc: 'SMS indoctrination, recurrent training, and human-factors competency tracking.', score: 4, comment: '94% flight crew and maintenance recurrent SMS training compliance.' },
+                    { id: 'e4_2', name: '4.2 Safety communication', desc: 'Dissemination of safety bulletins, lessons learned, and Just Culture feedback.', score: 4, comment: 'Monthly safety bulletin circulated with de-identified incident analysis.' }
+                ]
+            }
+        ];
+
+        function renderSurvey() {
+            const container = document.getElementById('surveyContainer');
+            if (!container) return;
+
+            container.innerHTML = icaoElements.map((p, pIdx) => `
+                <div class="pillar-card">
+                    <div class="pillar-header">
+                        <h3 style="margin:0;color:#0a1628;font-size:15px;">${p.pillarTitle}</h3>
+                        <span style="font-size:12px;font-weight:700;color:#2563eb;" id="pillarBadge_${p.pillar}">Calculated: 80%</span>
+                    </div>
+                    <div>
+                        ${p.elements.map(el => `
+                            <div class="element-row">
+                                <div>
+                                    <div style="font-weight:700;font-size:13px;color:#0f172a;">${el.name}</div>
+                                    <div style="font-size:11px;color:#64748b;margin-top:2px;">${el.desc}</div>
+                                </div>
+                                <div>
+                                    <select class="maturity-select" id="select_${el.id}" onchange="recalculateScores()">
+                                        <option value="1" ${el.score===1?'selected':''}>1 - Initial (Reactive)</option>
+                                        <option value="2" ${el.score===2?'selected':''}>2 - Developing (Informal)</option>
+                                        <option value="3" ${el.score===3?'selected':''}>3 - Defined (Standardized)</option>
+                                        <option value="4" ${el.score===4?'selected':''}>4 - Predictive (Proactive)</option>
+                                        <option value="5" ${el.score===5?'selected':''}>5 - Optimizing (Continuous)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <input type="text" class="maturity-comment" id="comment_${el.id}" value="${el.comment}" placeholder="Required supporting remarks & audit reference...">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            recalculateScores();
+        }
+
+        function recalculateScores() {
+            let totalScore = 0;
+            let totalElements = 0;
+
+            icaoElements.forEach(p => {
+                let pSum = 0;
+                p.elements.forEach(el => {
+                    const sel = document.getElementById(`select_${el.id}`);
+                    const val = sel ? parseInt(sel.value, 10) : el.score;
+                    pSum += val;
+                    totalScore += val;
+                    totalElements++;
+                });
+
+                const pPct = Math.round((pSum / (p.elements.length * 5)) * 100);
+                const badge = document.getElementById(`pillarBadge_${p.pillar}`);
+                if (badge) badge.textContent = `Maturity: ${pPct}%`;
+
+                const pBar = document.getElementById(`p${p.pillar}Bar`);
+                const pText = document.getElementById(`p${p.pillar}Score`);
+                if (pBar) pBar.style.width = `${pPct}%`;
+                if (pText) pText.textContent = `${pPct}%`;
+            });
+
+            const overallPct = Math.round((totalScore / (totalElements * 5)) * 100);
+            const overallDisplay = document.getElementById('overallScoreDisplay');
+            if (overallDisplay) overallDisplay.textContent = `${overallPct}%`;
+
+            const bandLabel = document.getElementById('maturityBandLabel');
+            if (bandLabel) {
+                if (overallPct >= 85) bandLabel.innerHTML = '<span style="color:#059669;">Level 5 — Optimizing</span>';
+                else if (overallPct >= 70) bandLabel.innerHTML = '<span style="color:#2563eb;">Level 4 — Predictive</span>';
+                else if (overallPct >= 50) bandLabel.innerHTML = '<span style="color:#d97706;">Level 3 — Defined</span>';
+                else bandLabel.innerHTML = '<span style="color:#dc2626;">Level 2 — Developing</span>';
+            }
+        }
+
+        function submitAssessment() {
+            showNotification('✅ Q3 2026 SMS Health & Maturity Assessment submitted to State oversight log', 'success');
+        }
+
+        function exportMaturityReport() {
+            showNotification('📄 Generating CAAN-compliant 4-Pillar Maturity PDF extract...', 'info');
+        }
+
+        window.onTenantChange = function(tenantId) {
+            const label = document.getElementById('operatorScopeText');
+            if (label) label.textContent = getTenantName(tenantId);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSurvey();
+            const currentTenant = localStorage.getItem('tenantId') || 'all';
+            const label = document.getElementById('operatorScopeText');
+            if (label) label.textContent = getTenantName(currentTenant);
+        });
+    </script>
+</body>
+</html>
